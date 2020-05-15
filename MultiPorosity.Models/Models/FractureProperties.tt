@@ -1,0 +1,33 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#@ include file="NativeStructBuilder.ttinclude" #>
+<#
+    string structName = "FractureProperties";
+    List<string> genericTypeList = new List<string>{"T"};
+    List<(string type, string fieldName, string propertyName)> propertyList = new List<(string type, string fieldName, string propertyName)>
+    {
+        ("int", "_count", "Count"),
+        ("T", "_width", "Width"),
+        ("T", "_height", "Height"),
+        ("T", "_halfLength", "HalfLength"),
+        ("T", "_porosity", "Porosity"),
+        ("T", "_permeability", "Permeability"),
+        ("T", "_skin", "Skin")
+    };
+    int indentLevel = 1;
+    string executionSpace = "Cuda";
+#>
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+using Kokkos;
+
+namespace MultiPorosity.Models
+{
+    <#= NATIVE_STRUCT_BUILDER(structName, genericTypeList, propertyList, indentLevel, executionSpace)#>
+}

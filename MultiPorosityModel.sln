@@ -1,0 +1,90 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MultiPorosity.Models", "MultiPorosity.Models\MultiPorosity.Models.csproj", "{B7E9EB61-B95C-4164-92B0-19C5C4337824}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MultiPorosity.Services", "MultiPorosity.Services\MultiPorosity.Services.csproj", "{B69DD6B6-D347-4002-83F8-9B852CEBDF41}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MultiPorosityModel.UnitTests", "MultiPorosityModel.UnitTests\MultiPorosityModel.UnitTests.csproj", "{9A7DE2EE-34A9-4793-B321-1CC76931CB48}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MultiPorosity.Driver", "MultiPorosity.Driver\MultiPorosity.Driver.csproj", "{157197E2-3FA9-4948-894E-D3E8A74B1F7F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "runtime.MultiPorosity", "runtime.MultiPorosity\runtime.MultiPorosity.vcxproj", "{02CF930A-CB6E-4210-B57F-8E5FC5A7EB79}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildTools", "BuildTools", "{40E97774-9216-4D0F-8BD8-D28DBF3E41A3}"
+	ProjectSection(SolutionItems) = preProject
+		..\BuildTools\Clang.props = ..\BuildTools\Clang.props
+		..\BuildTools\Clang.targets = ..\BuildTools\Clang.targets
+		..\BuildTools\ClangLink.targets = ..\BuildTools\ClangLink.targets
+		..\BuildTools\Complex.hpp = ..\BuildTools\Complex.hpp
+		..\BuildTools\Constants.hpp = ..\BuildTools\Constants.hpp
+		..\BuildTools\Directory.Build.props = ..\BuildTools\Directory.Build.props
+		..\BuildTools\MathExtensions.hpp = ..\BuildTools\MathExtensions.hpp
+		..\BuildTools\Native.props = ..\BuildTools\Native.props
+		..\BuildTools\Native.targets = ..\BuildTools\Native.targets
+		..\BuildTools\NativeBuild.props = ..\BuildTools\NativeBuild.props
+		..\BuildTools\Print.hpp = ..\BuildTools\Print.hpp
+		..\BuildTools\StdExtensions.hpp = ..\BuildTools\StdExtensions.hpp
+		..\BuildTools\Types.hpp = ..\BuildTools\Types.hpp
+		..\BuildTools\ValueLimits.hpp = ..\BuildTools\ValueLimits.hpp
+		..\BuildTools\WinMD.targets = ..\BuildTools\WinMD.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B586E6D9-34EE-4C4A-88B4-5BFBB7523225}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Versioning.props = Versioning.props
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B7E9EB61-B95C-4164-92B0-19C5C4337824}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7E9EB61-B95C-4164-92B0-19C5C4337824}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7E9EB61-B95C-4164-92B0-19C5C4337824}.Debug|x64.ActiveCfg = Debug|x64
+		{B7E9EB61-B95C-4164-92B0-19C5C4337824}.Debug|x64.Build.0 = Debug|x64
+		{B7E9EB61-B95C-4164-92B0-19C5C4337824}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7E9EB61-B95C-4164-92B0-19C5C4337824}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7E9EB61-B95C-4164-92B0-19C5C4337824}.Release|x64.ActiveCfg = Release|x64
+		{B7E9EB61-B95C-4164-92B0-19C5C4337824}.Release|x64.Build.0 = Release|x64
+		{B69DD6B6-D347-4002-83F8-9B852CEBDF41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B69DD6B6-D347-4002-83F8-9B852CEBDF41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B69DD6B6-D347-4002-83F8-9B852CEBDF41}.Debug|x64.ActiveCfg = Debug|x64
+		{B69DD6B6-D347-4002-83F8-9B852CEBDF41}.Debug|x64.Build.0 = Debug|x64
+		{B69DD6B6-D347-4002-83F8-9B852CEBDF41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B69DD6B6-D347-4002-83F8-9B852CEBDF41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B69DD6B6-D347-4002-83F8-9B852CEBDF41}.Release|x64.ActiveCfg = Release|x64
+		{B69DD6B6-D347-4002-83F8-9B852CEBDF41}.Release|x64.Build.0 = Release|x64
+		{9A7DE2EE-34A9-4793-B321-1CC76931CB48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A7DE2EE-34A9-4793-B321-1CC76931CB48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A7DE2EE-34A9-4793-B321-1CC76931CB48}.Debug|x64.ActiveCfg = Debug|x64
+		{9A7DE2EE-34A9-4793-B321-1CC76931CB48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A7DE2EE-34A9-4793-B321-1CC76931CB48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A7DE2EE-34A9-4793-B321-1CC76931CB48}.Release|x64.ActiveCfg = Release|x64
+		{157197E2-3FA9-4948-894E-D3E8A74B1F7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{157197E2-3FA9-4948-894E-D3E8A74B1F7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{157197E2-3FA9-4948-894E-D3E8A74B1F7F}.Debug|x64.ActiveCfg = Debug|x64
+		{157197E2-3FA9-4948-894E-D3E8A74B1F7F}.Debug|x64.Build.0 = Debug|x64
+		{157197E2-3FA9-4948-894E-D3E8A74B1F7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{157197E2-3FA9-4948-894E-D3E8A74B1F7F}.Release|x64.ActiveCfg = Release|x64
+		{157197E2-3FA9-4948-894E-D3E8A74B1F7F}.Release|x64.Build.0 = Release|x64
+		{02CF930A-CB6E-4210-B57F-8E5FC5A7EB79}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{02CF930A-CB6E-4210-B57F-8E5FC5A7EB79}.Debug|x64.ActiveCfg = Debug|x64
+		{02CF930A-CB6E-4210-B57F-8E5FC5A7EB79}.Release|Any CPU.ActiveCfg = Release|x64
+		{02CF930A-CB6E-4210-B57F-8E5FC5A7EB79}.Release|x64.ActiveCfg = Release|x64
+		{02CF930A-CB6E-4210-B57F-8E5FC5A7EB79}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {31E2B99E-68A2-4313-BFAB-C7D65D218A36}
+	EndGlobalSection
+EndGlobal

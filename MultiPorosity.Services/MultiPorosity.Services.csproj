@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Versioning.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <NuspecFile>D:\TFS_Sources\Github\Compilation\trmcnealy\MultiPorosityModel\MultiPorosity.Services\MultiPorosityModel.nuspec</NuspecFile>
+    <NuspecProperties>Configuration=$(Configuration);Platform=$(Platform);Version=$(MUTLIPOROSITY_VERSION);RuntimeVersion=$(RUNTIME_MUTLIPOROSITY_VERSION)</NuspecProperties>
+    <RootNamespace>MultiPorosity</RootNamespace>
+    <Platforms>AnyCPU;x64</Platforms>
+    <Company>Timothy R. McNealy</Company>
+    <Copyright>© Timothy R. McNealy</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/trmcnealy/MultiPorosityModel</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/trmcnealy/MultiPorosityModel</RepositoryUrl>
+    <PackageIcon>nindra.png</PackageIcon>
+    <PackageIconUrl />
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>1.0.4</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageOutputPath Condition="'$(PACKAGE_CACHE)'!=''">$(PACKAGE_CACHE)</PackageOutputPath>
+    <PackageOutputPath Condition="'$(PACKAGE_CACHE)'==''">$(OutputPath)</PackageOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\ProductionService.cs" />
+    <Compile Remove="Services\TODO\MultiWellCsvReader.cs" />
+    <Compile Remove="Services\TODO\ProductionService.cs" />
+    <Compile Remove="Services\TODO\RowData.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\trmcnealy.github.io\assets\nindra.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="Services\TODO\MultiWellCsvReader.cs" />
+    <None Include="Services\ProductionService.cs" />
+    <None Include="Services\TODO\RowData.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Kokkos.NET" Version="0.6.3" />
+    <PackageReference Include="native.MultiPorosity" Version="$(RUNTIME_MUTLIPOROSITY_VERSION)" />
+    <PackageReference Include="OilGas.Data" Version="1.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MultiPorosity.Models\MultiPorosity.Models.csproj" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="REM NuGet.exe pack &quot;$(ProjectDir)MultiPorosityModel.nuspec&quot; -Properties Configuration=$(Configuration);Platform=$(Platform);Version=$(MUTLIPOROSITY_VERSION);RuntimeVersion=$(RUNTIME_MUTLIPOROSITY_VERSION) -OutputDirectory C:\AssemblyCache\_packages&#xA;&#xD;&#xA;rd /s /q C:\Users\tehgo\.nuget\packages\multiporositymodel" />
+  </Target>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="dotnet restore" />
+  </Target>
+
+</Project>

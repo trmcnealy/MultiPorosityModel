@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\Versioning.props" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Platforms>AnyCPU;x64</Platforms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Kokkos.NET" Version="0.6.3" />
+    <PackageReference Include="MultiPorosityModel" Version="0.4.0" />
+    <PackageReference Include="OilGas.Data" Version="1.10.0" />
+    <PackageReference Include="ParallelExtensionsCore" Version="1.3.0" />
+    <PackageReference Include="VegaLite.NET" Version="1.3.22" />
+  </ItemGroup>
+
+</Project>

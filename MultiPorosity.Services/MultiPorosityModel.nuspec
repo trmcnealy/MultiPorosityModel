@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>MultiPorosityModel</id>
+    <version>$Version$</version>
+    <authors>Timothy R. McNealy</authors>
+    <owners>Timothy R. McNealy</owners>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/trmcnealy/MultiPorosityModel</projectUrl>
+    <icon>nindra.png</icon>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Multi-Porosity Model</description>
+    <releaseNotes></releaseNotes>
+    <copyright>© Timothy R. McNealy</copyright>
+    <tags></tags>
+    <dependencies>
+      <group targetFramework=".NETCoreApp3.1">
+        <dependency id="Kokkos.NET"
+                    version="0.6.0" />
+        <dependency id="OilGas.Data"
+                    version="1.6.5" />
+        <dependency id="ParallelExtensionsExtras"
+                    version="1.0.0" />
+        <dependency id="native.MultiPorosity"
+                    version="$RuntimeVersion$" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\..\trmcnealy.github.io\assets\nindra.png"
+          target="" />
+
+    <file src="..\bin\$Configuration$\netcoreapp3.1\MultiPorosity.Models.dll"
+          target="lib\netcoreapp3.1" />
+
+    <file src="..\bin\$Configuration$\netcoreapp3.1\MultiPorosity.Models.pdb"
+          target="lib\netcoreapp3.1" />
+
+    <file src="..\bin\$Configuration$\netcoreapp3.1\MultiPorosity.Services.dll"
+          target="lib\netcoreapp3.1" />
+
+    <file src="..\bin\$Configuration$\netcoreapp3.1\MultiPorosity.Services.pdb"
+          target="lib\netcoreapp3.1" />
+
+    <!-- <file src="bin\$Platform$\$Configuration$\netcoreapp3.1\Kokkos.NET.pdb" -->
+    <!--       target="lib\netcoreapp3.1\Kokkos.NET.pdb" /> -->
+  </files>
+</package>

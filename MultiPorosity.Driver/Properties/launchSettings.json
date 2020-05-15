@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MultiPorosity.Driver": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
