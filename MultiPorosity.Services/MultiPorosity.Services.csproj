@@ -15,7 +15,7 @@
     <PackageIcon>nindra.png</PackageIcon>
     <PackageIconUrl />
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Version>1.0.4</Version>
+    <Version>$(MUTLIPOROSITY_VERSION)</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageOutputPath Condition="'$(PACKAGE_CACHE)'!=''">$(PACKAGE_CACHE)</PackageOutputPath>
     <PackageOutputPath Condition="'$(PACKAGE_CACHE)'==''">$(OutputPath)</PackageOutputPath>
@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <Compile Remove="Services\ProductionService.cs" />
+    <Compile Remove="Services\Sequence.cs" />
     <Compile Remove="Services\TODO\MultiWellCsvReader.cs" />
     <Compile Remove="Services\TODO\ProductionService.cs" />
     <Compile Remove="Services\TODO\RowData.cs" />
@@ -33,15 +34,17 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+    <None Include="Services\Sequence.cs" />
     <None Include="Services\TODO\MultiWellCsvReader.cs" />
     <None Include="Services\ProductionService.cs" />
     <None Include="Services\TODO\RowData.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kokkos.NET" Version="0.6.3" />
+    <PackageReference Include="Kokkos.NET" Version="0.7.2" />
     <PackageReference Include="native.MultiPorosity" Version="$(RUNTIME_MUTLIPOROSITY_VERSION)" />
-    <PackageReference Include="OilGas.Data" Version="1.10.0" />
+    <PackageReference Include="OilGas.Data" Version="1.10.5" />
+    <PackageReference Include="PlatformApi" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

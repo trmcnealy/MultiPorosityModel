@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\Versioning.props" />
 
   <PropertyGroup>
@@ -9,9 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kokkos.NET" Version="0.6.3" />
-    <PackageReference Include="MultiPorosityModel" Version="0.4.0" />
-    <PackageReference Include="OilGas.Data" Version="1.10.0" />
+    <PackageReference Include="Engineering.DataSource" Version="1.2.0" />
+    <PackageReference Include="Kokkos.NET" Version="0.7.2" />
+    <PackageReference Include="MultiPorosityModel" Version="0.4.3" />
+    <PackageReference Include="OilGas.Data" Version="1.10.5" />
     <PackageReference Include="ParallelExtensionsCore" Version="1.3.0" />
     <PackageReference Include="VegaLite.NET" Version="1.3.22" />
   </ItemGroup>

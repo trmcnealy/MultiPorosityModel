@@ -10,10 +10,8 @@ namespace MultiPorosity.Models
     public sealed unsafe class MultiPorosityData<T>
         where T : unmanaged
     {
-        private static readonly Type _T = typeof(T);
-        public static readonly int ThisSize;
-        
-        private static readonly int _ProductionDataOffset;
+        private static readonly Type               _T = typeof(T);
+        public static readonly  int                ThisSize;
         
         private static readonly int _ReservoirPropertiesOffset;
         
@@ -27,13 +25,12 @@ namespace MultiPorosity.Models
 
         static MultiPorosityData()
         {
-            _ProductionDataOffset = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_ProductionData)).ToInt32();
-            _ReservoirPropertiesOffset = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_ReservoirProperties)).ToInt32();
-            _WellPropertiesOffset = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_WellProperties)).ToInt32();
-            _FracturePropertiesOffset = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_FractureProperties)).ToInt32();
+            _ReservoirPropertiesOffset       = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_ReservoirProperties)).ToInt32();
+            _WellPropertiesOffset            = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_WellProperties)).ToInt32();
+            _FracturePropertiesOffset        = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_FractureProperties)).ToInt32();
             _NaturalFracturePropertiesOffset = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_NaturalFractureProperties)).ToInt32();
-            _PvtOffset = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_Pvt)).ToInt32();
-            ThisSize = _PvtOffset + Unsafe.SizeOf<IntPtr>();
+            _PvtOffset                       = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_Pvt)).ToInt32();
+            ThisSize                         = _PvtOffset + Unsafe.SizeOf<IntPtr>();
         }
         
         private IntPtr _ProductionData;
@@ -49,14 +46,6 @@ namespace MultiPorosity.Models
         private IntPtr _Pvt;
         
         private readonly NativePointer pointer;
-
-        public ProductionData<T> ProductionData
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            get { return new ProductionData<T>(*(IntPtr*)(pointer.Data + _ProductionDataOffset)); }
-            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            set { *(IntPtr*)(pointer.Data + _ProductionDataOffset) = value.Instance.Data; }
-        }
         
         public ReservoirProperties<T> ReservoirProperties
         {
@@ -104,21 +93,20 @@ namespace MultiPorosity.Models
             get { return pointer; }
         }
 
-        public MultiPorosityData()
+        public MultiPorosityData(ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)
         {
-            pointer = NativePointer.Allocate(ThisSize, ExecutionSpaceKind.Cuda);
+            pointer = NativePointer.Allocate(ThisSize, executionSpace);
         }
 
-        public MultiPorosityData(ProductionData<T> productionData,
-                                 ReservoirProperties<T> reservoirProperties,
-                                 WellProperties<T> wellProperties,
-                                 FractureProperties<T> fractureProperties,
+        public MultiPorosityData(ReservoirProperties <T >     reservoirProperties,
+                                 WellProperties<T>            wellProperties,
+                                 FractureProperties<T>        fractureProperties,
                                  NaturalFractureProperties<T> naturalFractureProperties,
-                                 Pvt<T> pvt)
+                                 Pvt<T>                       pvt,
+                                 ExecutionSpaceKind           executionSpace = ExecutionSpaceKind.Cuda)
         {
-            pointer = NativePointer.Allocate(ThisSize, ExecutionSpaceKind.Cuda);
+            pointer = NativePointer.Allocate(ThisSize, executionSpace);
 
-            ProductionData = productionData;
             ReservoirProperties = reservoirProperties;
             WellProperties = wellProperties;
             FractureProperties = fractureProperties;

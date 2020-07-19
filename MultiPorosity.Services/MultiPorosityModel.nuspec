@@ -14,13 +14,12 @@
     <copyright>© Timothy R. McNealy</copyright>
     <tags></tags>
     <dependencies>
-      <group targetFramework=".NETCoreApp3.1">
+      <group targetFramework="netcoreapp3.1">
         <dependency id="Kokkos.NET"
-                    version="0.6.0" />
+                    version="0.7.2" />
         <dependency id="OilGas.Data"
-                    version="1.6.5" />
-        <dependency id="ParallelExtensionsExtras"
-                    version="1.0.0" />
+                    version="1.10.5" />
+        <dependency id="System.Text.Json" version="4.7.2" />
         <dependency id="native.MultiPorosity"
                     version="$RuntimeVersion$" />
       </group>

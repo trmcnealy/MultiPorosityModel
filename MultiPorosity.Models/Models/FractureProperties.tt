@@ -7,7 +7,7 @@
 <#@ include file="NativeStructBuilder.ttinclude" #>
 <#
     string structName = "FractureProperties";
-    List<string> genericTypeList = new List<string>{"T"};
+    List<(string Name, string Constraint)> genericTypeList = new List<(string Name, string Constraint)>{("T", "unmanaged")};
     List<(string type, string fieldName, string propertyName)> propertyList = new List<(string type, string fieldName, string propertyName)>
     {
         ("int", "_count", "Count"),

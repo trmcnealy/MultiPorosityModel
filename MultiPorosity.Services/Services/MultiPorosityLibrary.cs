@@ -15,152 +15,154 @@ using Kokkos;
 using MultiPorosity.Models;
 using MultiPorosity.Models.BoundConstraints;
 
+using PlatformApi.Win32;
+
 namespace MultiPorosity.Services
 {
-    [NonVersionable]
-    internal static class Kernel32
-    {
-        [Flags]
-        public enum LoadLibraryFlags : uint
-        {
-            None                                = 0,
-            DONT_RESOLVE_DLL_REFERENCES         = 0x00000001,
-            LOAD_IGNORE_CODE_AUTHZ_LEVEL        = 0x00000010,
-            LOAD_LIBRARY_AS_DATAFILE            = 0x00000002,
-            LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE  = 0x00000040,
-            LOAD_LIBRARY_AS_IMAGE_RESOURCE      = 0x00000020,
-            LOAD_LIBRARY_SEARCH_APPLICATION_DIR = 0x00000200,
-            LOAD_LIBRARY_SEARCH_DEFAULT_DIRS    = 0x00001000,
-            LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR    = 0x00000100,
-            LOAD_LIBRARY_SEARCH_SYSTEM32        = 0x00000800,
-            LOAD_LIBRARY_SEARCH_USER_DIRS       = 0x00000400,
-            LOAD_WITH_ALTERED_SEARCH_PATH       = 0x00000008
-        }
+//    [NonVersionable]
+//    internal static class Kernel32
+//    {
+//        [Flags]
+//        public enum LoadLibraryFlags : uint
+//        {
+//            None                                = 0,
+//            DONT_RESOLVE_DLL_REFERENCES         = 0x00000001,
+//            LOAD_IGNORE_CODE_AUTHZ_LEVEL        = 0x00000010,
+//            LOAD_LIBRARY_AS_DATAFILE            = 0x00000002,
+//            LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE  = 0x00000040,
+//            LOAD_LIBRARY_AS_IMAGE_RESOURCE      = 0x00000020,
+//            LOAD_LIBRARY_SEARCH_APPLICATION_DIR = 0x00000200,
+//            LOAD_LIBRARY_SEARCH_DEFAULT_DIRS    = 0x00001000,
+//            LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR    = 0x00000100,
+//            LOAD_LIBRARY_SEARCH_SYSTEM32        = 0x00000800,
+//            LOAD_LIBRARY_SEARCH_USER_DIRS       = 0x00000400,
+//            LOAD_WITH_ALTERED_SEARCH_PATH       = 0x00000008
+//        }
 
-        public const int MaxPath = 255;
+//        public const int MaxPath = 255;
 
-        [SuppressUnmanagedCodeSecurity]
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        [DllImport("kernel32", EntryPoint = "LoadLibraryA", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern IntPtr LoadLibrary([In] [MarshalAs(UnmanagedType.LPStr)] string libName);
+//        [SuppressUnmanagedCodeSecurity]
+//        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+//        [DllImport("kernel32", EntryPoint = "LoadLibraryA", CharSet = CharSet.Ansi, SetLastError = true)]
+//        private static extern IntPtr LoadLibrary([In] [MarshalAs(UnmanagedType.LPStr)] string libName);
 
-        [SuppressUnmanagedCodeSecurity]
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        [DllImport("kernel32", EntryPoint = "LoadLibraryW", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern IntPtr LoadLibraryW([In] [MarshalAs(UnmanagedType.LPWStr)] string libName);
+//        [SuppressUnmanagedCodeSecurity]
+//        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+//        [DllImport("kernel32", EntryPoint = "LoadLibraryW", CharSet = CharSet.Unicode, SetLastError = true)]
+//        private static extern IntPtr LoadLibraryW([In] [MarshalAs(UnmanagedType.LPWStr)] string libName);
 
-        [SuppressUnmanagedCodeSecurity]
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        [DllImport("kernel32", EntryPoint = "LoadLibraryExA", CharSet = CharSet.Ansi, SetLastError = true)]
-        private static extern IntPtr LoadLibraryEx([In] [MarshalAs(UnmanagedType.LPStr)] string lpFileName,
-                                                   IntPtr                                       hReservedNull,
-                                                   uint                                         dwFlags);
+//        [SuppressUnmanagedCodeSecurity]
+//        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+//        [DllImport("kernel32", EntryPoint = "LoadLibraryExA", CharSet = CharSet.Ansi, SetLastError = true)]
+//        private static extern IntPtr LoadLibraryEx([In] [MarshalAs(UnmanagedType.LPStr)] string lpFileName,
+//                                                   IntPtr                                       hReservedNull,
+//                                                   uint                                         dwFlags);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        [SuppressUnmanagedCodeSecurity]
-        [DllImport("kernel32", ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern IntPtr LoadLibraryExW([In] [MarshalAs(UnmanagedType.LPWStr)] string lpwLibFileName,
-                                                    [In]                                   IntPtr hFile,
-                                                    [In]                                   uint   dwFlags);
+//        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+//        [SuppressUnmanagedCodeSecurity]
+//        [DllImport("kernel32", ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
+//        private static extern IntPtr LoadLibraryExW([In] [MarshalAs(UnmanagedType.LPWStr)] string lpwLibFileName,
+//                                                    [In]                                   IntPtr hFile,
+//                                                    [In]                                   uint   dwFlags);
 
-        [SuppressUnmanagedCodeSecurity]
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        [DllImport("kernel32", EntryPoint = "GetShortPathNameW", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern int GetShortPathName([MarshalAs(UnmanagedType.LPWStr)] string        path,
-                                                  [MarshalAs(UnmanagedType.LPWStr)] StringBuilder shortPath,
-                                                  uint                                            shortPathLength);
+//        [SuppressUnmanagedCodeSecurity]
+//        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+//        [DllImport("kernel32", EntryPoint = "GetShortPathNameW", CharSet = CharSet.Unicode, SetLastError = true)]
+//        public static extern int GetShortPathName([MarshalAs(UnmanagedType.LPWStr)] string        path,
+//                                                  [MarshalAs(UnmanagedType.LPWStr)] StringBuilder shortPath,
+//                                                  uint                                            shortPathLength);
 
-        [SuppressUnmanagedCodeSecurity]
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        [DllImport("kernel32", EntryPoint = "AddDllDirectory", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern IntPtr AddDllDirectory([In] [MarshalAs(UnmanagedType.LPWStr)] string newDirectory);
+//        [SuppressUnmanagedCodeSecurity]
+//        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+//        [DllImport("kernel32", EntryPoint = "AddDllDirectory", CharSet = CharSet.Unicode, SetLastError = true)]
+//        public static extern IntPtr AddDllDirectory([In] [MarshalAs(UnmanagedType.LPWStr)] string newDirectory);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static string GetShortPath(string path)
-        {
-            StringBuilder shortPath = new StringBuilder(MaxPath);
+//        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+//        public static string GetShortPath(string path)
+//        {
+//            StringBuilder shortPath = new StringBuilder(MaxPath);
 
-            if(path.EndsWith("\\"))
-            {
-                path = path.Substring(0, path.Length - 1);
-            }
+//            if(path.EndsWith("\\"))
+//            {
+//                path = path.Substring(0, path.Length - 1);
+//            }
 
-            GetShortPathName(path, shortPath, MaxPath);
+//            GetShortPathName(path, shortPath, MaxPath);
 
-            return shortPath.ToString();
-        }
+//            return shortPath.ToString();
+//        }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static IntPtr AddDllDirectory(string        newDirectory,
-                                             out ErrorCode errorCode)
-        {
-            IntPtr result = AddDllDirectory(newDirectory);
-            errorCode = ((ErrorCode)Marshal.GetLastWin32Error()).IfErrorThrow();
+//        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+//        public static IntPtr AddDllDirectory(string        newDirectory,
+//                                             out ErrorCode errorCode)
+//        {
+//            IntPtr result = AddDllDirectory(newDirectory);
+//            errorCode = ((ErrorCode)Marshal.GetLastWin32Error()).IfErrorThrow();
 
-            return result;
-        }
+//            return result;
+//        }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        //public static IntPtr LoadLibrary(string libName, out ErrorCode errorCode)
-        //{
-        //    IntPtr result = LoadLibrary(libName);
-        //    errorCode = ((ErrorCode)Marshal.GetLastWin32Error()).IfErrorThrow();
-        //    return result;
-        //}
+//        //[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+//        //public static IntPtr LoadLibrary(string libName, out ErrorCode errorCode)
+//        //{
+//        //    IntPtr result = LoadLibrary(libName);
+//        //    errorCode = ((ErrorCode)Marshal.GetLastWin32Error()).IfErrorThrow();
+//        //    return result;
+//        //}
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static IntPtr LoadLibraryEx(string           lpFileName,
-                                           LoadLibraryFlags dwFlags,
-                                           out ErrorCode    errorCode)
-        {
-            //LoadLibraryFlags.LOAD_LIBRARY_AS_DATAFILE | LoadLibraryFlags.LOAD_LIBRARY_AS_IMAGE_RESOURCE | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR
-            IntPtr result = LoadLibraryEx(lpFileName, IntPtr.Zero, (uint)dwFlags); // & 0xFFFFFF00
+//        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+//        public static IntPtr LoadLibraryEx(string           lpFileName,
+//                                           LoadLibraryFlags dwFlags,
+//                                           out ErrorCode    errorCode)
+//        {
+//            //LoadLibraryFlags.LOAD_LIBRARY_AS_DATAFILE | LoadLibraryFlags.LOAD_LIBRARY_AS_IMAGE_RESOURCE | LoadLibraryFlags.LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR
+//            IntPtr result = LoadLibraryEx(lpFileName, IntPtr.Zero, (uint)dwFlags); // & 0xFFFFFF00
 
-            errorCode = ((ErrorCode)Marshal.GetLastWin32Error()).IfErrorThrow();
+//            errorCode = ((ErrorCode)Marshal.GetLastWin32Error()).IfErrorThrow();
 
-            return result;
-        }
+//            return result;
+//        }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public static bool AddToPath(string dirToAdd)
-        {
-            if(string.IsNullOrEmpty(dirToAdd))
-            {
-                return false;
-            }
+//        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+//        public static bool AddToPath(string dirToAdd)
+//        {
+//            if(string.IsNullOrEmpty(dirToAdd))
+//            {
+//                return false;
+//            }
 
-            if(!Directory.Exists(dirToAdd))
-            {
-                return false;
-            }
+//            if(!Directory.Exists(dirToAdd))
+//            {
+//                return false;
+//            }
 
-            string text = Environment.GetEnvironmentVariable("PATH");
+//            string text = Environment.GetEnvironmentVariable("PATH");
 
-            if(text == null)
-            {
-                return false;
-            }
+//            if(text == null)
+//            {
+//                return false;
+//            }
 
-            //string[] array = text.Split(Path.PathSeparator);
+//            //string[] array = text.Split(Path.PathSeparator);
 
-            text += Path.PathSeparator;
+//            text += Path.PathSeparator;
 
-            text = text.Replace(dirToAdd + Path.PathSeparator, "");
+//            text = text.Replace(dirToAdd + Path.PathSeparator, "");
 
-            if(text[^1] == Path.PathSeparator)
-            {
-                text = text.Substring(0, text.Length - 1);
-            }
+//            if(text[^1] == Path.PathSeparator)
+//            {
+//                text = text.Substring(0, text.Length - 1);
+//            }
 
-            string value = dirToAdd + Path.PathSeparator + text;
+//            string value = dirToAdd + Path.PathSeparator + text;
 
-            Environment.SetEnvironmentVariable("PATH", value);
-#if DEBUG
-            string PATH = Environment.GetEnvironmentVariable("PATH");
-#endif
-            return true;
-        }
-    }
+//            Environment.SetEnvironmentVariable("PATH", value);
+//#if DEBUG
+//            string PATH = Environment.GetEnvironmentVariable("PATH");
+//#endif
+//            return true;
+//        }
+//    }
 
     [NonVersionable]
     internal static class MultiPorosityLibrary
