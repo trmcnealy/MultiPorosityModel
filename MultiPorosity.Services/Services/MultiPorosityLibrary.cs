@@ -309,13 +309,14 @@ namespace MultiPorosity.Services
 #if DEBUG
             Console.WriteLine("Loading " + RuntimeLibraryName);
 #endif
+            //typeof(View).Assembly, DllImportSearchPath.UseDllDirectoryForDependencies, 
 
-            if(!NativeLibrary.TryLoad(RuntimeLibraryName, typeof(View).Assembly, DllImportSearchPath.UseDllDirectoryForDependencies, out Handle))
+            if(!PlatformApi.NativeLibrary.TryLoad(RuntimeLibraryName, out Handle, out ulong errorCode))
             {
-                MultiPorosityLibraryException.Throw();
+                MultiPorosityLibraryException.Throw($"Error Code:{errorCode}");
             }
 
-            if(NativeLibrary.TryGetExport(Handle, "GetApi", out IntPtr getApiHandle))
+            if(PlatformApi.NativeLibrary.TryGetExport(Handle, "GetApi", out IntPtr getApiHandle, out errorCode))
             {
                 GetApi = Marshal.GetDelegateForFunctionPointer<GetApiDelegate>(getApiHandle);
 
@@ -355,29 +356,35 @@ namespace MultiPorosity.Services
 
         internal static void Unload()
         {
-            NativeLibrary.Free(Handle);
+            PlatformApi.NativeLibrary.Free(Handle, out ulong errorCode);
         }
 
         #region Delegates
-
+        
+        [SuppressUnmanagedCodeSecurity]
         internal delegate ref MultiPorosityApi GetApiDelegate(in uint version);
-
+        
+        [SuppressUnmanagedCodeSecurity]
         internal delegate IntPtr CreateSolverSingleDelegate(in ExecutionSpaceKind        execution_space,
                                                             IntPtr                       multi_porosity_data_ptr,
                                                             in InverseTransformPrecision inverseTransformPrecision = InverseTransformPrecision.High);
 
+        [SuppressUnmanagedCodeSecurity]
         internal delegate IntPtr CreateSolverDoubleDelegate(in ExecutionSpaceKind        execution_space,
                                                             IntPtr                       multi_porosity_data_ptr,
                                                             in InverseTransformPrecision inverseTransformPrecision = InverseTransformPrecision.High);
 
+        [SuppressUnmanagedCodeSecurity]
         internal delegate void FreeSolverSingleDelegate(IntPtr                       instance,
                                                         in ExecutionSpaceKind        execution_space,
                                                         in InverseTransformPrecision inverseTransformPrecision);
 
+        [SuppressUnmanagedCodeSecurity]
         internal delegate void FreeSolverDoubleDelegate(IntPtr                       instance,
                                                         in ExecutionSpaceKind        execution_space,
                                                         in InverseTransformPrecision inverseTransformPrecision);
 
+        [SuppressUnmanagedCodeSecurity]
         internal delegate IntPtr SolverHistoryMatchSingleDelegate(in ParticleSwarmOptimizationOptionsF options,
                                                                   IntPtr                               actual_data_rcp_view_ptr,
                                                                   IntPtr                               actual_time_rcp_view_ptr,
@@ -387,6 +394,7 @@ namespace MultiPorosity.Services
                                                                   in ExecutionSpaceKind                executionSpace,
                                                                   in InverseTransformPrecision         inverseTransformPrecision = InverseTransformPrecision.High);
 
+        [SuppressUnmanagedCodeSecurity]
         internal delegate IntPtr SolverHistoryMatchDoubleDelegate(in ParticleSwarmOptimizationOptions options,
                                                                   IntPtr                              actual_data_rcp_view_ptr,
                                                                   IntPtr                              actual_time_rcp_view_ptr,
@@ -396,24 +404,28 @@ namespace MultiPorosity.Services
                                                                   in ExecutionSpaceKind               executionSpace,
                                                                   in InverseTransformPrecision        inverseTransformPrecision = InverseTransformPrecision.High);
 
+        [SuppressUnmanagedCodeSecurity]
         internal delegate void SolverGetResultsSingleDelegate(IntPtr                 instance,
                                                               in  ExecutionSpaceKind executionSpace,
                                                               out IntPtr             args,
                                                               out float              error,
                                                               out IntPtr             cached_data);
 
+        [SuppressUnmanagedCodeSecurity]
         internal delegate void SolverGetResultsDoubleDelegate(IntPtr                 instance,
                                                               in  ExecutionSpaceKind executionSpace,
                                                               out IntPtr             args,
                                                               out double             error,
                                                               out IntPtr             cached_data);
 
+        [SuppressUnmanagedCodeSecurity]
         internal delegate IntPtr SolverCalculateSingleDelegate(IntPtr                       time_rcp_view_ptr,
                                                                IntPtr                       args_rcp_view_ptr,
                                                                IntPtr                       instance,
                                                                in ExecutionSpaceKind        executionSpace,
                                                                in InverseTransformPrecision inverseTransformPrecision = InverseTransformPrecision.High);
 
+        [SuppressUnmanagedCodeSecurity]
         internal delegate IntPtr SolverCalculateDoubleDelegate(IntPtr                       time_rcp_view_ptr,
                                                                IntPtr                       args_rcp_view_ptr,
                                                                IntPtr                       instance,

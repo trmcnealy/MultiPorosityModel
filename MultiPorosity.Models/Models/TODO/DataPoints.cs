@@ -19,7 +19,7 @@ namespace MultiPorosity.Models
             internal IntPtr Weights;
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIfEC2EPN6System5ArrayIfEES6_")]
             internal static extern void ctorc__N_EAS_N_MultiPorosityModel_S_DataPoints__f(IntPtr instance,
@@ -27,33 +27,33 @@ namespace MultiPorosity.Models
                                                                                           IntPtr weights);
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIfEC2ERKS2_")]
             internal static extern void cctorc__N_EAS_N_MultiPorosityModel_S_DataPoints__f(IntPtr instance,
                                                                                            IntPtr other);
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIfE6CreateEPPS2_")]
             internal static extern void Createc__N_EAS_N_MultiPorosityModel_S_DataPoints__f(out IntPtr instance);
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIfE6CreateEPvRKS2_")]
             internal static extern void Createc__N_EAS_N_MultiPorosityModel_S_DataPoints__f(IntPtr instance,
                                                                                             IntPtr args);
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIfE7DestroyEPS2_")]
             internal static extern void Destroyc__N_EAS_N_MultiPorosityModel_S_DataPoints__f(IntPtr instance);
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIfE6CreateEPPS2_PN6System5ArrayIfEES8_")]
             internal static extern void Createc__N_EAS_N_MultiPorosityModel_S_DataPoints__f(IntPtr instance,
@@ -61,7 +61,7 @@ namespace MultiPorosity.Models
                                                                                             IntPtr weights);
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIdEC2EPN6System5ArrayIdEES6_")]
             internal static extern void ctorc__N_EAS_N_MultiPorosityModel_S_DataPoints__d(IntPtr instance,
@@ -69,33 +69,33 @@ namespace MultiPorosity.Models
                                                                                           IntPtr weights);
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIdEC2ERKS2_")]
             internal static extern void cctorc__N_EAS_N_MultiPorosityModel_S_DataPoints__d(IntPtr instance,
                                                                                            IntPtr other);
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIdE6CreateEPPS2_")]
             internal static extern void Createc__N_EAS_N_MultiPorosityModel_S_DataPoints__d(out IntPtr instance);
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIdE6CreateEPvRKS2_")]
             internal static extern void Createc__N_EAS_N_MultiPorosityModel_S_DataPoints__d(IntPtr instance,
                                                                                             IntPtr args);
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIdE7DestroyEPS2_")]
             internal static extern void Destroyc__N_EAS_N_MultiPorosityModel_S_DataPoints__d(IntPtr instance);
 
             [SuppressUnmanagedCodeSecurity, MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            [DllImport(NativeModule.DllName,
+            [SuppressGCTransition, SuppressUnmanagedCodeSecurity, DllImport(NativeModule.DllName,
                        CallingConvention = CallingConvention.Cdecl,
                        EntryPoint        = "_ZN3EAS18MultiPorosityModel10DataPointsIdE6CreateEPPS2_PN6System5ArrayIdEES8_")]
             internal static extern void Createc__N_EAS_N_MultiPorosityModel_S_DataPoints__d(IntPtr instance,

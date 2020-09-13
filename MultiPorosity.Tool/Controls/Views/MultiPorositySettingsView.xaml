@@ -1,0 +1,173 @@
+﻿<reactiveUi:ReactiveUserControl x:Class="MultiPorosity.Tool.MultiPorositySettingsView"
+                                x:TypeArguments="local:MultiPorositySettingsViewModel"
+                                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                                xmlns:local="clr-namespace:MultiPorosity.Tool"
+                                xmlns:reactiveUi="http://reactiveui.net"
+                                mc:Ignorable="d"
+                                d:DesignHeight="450"
+                                d:DesignWidth="400">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="195"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+
+        <Label Content="Parameter"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="0"
+               Grid.Column="0"/>
+        <Label Content="Lower Value"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Center"
+               VerticalContentAlignment="Center"
+               Grid.Row="0"
+               Grid.Column="1"/>
+        <Label Content="Upper Value"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Center"
+               VerticalContentAlignment="Center"
+               Grid.Row="0"
+               Grid.Column="2"/>
+
+        <Label Content="Matrix Perm (md)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="1"
+               Grid.Column="0"/>
+        <TextBox x:Name="MatrixPermLowerValue"
+                 Height="20"
+                 Grid.Row="1"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.MatrixPermLower, StringFormat={}{0:N4}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 PreviewTextInput="NumberValidationTextBox"
+                 Margin="5,0,5,0"/>
+        <TextBox x:Name="MatrixPermUpperValue"
+                 Height="20"
+                 Grid.Row="1"
+                 Grid.Column="2"
+                 Text="{Binding Path=ViewModel.MatrixPermUpper, StringFormat={}{0:N4}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 PreviewTextInput="NumberValidationTextBox"
+                 Margin="5,0,5,0"/>
+
+        <Label Content="Hydralic Fracture Perm (md)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="2"
+               Grid.Column="0"/>
+        <TextBox x:Name="HydralicFracturePermLowerValue"
+                 Height="20"
+                 Grid.Row="2"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.HydralicFracturePermLower, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"/>
+        <TextBox x:Name="HydralicFracturePermUpperValue"
+                 Height="20"
+                 Grid.Row="2"
+                 Grid.Column="2"
+                 Text="{Binding Path=ViewModel.HydralicFracturePermUpper, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"/>
+
+        <Label Content="Natural Fracture Perm (md)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="3"
+               Grid.Column="0"/>
+        <TextBox x:Name="NaturalFracturePermLowerValue"
+                 Height="20"
+                 Grid.Row="3"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.NaturalFracturePermLower, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"/>
+        <TextBox x:Name="NaturalFracturePermUpperValue"
+                 Height="20"
+                 Grid.Row="3"
+                 Grid.Column="2"
+                 Text="{Binding Path=ViewModel.NaturalFracturePermUpper, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"/>
+
+        <Label Content="Hydralic Fracture Half Length (ft)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="4"
+               Grid.Column="0"/>
+        <TextBox x:Name="HydralicFractureHalfLengthLowerValue"
+                 Height="20"
+                 Grid.Row="4"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.HydralicFractureHalfLengthLower, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"/>
+        <TextBox x:Name="HydralicFractureHalfLengthUpperValue"
+                 Height="20"
+                 Grid.Row="4"
+                 Grid.Column="2"
+                 Text="{Binding Path=ViewModel.HydralicFractureHalfLengthUpper, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"/>
+
+        <Label Content="Hydralic Fracture Spacing (ft)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="5"
+               Grid.Column="0"/>
+        <TextBox x:Name="HydralicFractureSpacingLowerValue"
+                 Height="20"
+                 Grid.Row="5"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.HydralicFractureSpacingLower, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"/>
+        <TextBox x:Name="HydralicFractureSpacingUpperValue"
+                 Height="20"
+                 Grid.Row="5"
+                 Grid.Column="2"
+                 Text="{Binding Path=ViewModel.HydralicFractureSpacingUpper, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"/>
+
+        <Label Content="Natural Fracture Spacing (ft)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="6"
+               Grid.Column="0"/>
+        <TextBox x:Name="NaturalFractureSpacingLowerValue"
+                 Height="20"
+                 Grid.Row="6"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.NaturalFractureSpacingLower, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"/>
+        <TextBox x:Name="NaturalFractureSpacingUpperValue"
+                 Height="20"
+                 Grid.Row="6"
+                 Grid.Column="2"
+                 Text="{Binding Path=ViewModel.NaturalFractureSpacingUpper, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"/>
+
+    </Grid>
+</reactiveUi:ReactiveUserControl>

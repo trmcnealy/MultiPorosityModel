@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
+using Engineering.DataSource;
 using Engineering.DataSource.OilGas;
 
 using Kokkos;
@@ -34,62 +38,261 @@ namespace MultiPorosity.Driver
 #endif
         }
 
+        private static readonly ApiNumber[] TestWells = new ApiNumber[]
+        {
+            new ApiNumber("42-025-33724-00-00"), new ApiNumber("42-297-35266-00-00"), new ApiNumber("42-123-32806-00-00"), new ApiNumber("42-123-32546-00-00"),
+            new ApiNumber("42-123-32848-00-00"), new ApiNumber("42-297-35087-00-00"), new ApiNumber("42-297-35343-00-00"), new ApiNumber("42-297-34747-00-00"),
+            new ApiNumber("42-255-35575-00-00"), new ApiNumber("42-123-32998-00-00"), new ApiNumber("42-123-32462-00-00"), new ApiNumber("42-297-34879-00-00"),
+            new ApiNumber("42-297-35350-00-00"), new ApiNumber("42-123-32786-00-00"), new ApiNumber("42-255-35843-00-00"), new ApiNumber("42-255-32990-00-00"),
+            new ApiNumber("42-311-35071-00-00"), new ApiNumber("42-123-34330-00-00"), new ApiNumber("42-123-34413-00-00"), new ApiNumber("42-297-34814-00-00"),
+            new ApiNumber("42-297-35859-00-00"), new ApiNumber("42-123-32679-00-00"), new ApiNumber("42-123-34607-00-00"), new ApiNumber("42-123-33117-00-00"),
+            new ApiNumber("42-123-32357-00-00"), new ApiNumber("42-123-32892-00-00"), new ApiNumber("42-123-34306-00-00"), new ApiNumber("42-123-32813-00-00"),
+            new ApiNumber("42-123-32816-00-00"), new ApiNumber("42-255-31931-00-00"), new ApiNumber("42-123-32634-00-00"), new ApiNumber("42-255-32463-00-00"),
+            new ApiNumber("42-123-32596-00-00"), new ApiNumber("42-297-35193-00-00"), new ApiNumber("42-123-34049-00-00"), new ApiNumber("42-297-35284-00-00"),
+            new ApiNumber("42-255-32457-00-00"), new ApiNumber("42-123-34639-00-00"), new ApiNumber("42-297-35367-00-00"), new ApiNumber("42-123-34416-00-00"),
+            new ApiNumber("42-123-34604-00-00"), new ApiNumber("42-297-35158-00-00"), new ApiNumber("42-123-32789-00-00"), new ApiNumber("42-123-32784-00-00"),
+            new ApiNumber("42-123-34318-00-00"), new ApiNumber("42-123-32762-00-00"), new ApiNumber("42-297-35097-00-00"), new ApiNumber("42-255-32980-00-00"),
+            new ApiNumber("42-255-33014-00-00"), new ApiNumber("42-123-32739-00-00"), new ApiNumber("42-297-35298-00-00"), new ApiNumber("42-297-34861-00-00"),
+            new ApiNumber("42-255-31719-00-00"), new ApiNumber("42-255-31700-00-00"), new ApiNumber("42-255-31691-00-00"), new ApiNumber("42-123-32302-00-00"),
+            new ApiNumber("42-255-31724-00-00"), new ApiNumber("42-025-33726-00-00"), new ApiNumber("42-255-31714-00-00"), new ApiNumber("42-123-32722-00-00"),
+            new ApiNumber("42-255-31657-00-00"), new ApiNumber("42-123-32362-00-00"), new ApiNumber("42-311-35254-00-00"), new ApiNumber("42-123-34073-00-00"),
+            new ApiNumber("42-255-31756-00-00"), new ApiNumber("42-297-34921-00-00"), new ApiNumber("42-123-34325-00-00"), new ApiNumber("42-123-34442-00-00"),
+            new ApiNumber("42-123-34629-00-00"), new ApiNumber("42-297-35806-00-00"), new ApiNumber("42-123-34605-00-00"), new ApiNumber("42-123-34329-00-00"),
+            new ApiNumber("42-123-34302-00-00"), new ApiNumber("42-123-34412-00-00"), new ApiNumber("42-255-35395-00-00"), new ApiNumber("42-123-32658-00-00"),
+            new ApiNumber("42-123-32551-00-00"), new ApiNumber("42-123-32501-00-00"), new ApiNumber("42-123-34144-00-00"), new ApiNumber("42-123-32306-00-00"),
+            new ApiNumber("42-123-32615-00-00"), new ApiNumber("42-123-34597-00-00"), new ApiNumber("42-123-34826-00-00"), new ApiNumber("42-123-32320-00-00"),
+            new ApiNumber("42-123-34598-00-00"), new ApiNumber("42-123-32450-00-00"), new ApiNumber("42-123-34535-00-00"), new ApiNumber("42-123-34283-00-00"),
+            new ApiNumber("42-123-32986-00-00"), new ApiNumber("42-123-32443-00-00"), new ApiNumber("42-123-34716-00-00"), new ApiNumber("42-123-32494-00-00"),
+            new ApiNumber("42-123-32338-00-00"), new ApiNumber("42-123-34282-00-00"), new ApiNumber("42-123-32903-00-00"), new ApiNumber("42-123-32316-00-00"),
+            new ApiNumber("42-123-32578-00-00"), new ApiNumber("42-123-32506-00-00"), new ApiNumber("42-123-34236-00-00"), new ApiNumber("42-123-32481-00-00"),
+            new ApiNumber("42-123-32902-00-00"), new ApiNumber("42-123-33072-00-00"), new ApiNumber("42-123-33266-00-00"), new ApiNumber("42-123-33062-00-00"),
+            new ApiNumber("42-123-32365-00-00"), new ApiNumber("42-123-32622-00-00"), new ApiNumber("42-123-34600-00-00"), new ApiNumber("42-255-32699-00-00"),
+            new ApiNumber("42-123-33640-00-00"), new ApiNumber("42-123-33017-00-00"), new ApiNumber("42-123-34275-00-00"), new ApiNumber("42-123-32304-00-00"),
+            new ApiNumber("42-123-34719-00-00"), new ApiNumber("42-123-34555-00-00"), new ApiNumber("42-123-34601-00-00"), new ApiNumber("42-123-34588-00-00"),
+            new ApiNumber("42-123-34596-00-00"), new ApiNumber("42-123-32483-00-00"), new ApiNumber("42-123-34599-00-00"), new ApiNumber("42-123-34584-00-00"),
+            new ApiNumber("42-123-33164-00-00"), new ApiNumber("42-123-32999-00-00"), new ApiNumber("42-123-33564-00-00"), new ApiNumber("42-123-32475-00-00"),
+            new ApiNumber("42-123-34556-00-00"), new ApiNumber("42-123-32674-00-00"), new ApiNumber("42-123-32823-00-00"), new ApiNumber("42-123-32301-00-00"),
+            new ApiNumber("42-123-34536-00-00"), new ApiNumber("42-123-33102-00-00"), new ApiNumber("42-123-32642-00-00"), new ApiNumber("42-123-33101-00-00"),
+            new ApiNumber("42-123-33090-00-00"), new ApiNumber("42-123-33015-00-00"), new ApiNumber("42-123-34035-00-00"), new ApiNumber("42-123-32451-00-00"),
+            new ApiNumber("42-123-32910-00-00"), new ApiNumber("42-123-34714-00-00"), new ApiNumber("42-123-33299-00-00"), new ApiNumber("42-123-34585-00-00"),
+            new ApiNumber("42-123-34742-00-00"), new ApiNumber("42-123-32911-00-00"), new ApiNumber("42-255-33623-00-00"), new ApiNumber("42-123-33710-00-00"),
+            new ApiNumber("42-255-33493-00-00"), new ApiNumber("42-297-35326-00-00"), new ApiNumber("42-123-34156-00-00"), new ApiNumber("42-297-35792-00-00"),
+            new ApiNumber("42-297-35027-00-00"), new ApiNumber("42-255-32163-00-00"), new ApiNumber("42-255-33202-00-00"), new ApiNumber("42-255-32300-00-00"),
+            new ApiNumber("42-123-33246-00-00"), new ApiNumber("42-123-32295-00-00"), new ApiNumber("42-255-33468-00-00"), new ApiNumber("42-123-33716-00-00"),
+            new ApiNumber("42-297-35934-00-00"), new ApiNumber("42-255-33561-00-00"), new ApiNumber("42-255-34628-00-00"), new ApiNumber("42-297-35376-00-00"),
+            new ApiNumber("42-297-35308-00-00"), new ApiNumber("42-123-33186-00-00"), new ApiNumber("42-255-32153-00-00"), new ApiNumber("42-297-35416-00-00"),
+            new ApiNumber("42-123-33692-00-00"), new ApiNumber("42-255-35335-00-00"), new ApiNumber("42-297-35481-00-00"), new ApiNumber("42-123-33501-00-00"),
+            new ApiNumber("42-123-33572-00-00"), new ApiNumber("42-123-33586-00-00"), new ApiNumber("42-123-33712-00-00"), new ApiNumber("42-255-34605-00-00"),
+            new ApiNumber("42-255-34342-00-00"), new ApiNumber("42-123-33960-00-00"), new ApiNumber("42-123-33543-00-00"), new ApiNumber("42-123-34063-00-00"),
+            new ApiNumber("42-255-34611-00-00"), new ApiNumber("42-255-31948-00-00"), new ApiNumber("42-123-33986-00-00"), new ApiNumber("42-297-35484-00-00"),
+            new ApiNumber("42-255-34607-00-00"), new ApiNumber("42-123-32951-00-00"), new ApiNumber("42-255-33836-00-00"), new ApiNumber("42-123-33697-00-00"),
+            new ApiNumber("42-297-34901-00-00"), new ApiNumber("42-255-33007-00-00"), new ApiNumber("42-255-34457-00-00"), new ApiNumber("42-123-32590-00-00"),
+            new ApiNumber("42-255-34352-00-00"), new ApiNumber("42-123-32436-00-00"), new ApiNumber("42-123-32647-00-00"), new ApiNumber("42-255-32225-00-00"),
+            new ApiNumber("42-255-34216-00-00"), new ApiNumber("42-123-34115-00-00"), new ApiNumber("42-123-34164-00-00"), new ApiNumber("42-297-35781-00-00"),
+            new ApiNumber("42-123-34155-00-00"), new ApiNumber("42-297-35375-00-00"), new ApiNumber("42-123-33987-00-00"), new ApiNumber("42-123-33961-00-00"),
+            new ApiNumber("42-123-33483-00-00"), new ApiNumber("42-123-32932-00-00"), new ApiNumber("42-255-35333-00-00"), new ApiNumber("42-297-35556-00-00"),
+            new ApiNumber("42-255-35329-00-00"), new ApiNumber("42-297-35065-00-00"), new ApiNumber("42-255-33724-00-00"), new ApiNumber("42-297-35477-00-00"),
+            new ApiNumber("42-123-33247-00-00"), new ApiNumber("42-297-35030-00-00"), new ApiNumber("42-297-35129-00-00"), new ApiNumber("42-255-32247-00-00"),
+            new ApiNumber("42-123-32718-00-00"), new ApiNumber("42-297-35156-00-00"), new ApiNumber("42-255-33342-00-00"), new ApiNumber("42-297-35476-00-00"),
+            new ApiNumber("42-297-35306-00-00"), new ApiNumber("42-123-33821-00-00"), new ApiNumber("42-255-34453-00-00"), new ApiNumber("42-123-33698-00-00"),
+            new ApiNumber("42-297-35602-00-00"), new ApiNumber("42-255-34214-00-00"), new ApiNumber("42-255-33590-00-00"), new ApiNumber("42-297-35324-00-00"),
+            new ApiNumber("42-123-33544-00-00"), new ApiNumber("42-297-35068-00-00"), new ApiNumber("42-255-33492-00-00"), new ApiNumber("42-123-33219-00-00"),
+            new ApiNumber("42-297-34846-00-00"), new ApiNumber("42-255-33488-00-00"), new ApiNumber("42-123-33963-00-00"), new ApiNumber("42-255-33489-00-00"),
+            new ApiNumber("42-297-35325-00-00"), new ApiNumber("42-123-33346-00-00"), new ApiNumber("42-123-33500-00-00"), new ApiNumber("42-297-35480-00-00"),
+            new ApiNumber("42-297-35131-00-00"), new ApiNumber("42-255-33619-00-00"), new ApiNumber("42-297-35113-00-00"), new ApiNumber("42-255-33680-00-00"),
+            new ApiNumber("42-123-33964-00-00"), new ApiNumber("42-123-33569-00-00"), new ApiNumber("42-255-34649-00-00"), new ApiNumber("42-123-33485-00-00"),
+            new ApiNumber("42-297-35307-00-00"), new ApiNumber("42-123-32949-00-00"), new ApiNumber("42-123-33491-00-00"), new ApiNumber("42-123-33528-00-00"),
+            new ApiNumber("42-255-33491-00-00"), new ApiNumber("42-255-33591-00-00"), new ApiNumber("42-255-33566-00-00"), new ApiNumber("42-123-33492-00-00"),
+            new ApiNumber("42-255-33722-00-00"), new ApiNumber("42-255-34646-00-00"), new ApiNumber("42-297-35374-00-00"), new ApiNumber("42-255-35330-00-00"),
+            new ApiNumber("42-297-35494-00-00"), new ApiNumber("42-123-33222-00-00"), new ApiNumber("42-297-35555-00-00"), new ApiNumber("42-255-33834-00-00"),
+            new ApiNumber("42-255-34459-00-00"), new ApiNumber("42-123-33820-00-00"), new ApiNumber("42-123-34198-00-00"), new ApiNumber("42-255-34629-00-00"),
+            new ApiNumber("42-255-34366-00-00"), new ApiNumber("42-255-34346-00-00"), new ApiNumber("42-123-34064-00-00"), new ApiNumber("42-255-34632-00-00"),
+            new ApiNumber("42-123-33694-00-00"), new ApiNumber("42-123-33711-00-00"), new ApiNumber("42-255-33824-00-00"), new ApiNumber("42-255-33213-00-00"),
+            new ApiNumber("42-123-34197-00-00"), new ApiNumber("42-255-36331-00-00"), new ApiNumber("42-255-35950-00-00"), new ApiNumber("42-255-35947-00-00"),
+            new ApiNumber("42-255-35933-00-00"), new ApiNumber("42-123-32580-00-00"), new ApiNumber("42-123-33373-00-00"), new ApiNumber("42-123-33048-00-00"),
+            new ApiNumber("42-123-33050-00-00"), new ApiNumber("42-123-34758-00-00"), new ApiNumber("42-123-33140-00-00"), new ApiNumber("42-123-33238-00-00"),
+            new ApiNumber("42-123-33237-00-00"), new ApiNumber("42-123-33374-00-00"), new ApiNumber("42-123-33319-00-00"), new ApiNumber("42-123-34757-00-00"),
+            new ApiNumber("42-123-33150-00-00"), new ApiNumber("42-123-33141-00-00"), new ApiNumber("42-123-33239-00-00"), new ApiNumber("42-123-33049-00-00"),
+            new ApiNumber("42-255-34902-00-00"), new ApiNumber("42-255-34951-00-00"), new ApiNumber("42-255-33605-00-00"), new ApiNumber("42-255-35155-00-00"),
+            new ApiNumber("42-255-35285-00-00"), new ApiNumber("42-255-35627-00-00"), new ApiNumber("42-255-32591-00-00"), new ApiNumber("42-255-32512-00-00"),
+            new ApiNumber("42-255-34168-00-00"), new ApiNumber("42-255-33082-00-00"), new ApiNumber("42-123-33217-00-00"), new ApiNumber("42-255-34227-00-00"),
+            new ApiNumber("42-255-32571-00-00"), new ApiNumber("42-255-34657-00-00"), new ApiNumber("42-255-33318-00-00"), new ApiNumber("42-255-34900-00-00"),
+            new ApiNumber("42-255-34955-00-00"), new ApiNumber("42-297-35094-00-00"), new ApiNumber("42-255-32324-00-00"), new ApiNumber("42-255-33641-00-00"),
+            new ApiNumber("42-297-35959-00-00"), new ApiNumber("42-123-32781-00-00"), new ApiNumber("42-255-34713-00-00"), new ApiNumber("42-255-31721-00-00"),
+            new ApiNumber("42-255-33970-00-00"), new ApiNumber("42-255-36084-00-00"), new ApiNumber("42-255-34898-00-00"), new ApiNumber("42-255-34355-00-00"),
+            new ApiNumber("42-255-35135-00-00"), new ApiNumber("42-255-33313-00-00"), new ApiNumber("42-123-32835-00-00"), new ApiNumber("42-255-35628-00-00"),
+            new ApiNumber("42-255-33033-00-00"), new ApiNumber("42-255-32337-00-00"), new ApiNumber("42-255-33320-00-00"), new ApiNumber("42-255-32464-00-00"),
+            new ApiNumber("42-255-35133-00-00"), new ApiNumber("42-255-34112-00-00"), new ApiNumber("42-255-34279-00-00"), new ApiNumber("42-255-33309-00-00"),
+            new ApiNumber("42-255-33545-00-00"), new ApiNumber("42-255-33729-00-00"), new ApiNumber("42-297-35814-00-00"), new ApiNumber("42-255-32531-00-00"),
+            new ApiNumber("42-297-35697-00-00"), new ApiNumber("42-255-32755-00-00"), new ApiNumber("42-255-34297-00-00"), new ApiNumber("42-255-35156-00-00"),
+            new ApiNumber("42-255-34329-00-00"), new ApiNumber("42-255-34826-00-00"), new ApiNumber("42-255-35129-00-00"), new ApiNumber("42-255-34088-00-00"),
+            new ApiNumber("42-255-34824-00-00"), new ApiNumber("42-255-35192-00-00"), new ApiNumber("42-255-34111-00-00"), new ApiNumber("42-255-33547-00-00"),
+            new ApiNumber("42-297-35669-00-00"), new ApiNumber("42-255-32817-00-00"), new ApiNumber("42-255-35260-00-00"), new ApiNumber("42-297-35614-00-00"),
+            new ApiNumber("42-255-33661-00-00"), new ApiNumber("42-297-35741-00-00"), new ApiNumber("42-255-34089-00-00"), new ApiNumber("42-255-34838-00-00"),
+            new ApiNumber("42-255-34822-00-00"), new ApiNumber("42-255-34819-00-00"), new ApiNumber("42-255-33505-00-00"), new ApiNumber("42-255-32811-00-00"),
+            new ApiNumber("42-255-32820-00-00"), new ApiNumber("42-255-34686-00-00"), new ApiNumber("42-255-32856-00-00"), new ApiNumber("42-123-32834-00-00"),
+            new ApiNumber("42-255-32397-00-00"), new ApiNumber("42-123-32690-00-00"), new ApiNumber("42-255-34844-00-00"), new ApiNumber("42-255-34952-00-00"),
+            new ApiNumber("42-255-32815-00-00"), new ApiNumber("42-255-32835-00-00"), new ApiNumber("42-255-34584-00-00"), new ApiNumber("42-255-32442-00-00"),
+            new ApiNumber("42-255-36083-00-00"), new ApiNumber("42-255-35545-00-00"), new ApiNumber("42-255-33539-00-00"), new ApiNumber("42-297-35945-00-00"),
+            new ApiNumber("42-255-35145-00-00"), new ApiNumber("42-255-33932-00-00"), new ApiNumber("42-255-36009-00-00"), new ApiNumber("42-297-35191-00-00"),
+            new ApiNumber("42-297-35912-00-00"), new ApiNumber("42-255-33968-00-00"), new ApiNumber("42-255-34330-00-00"), new ApiNumber("42-255-32345-00-00"),
+            new ApiNumber("42-255-32406-00-00"), new ApiNumber("42-255-32340-00-00"), new ApiNumber("42-255-35638-00-00"), new ApiNumber("42-297-35672-00-00"),
+            new ApiNumber("42-255-33816-00-00"), new ApiNumber("42-255-33568-00-00"), new ApiNumber("42-255-33960-00-00"), new ApiNumber("42-255-33958-00-00"),
+            new ApiNumber("42-255-32534-00-00"), new ApiNumber("42-297-35913-00-00"), new ApiNumber("42-297-35190-00-00"), new ApiNumber("42-255-33798-00-00"),
+            new ApiNumber("42-297-35870-00-00"), new ApiNumber("42-255-32575-00-00"), new ApiNumber("42-255-32533-00-00"), new ApiNumber("42-255-34615-00-00"),
+            new ApiNumber("42-297-35813-00-00"), new ApiNumber("42-255-33964-00-00"), new ApiNumber("42-255-33971-00-00"), new ApiNumber("42-255-35264-00-00"),
+            new ApiNumber("42-255-33544-00-00"), new ApiNumber("42-255-33659-00-00"), new ApiNumber("42-255-33502-00-00"), new ApiNumber("42-255-32579-00-00"),
+            new ApiNumber("42-255-34663-00-00"), new ApiNumber("42-255-33671-00-00"), new ApiNumber("42-255-34770-00-00"), new ApiNumber("42-255-34027-00-00"),
+            new ApiNumber("42-255-34145-00-00"), new ApiNumber("42-255-34028-00-00"), new ApiNumber("42-255-35544-00-00"), new ApiNumber("42-297-35867-00-00"),
+            new ApiNumber("42-255-32281-00-00"), new ApiNumber("42-297-35699-00-00"), new ApiNumber("42-255-34498-00-00"), new ApiNumber("42-255-32239-00-00"),
+            new ApiNumber("42-255-34328-00-00"), new ApiNumber("42-255-34956-00-00"), new ApiNumber("42-255-34617-00-00"), new ApiNumber("42-123-33003-00-00"),
+            new ApiNumber("42-255-34841-00-00"), new ApiNumber("42-255-34579-00-00"), new ApiNumber("42-255-33538-00-00"), new ApiNumber("42-255-35194-00-00"),
+            new ApiNumber("42-255-34839-00-00"), new ApiNumber("42-297-35868-00-00"), new ApiNumber("42-255-32546-00-00"), new ApiNumber("42-255-35769-00-00"),
+            new ApiNumber("42-255-31823-00-00"), new ApiNumber("42-255-35467-00-00"), new ApiNumber("42-255-34760-00-00"), new ApiNumber("42-255-31883-00-00"),
+            new ApiNumber("42-255-32172-00-00"), new ApiNumber("42-255-36270-00-00"), new ApiNumber("42-255-35112-00-00"), new ApiNumber("42-255-35770-00-00"),
+            new ApiNumber("42-255-33011-00-00"), new ApiNumber("42-255-35733-00-00"), new ApiNumber("42-255-35772-00-00"), new ApiNumber("42-255-31935-00-00"),
+            new ApiNumber("42-255-32298-00-00"), new ApiNumber("42-255-32513-00-00"), new ApiNumber("42-255-35106-00-00"), new ApiNumber("42-255-35982-00-00"),
+            new ApiNumber("42-255-35865-00-00"), new ApiNumber("42-255-35345-00-00"), new ApiNumber("42-285-33598-00-00"), new ApiNumber("42-255-35003-00-00"),
+            new ApiNumber("42-123-32568-00-00"), new ApiNumber("42-255-31761-00-00"), new ApiNumber("42-025-33717-00-00"), new ApiNumber("42-123-32333-00-00"),
+            new ApiNumber("42-255-31777-00-00"), new ApiNumber("42-255-31650-00-00"), new ApiNumber("42-255-34756-00-00"), new ApiNumber("42-255-35791-00-00"),
+            new ApiNumber("42-255-35651-00-00"), new ApiNumber("42-255-31808-00-00"), new ApiNumber("42-255-32320-00-00"), new ApiNumber("42-255-32948-00-00"),
+            new ApiNumber("42-255-35005-00-00"), new ApiNumber("42-123-32641-00-00"), new ApiNumber("42-255-32102-00-00"), new ApiNumber("42-123-32452-00-00"),
+            new ApiNumber("42-255-32171-00-00"), new ApiNumber("42-297-35020-00-00"), new ApiNumber("42-123-32528-00-00"), new ApiNumber("42-123-34590-00-00"),
+            new ApiNumber("42-297-34970-00-00"), new ApiNumber("42-255-34971-00-00"), new ApiNumber("42-255-34972-00-00"), new ApiNumber("42-255-35883-00-00"),
+            new ApiNumber("42-255-35556-00-00"), new ApiNumber("42-255-32200-00-00"), new ApiNumber("42-123-32413-00-00"), new ApiNumber("42-255-35886-00-00"),
+            new ApiNumber("42-255-35911-00-00"), new ApiNumber("42-255-32279-00-00"), new ApiNumber("42-123-32317-00-00"), new ApiNumber("42-255-32264-00-00"),
+            new ApiNumber("42-255-31622-00-00"), new ApiNumber("42-255-32254-00-00"), new ApiNumber("42-255-32967-00-00"), new ApiNumber("42-123-32315-00-00"),
+            new ApiNumber("42-123-32591-00-00"), new ApiNumber("42-255-31806-00-00"), new ApiNumber("42-255-35557-00-00"), new ApiNumber("42-255-34920-00-00"),
+            new ApiNumber("42-255-34919-00-00"), new ApiNumber("42-255-35885-00-00"), new ApiNumber("42-255-34970-00-00"), new ApiNumber("42-255-34758-00-00"),
+            new ApiNumber("42-255-35646-00-00"), new ApiNumber("42-123-34472-00-00"), new ApiNumber("42-123-33574-00-00"), new ApiNumber("42-123-33393-00-00"),
+            new ApiNumber("42-123-34578-00-00"), new ApiNumber("42-123-33530-00-00"), new ApiNumber("42-123-33498-00-00"), new ApiNumber("42-123-34579-00-00"),
+            new ApiNumber("42-123-33000-00-00"), new ApiNumber("42-123-33224-00-00"), new ApiNumber("42-123-33754-00-00"), new ApiNumber("42-123-33545-00-00"),
+            new ApiNumber("42-297-35390-00-00"), new ApiNumber("42-297-35633-00-00"), new ApiNumber("42-297-35255-00-00"), new ApiNumber("42-297-35520-00-00"),
+            new ApiNumber("42-297-35345-00-00"), new ApiNumber("42-297-35523-00-00"), new ApiNumber("42-297-35315-00-00")
+        };
+
+        readonly struct EagleFordLatLong
+        {
+            public readonly ApiNumber Api;
+            public readonly double    SurfaceLatitude;
+            public readonly double    SurfaceLongitude;
+            public readonly double    BottomLatitude;
+            public readonly double    BottomLongitude;
+
+            public EagleFordLatLong(string[] row)
+            {
+                if(row.Length != 5)
+                {
+                    throw new InvalidDataException();
+                }
+
+                Api              = row[0];
+                SurfaceLatitude  = double.Parse(row[1]);
+                SurfaceLongitude = double.Parse(row[2]);
+                BottomLatitude   = double.Parse(row[3]);
+                BottomLongitude  = double.Parse(row[4]);
+            }
+        }
+
         private static void Test()
         {
             ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda;
 
-            RrcTexasDataAdapter adapter        = new RrcTexasDataAdapter();
+            using RrcTexasDataAdapter adapter = new RrcTexasDataAdapter();
 
-            List<Well> wells = adapter.GetWellsByCounty("Karnes").Where(w => w.MonthlyProduction != null).ToList();
+            adapter.Context.ChangeTracker.AutoDetectChangesEnabled = false;
+
+            //List<Well> wells = adapter.GetWellsByCounty("Karnes").Where(w => w.MonthlyProduction.Count > 0).ToList();
 
             InitArguments arguments = new InitArguments(8, -1, 0, true);
 
             using(ScopeGuard.Get(arguments))
             {
-                foreach(Well well in wells)
+                EagleFordLatLong[] EagleFordLatLongs;
+
+                using(MemoryMapped mm = new MemoryMapped("T:/EagleFordLatLongs.csv"))
                 {
-                    Console.WriteLine($"{well.Api}");                    
+                    MappedCsvReader csvReader = new MappedCsvReader(mm);
 
-                    ReservoirProperties<double> reservoir = new ReservoirProperties<double>(executionSpace);
-                    reservoir.Length = 6500.0;
-                    reservoir.Width  = 348.0;
-                    // reservoir.Area                        = (reservoir.Length * reservoir.Width) / 43560;
-                    reservoir.Thickness       = 50.0;
-                    reservoir.Porosity        = 0.06;
-                    reservoir.Permeability    = 0.002;
-                    reservoir.Temperature     = 275.0;
-                    reservoir.InitialPressure = 7000.0;
+                    (_, List<string[]> rows) = csvReader.ReadFile(1);
 
-                    WellProperties<double> wellProperties = new WellProperties<double>(executionSpace);
-                    wellProperties.LateralLength      = 6500.0;
-                    wellProperties.BottomholePressure = 3500.0;
+                    EagleFordLatLongs = new EagleFordLatLong[rows.Count];
 
-                    FractureProperties<double> fracture = new FractureProperties<double>(executionSpace);
-                    fracture.Count        = 60;
-                    fracture.Width        = 0.1;
-                    fracture.Height       = 50.0;
-                    fracture.HalfLength   = 348.0;
-                    fracture.Porosity     = 0.20;
-                    fracture.Permeability = 184.0;
-                    fracture.Skin         = 0.0;
+                    Parallel.ForEach(Partitioner.Create(0, rows.Count),
+                                     (row) =>
+                                     {
+                                         for(int i = row.Item1; i < row.Item2; i++)
+                                         {
+                                             EagleFordLatLongs[i] = new EagleFordLatLong(rows[i]);
+                                         }
+                                     });
+                }
 
-                    NaturalFractureProperties<double> natural_fracture = new NaturalFractureProperties<double>(executionSpace);
-                    natural_fracture.Count        = 60;
-                    natural_fracture.Width        = 0.01;
-                    natural_fracture.Porosity     = 0.10;
-                    natural_fracture.Permeability = 1.0;
+                //View<double, Cuda> latlongdegrees = new View<double, Cuda>("latlongdegrees", EagleFordLatLongs.Length, 2, 2);
 
-                    Pvt<double> pvt = new Pvt<double>();
-                    pvt.OilViscosity             = 0.5;
-                    pvt.OilFormationVolumeFactor = 1.5;
-                    pvt.TotalCompressibility     = 0.00002;
+                //for(int i = 0; i < EagleFordLatLongs.Length; ++i)
+                //{
+                //    latlongdegrees[i, 0, 0] = EagleFordLatLongs[i].SurfaceLatitude;
+                //    latlongdegrees[i, 0, 1] = EagleFordLatLongs[i].SurfaceLongitude;
+                //    latlongdegrees[i, 1, 0] = EagleFordLatLongs[i].BottomLatitude;
+                //    latlongdegrees[i, 1, 1] = EagleFordLatLongs[i].BottomLongitude;
+                //}
+
+                //View<double, Cuda> neighbors = SpatialMethods<double, Cuda>.NearestNeighbor(latlongdegrees);
+
+                Well well;
+
+                foreach(EagleFordLatLong eagleFordLatLong in EagleFordLatLongs)
+                {
+                    well = adapter.GetWellByApi(eagleFordLatLong.Api);
+
+                    if (well.MonthlyProduction.Count < 9)
+                    {
+                        continue;
+                    }
+
+                    //    Console.WriteLine($"{well.Api}");
+
+                    //    ReservoirProperties<double> reservoir = new ReservoirProperties<double>(executionSpace);
+                    //    reservoir.Length = 6500.0;
+                    //    reservoir.Width  = 348.0;
+                    //    // reservoir.Area                        = (reservoir.Length * reservoir.Width) / 43560;
+                    //    reservoir.Thickness       = 50.0;
+                    //    reservoir.Porosity        = 0.06;
+                    //    reservoir.Permeability    = 0.002;
+                    //    reservoir.Temperature     = 275.0;
+                    //    reservoir.InitialPressure = 7000.0;
+
+                    //    WellProperties<double> wellProperties = new WellProperties<double>(executionSpace);
+                    //    wellProperties.LateralLength      = 6500.0;
+                    //    wellProperties.BottomholePressure = 3500.0;
+
+                    //    FractureProperties<double> fracture = new FractureProperties<double>(executionSpace);
+                    //    fracture.Count        = 60;
+                    //    fracture.Width        = 0.1;
+                    //    fracture.Height       = 50.0;
+                    //    fracture.HalfLength   = 348.0;
+                    //    fracture.Porosity     = 0.20;
+                    //    fracture.Permeability = 184.0;
+                    //    fracture.Skin         = 0.0;
+
+                    //    NaturalFractureProperties<double> natural_fracture = new NaturalFractureProperties<double>(executionSpace);
+                    //    natural_fracture.Count        = 60;
+                    //    natural_fracture.Width        = 0.01;
+                    //    natural_fracture.Porosity     = 0.10;
+                    //    natural_fracture.Permeability = 1.0;
+
+                    //    Pvt<double> pvt = new Pvt<double>();
+                    //    pvt.OilViscosity             = 0.5;
+                    //    pvt.OilFormationVolumeFactor = 1.5;
+                    //    pvt.TotalCompressibility     = 0.00002;
 
                     MultiPorosityData<double> mpd = new MultiPorosityData<double>(executionSpace);
-                    mpd.ReservoirProperties       = reservoir;
-                    mpd.WellProperties            = wellProperties;
-                    mpd.FractureProperties        = fracture;
-                    mpd.NaturalFractureProperties = natural_fracture;
-                    mpd.Pvt                       = pvt;
+                    //mpd.ReservoirProperties = reservoir;
+                    //mpd.WellProperties = wellProperties;
+                    //mpd.FractureProperties = fracture;
+                    //mpd.NaturalFractureProperties = natural_fracture;
+                    //mpd.Pvt = pvt;
 
                     BoundConstraints<double>[] arg_limits = new BoundConstraints<double>[7];
 
@@ -117,48 +320,40 @@ namespace MultiPorosity.Driver
                     /*sk*/
                     arg_limits[6] = new BoundConstraints<double>(0.0, 0.0);
 
-
-
-
-
-
-
                     View<double, Cuda> actual_data = new View<double, Cuda>("actual_data", well.MonthlyProduction.Count);
 
                     View<double, Cuda> actual_time = new View<double, Cuda>("actual_time", well.MonthlyProduction.Count);
 
                     View<double, Cuda> weights = new View<double, Cuda>("weights", well.MonthlyProduction.Count);
 
-                    for(ulong i0 = 0; i0 < actual_data.Extent(0); ++i0)
-                    {
-                        actual_data[i0] = HunterDailyData.actualAvgDailyBoe[i0];
-                        actual_time[i0] = HunterDailyData.actualMonthlyTime[i0];
+                    //    for(ulong i0 = 0; i0 < actual_data.Extent(0); ++i0)
+                    //    {
+                    //        actual_data[i0] = HunterDailyData.actualAvgDailyBoe[i0];
+                    //        actual_time[i0] = HunterDailyData.actualMonthlyTime[i0];
 
-                        weights[i0] = 1.0;
-                    }
+                    //        weights[i0] = 1.0;
+                    //    }
 
-                    //ProductionData<double> productionData = new ProductionData<double>(well.MonthlyProduction.Count);
+                    //    //ProductionData<double> productionData = new ProductionData<double>(well.MonthlyProduction.Count);
 
-                    //for(int i = 0; i < well.MonthlyProduction.Count; ++i)
-                    //{
-                    //    productionData[i].Time  = well.MonthlyProduction[i].Date;
-                    //    productionData[i].Qo    = HunterDailyData.qoData[i];
-                    //    productionData[i].Qw    = 0.0;
-                    //    productionData[i].Qg    = HunterDailyData.qgData[i];
-                    //    productionData[i].QgBoe = HunterDailyData.qgData[i] / 5.8;
-                    //    productionData[i].Qt    = productionData[i].Qo + productionData[i].QgBoe;
-                    //}
-
-
+                    //    //for(int i = 0; i < well.MonthlyProduction.Count; ++i)
+                    //    //{
+                    //    //    productionData[i].Time  = well.MonthlyProduction[i].Date;
+                    //    //    productionData[i].Qo    = HunterDailyData.qoData[i];
+                    //    //    productionData[i].Qw    = 0.0;
+                    //    //    productionData[i].Qg    = HunterDailyData.qgData[i];
+                    //    //    productionData[i].QgBoe = HunterDailyData.qgData[i] / 5.8;
+                    //    //    productionData[i].Qt    = productionData[i].Qo + productionData[i].QgBoe;
+                    //    //}
 
                     TriplePorosityModel<double, Cuda> tpm = new TriplePorosityModel<double, Cuda>(mpd);
-
 
                     uint estimatedSwarmSize = ParticleSwarmOptimizationOptions.EstimateSwarmSize(7);
 
                     ParticleSwarmOptimizationOptions options = new ParticleSwarmOptimizationOptions(20, estimatedSwarmSize, 150, 0.0, 0.1, 0.9, false);
 
                     MultiPorosityResult<double, Cuda> results = tpm.HistoryMatch(options, actual_data, actual_time, weights, arg_limits);
+
 
 
                 }
@@ -269,7 +464,7 @@ namespace MultiPorosity.Driver
                 pvt.OilFormationVolumeFactor = 1.5;
                 pvt.TotalCompressibility     = 0.00002;
 
-                MultiPorosityData<double> mpd = new MultiPorosityData<double>();                
+                MultiPorosityData<double> mpd = new MultiPorosityData<double>();
                 mpd.ReservoirProperties       = reservoir;
                 mpd.WellProperties            = well;
                 mpd.FractureProperties        = fracture;

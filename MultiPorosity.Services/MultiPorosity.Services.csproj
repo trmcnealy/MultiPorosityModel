@@ -1,10 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\Versioning.props" />
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(GlobalVersioning.props))" />
 
   <PropertyGroup>
+    <Version>$(MULTIPOROSITY_SERVICES_VERSION)</Version>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <NuspecFile>D:\TFS_Sources\Github\Compilation\trmcnealy\MultiPorosityModel\MultiPorosity.Services\MultiPorosityModel.nuspec</NuspecFile>
-    <NuspecProperties>Configuration=$(Configuration);Platform=$(Platform);Version=$(MUTLIPOROSITY_VERSION);RuntimeVersion=$(RUNTIME_MUTLIPOROSITY_VERSION)</NuspecProperties>
     <RootNamespace>MultiPorosity</RootNamespace>
     <Platforms>AnyCPU;x64</Platforms>
     <Company>Timothy R. McNealy</Company>
@@ -14,11 +13,16 @@
     <RepositoryUrl>https://github.com/trmcnealy/MultiPorosityModel</RepositoryUrl>
     <PackageIcon>nindra.png</PackageIcon>
     <PackageIconUrl />
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Version>$(MUTLIPOROSITY_VERSION)</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <NuspecFile>MultiPorosityModel.nuspec</NuspecFile>
+    <NuspecProperties>$(NUGET_PROPERTIES)</NuspecProperties>
+    <GeneratePackageOnBuild Condition="'$(Configuration)'!='Release'">false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild Condition="'$(Configuration)'=='Release'">true</GeneratePackageOnBuild>
     <PackageOutputPath Condition="'$(PACKAGE_CACHE)'!=''">$(PACKAGE_CACHE)</PackageOutputPath>
-    <PackageOutputPath Condition="'$(PACKAGE_CACHE)'==''">$(OutputPath)</PackageOutputPath>
+    <PackageOutputPath Condition="'$(PACKAGE_CACHE)'==''">$(OutputPath)</PackageOutputPath>  
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\trmcnealy.github.io\assets\nindra.png">
+    <None Include="..\..\trmcnealy.github.io\Assets\nindra.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
@@ -41,10 +45,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kokkos.NET" Version="0.7.2" />
-    <PackageReference Include="native.MultiPorosity" Version="$(RUNTIME_MUTLIPOROSITY_VERSION)" />
-    <PackageReference Include="OilGas.Data" Version="1.10.5" />
-    <PackageReference Include="PlatformApi" Version="1.0.0" />
+    <PackageReference Include="Kokkos.NET" Version="$(KOKKOS_VERSION)" />
+    <PackageReference Include="native.MultiPorosity" Version="$(RUNTIME_MULTIPOROSITY_VERSION)" />
+    <PackageReference Include="OilGas.Data" Version="$(OILGAS_DATA_VERSION)" />
+    <PackageReference Include="PlatformApi" Version="$(PLATFORMAPI_VERSION)" />
   </ItemGroup>
 
   <ItemGroup>

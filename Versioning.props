@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Label="UserMacros">
-    <PACKAGE_VERSION>0.4.3</PACKAGE_VERSION>
-  </PropertyGroup>
-  <PropertyGroup Label="UserMacros">
-    <MUTLIPOROSITY_VERSION>$(PACKAGE_VERSION)</MUTLIPOROSITY_VERSION>
-    <RUNTIME_MUTLIPOROSITY_VERSION>$(PACKAGE_VERSION)</RUNTIME_MUTLIPOROSITY_VERSION>
-  </PropertyGroup>
-  <ItemGroup>
-    <BuildMacro Include="MUTLIPOROSITY_VERSION">
-      <Value>$(MUTLIPOROSITY_VERSION)</Value>
-    </BuildMacro>
-    <BuildMacro Include="RUNTIME_MUTLIPOROSITY_VERSION">
-      <Value>$(RUNTIME_MUTLIPOROSITY_VERSION)</Value>
-    </BuildMacro>
-  </ItemGroup>
+  
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), GlobalVersioning.props))\GlobalVersioning.props" />
+
 </Project>

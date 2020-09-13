@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(GlobalVersioning.props))" />
+
+
   <PropertyGroup>
+    <Version>$(MULTIPOROSITY_MODELS_VERSION)</Version>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>MultiPorosity</RootNamespace>
     <Platforms>AnyCPU;x64</Platforms>
@@ -24,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\trmcnealy.github.io\assets\nindra.png">
+    <None Include="..\..\trmcnealy.github.io\Assets\nindra.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
@@ -46,7 +50,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kokkos.NET" Version="0.7.2" />
+    <PackageReference Include="Kokkos.NET" Version="$(KOKKOS_VERSION)" />
     <PackageReference Include="Microsoft.DotNet.Interactive.Formatting" Version="1.0.0-beta.20154.7" />
     <PackageReference Include="System.Text.Json" Version="4.7.2" />
   </ItemGroup>

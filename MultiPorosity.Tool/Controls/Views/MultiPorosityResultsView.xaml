@@ -1,0 +1,133 @@
+﻿<reactiveUi:ReactiveUserControl x:Class="MultiPorosity.Tool.MultiPorosityResultsView"
+                                x:TypeArguments="local:MultiPorosityResultsViewModel"
+                                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                                xmlns:local="clr-namespace:MultiPorosity.Tool"
+                                xmlns:reactiveUi="http://reactiveui.net"
+                                mc:Ignorable="d"
+                                d:DesignHeight="450"
+                                d:DesignWidth="400">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="195"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+
+        <Label Content="Parameter"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="0"
+               Grid.Column="0"/>
+        <Label Content="Value"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Center"
+               VerticalContentAlignment="Center"
+               Grid.Row="0"
+               Grid.Column="1"/>
+
+        <Label Content="Matrix Perm (md)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="1"
+               Grid.Column="0"/>
+        <TextBox x:Name="MatrixPermValue"
+                 Height="20"
+                 Grid.Row="1"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.MatrixPerm, StringFormat={}{0:N4}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"
+                 IsReadOnly="True"/>
+
+        <Label Content="Hydralic Fracture Perm (md)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="2"
+               Grid.Column="0"/>
+        <TextBox x:Name="HydralicFracturePermValue"
+                 Height="20"
+                 Grid.Row="2"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.HydralicFracturePerm, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"
+                 IsReadOnly="True"/>
+
+        <Label Content="Natural Fracture Perm (md)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="3"
+               Grid.Column="0"/>
+        <TextBox x:Name="NaturalFracturePermValue"
+                 Height="20"
+                 Grid.Row="3"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.NaturalFracturePerm, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"
+                 IsReadOnly="True"/>
+
+        <Label Content="Hydralic Fracture Half Length (ft)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="4"
+               Grid.Column="0"/>
+        <TextBox x:Name="HydralicFractureHalfLengthValue"
+                 Height="20"
+                 Grid.Row="4"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.HydralicFractureHalfLength, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"
+                 IsReadOnly="True"/>
+
+        <Label Content="Hydralic Fracture Spacing (ft)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="5"
+               Grid.Column="0"/>
+        <TextBox x:Name="HydralicFractureSpacingValue"
+                 Height="20"
+                 Grid.Row="5"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.HydralicFractureSpacing, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"
+                 IsReadOnly="True"/>
+
+        <Label Content="Natural Fracture Spacing (ft)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="6"
+               Grid.Column="0"/>
+        <TextBox x:Name="NaturalFractureSpacingValue"
+                 Height="20"
+                 Grid.Row="6"
+                 Grid.Column="1"
+                 Text="{Binding Path=ViewModel.NaturalFractureSpacing, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5,0,5,0"
+                 IsReadOnly="True"/>
+
+    </Grid>
+</reactiveUi:ReactiveUserControl>
