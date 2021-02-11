@@ -3,10 +3,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 
-using Microsoft.DotNet.Interactive.Formatting;
-
 namespace NumericalMethods.DataStorage
 {
+    [SkipLocalsInit]
     [NonVersionable]
     [StructLayout(LayoutKind.Sequential)]
     public readonly unsafe struct Array<T>
@@ -30,7 +29,7 @@ namespace NumericalMethods.DataStorage
         //                                 HtmlFormatter.MimeType);
         //}
 
-        public readonly uint length;
+        public readonly ulong length;
 
         public readonly T* data;
 

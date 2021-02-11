@@ -8,7 +8,7 @@ using Kokkos;
 namespace MultiPorosity.Models
 {
     [StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public sealed unsafe class ProductionDataRecord<T>
+    public sealed unsafe partial class ProductionDataRecord<T> : IDisposable
         where T : unmanaged
     {
         private static readonly Type _T = typeof(T);
@@ -98,6 +98,15 @@ namespace MultiPorosity.Models
         public ProductionDataRecord(ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)
         {
             pointer = NativePointer.Allocate(ThisSize, executionSpace);
+        }
+        
+        ~ProductionDataRecord()
+        {
+        }
+        public void Dispose()
+        {
+            pointer.Dispose();
+            GC.SuppressFinalize(this);
         }
         
         internal ProductionDataRecord(IntPtr intPtr, ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)

@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="MultiPorosity.Presentation.ProductionChartView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:interact="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             xmlns:local="clr-namespace:MultiPorosity.Presentation"
+             xmlns:plotly="http://www.plotly.com"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/ProductionChartResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <plotly:PlotlyView x:Name="PlotlyView"
+                           DataSource="{Binding Path=DataSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                           PlotData="{Binding Path=PlotData, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                           PlotLayout="{Binding Path=PlotLayout, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                           SelectedItems="{Binding Path=SelectedRecords, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+    </Grid>
+
+</UserControl>

@@ -4,15 +4,30 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
-<#@ include file="NativeStructBuilder.ttinclude" #>
+<#@ include file ="../../../BuildTools/NativeStructBuilder.ttinclude" #>
 <#
     string structName = "Pvt";
     List<(string Name, string Constraint)> genericTypeList = new List<(string Name, string Constraint)>{("T", "unmanaged")};
     List<(string type, string fieldName, string propertyName)> propertyList = new List<(string type, string fieldName, string propertyName)>
     {
+        ("T", "_oilSaturation", "OilSaturation"),
+        ("T", "_oilApiGravity", "OilApiGravity"),
         ("T", "_oilViscosity", "OilViscosity"),
         ("T", "_oilFormationVolumeFactor", "OilFormationVolumeFactor"),
-        ("T", "_totalCompressibility", "TotalCompressibility")
+        ("T", "_oilCompressibility", "OilCompressibility"),
+        
+        ("T", "_waterSaturation", "WaterSaturation"),
+        ("T", "_waterSpecificGravity", "WaterSpecificGravity"),
+        ("T", "_waterViscosity", "WaterViscosity"),
+        ("T", "_waterFormationVolumeFactor", "WaterFormationVolumeFactor"),
+        ("T", "_waterCompressibility", "WaterCompressibility"),
+        
+        ("T", "_gasSaturation", "GasSaturation"),
+        ("T", "_gasSpecificGravity", "GasSpecificGravity"),
+        ("T", "_gasViscosity", "GasViscosity"),
+        ("T", "_gasFormationVolumeFactor", "GasFormationVolumeFactor"),
+        ("T", "_gasCompressibilityFactor", "GasCompressibilityFactor"),
+        ("T", "_gasCompressibility", "GasCompressibility")
     };
     int indentLevel = 1;
     string executionSpace = "Cuda";

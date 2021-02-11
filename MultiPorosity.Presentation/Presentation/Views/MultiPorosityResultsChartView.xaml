@@ -1,0 +1,58 @@
+﻿<UserControl x:Class="MultiPorosity.Presentation.MultiPorosityResultsChartView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:interact="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+                          xmlns:local="clr-namespace:MultiPorosity.Presentation"
+             xmlns:plotly="http://www.plotly.com"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+
+        <plotly:PlotlyView x:Name="PlotlyView"
+                           Grid.Row="0"
+                           DataSource="{Binding Path=DataSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                           PlotData="{Binding Path=PlotData, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                           PlotLayout="{Binding Path=PlotLayout, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                           SelectedItems="{Binding Path=SelectedRecords, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        
+        <!--PlotFrames="{Binding Path=PlotFrames, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"-->
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="35"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Content="Iteration:"
+                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            <Label Grid.Column="1"
+                   Content="{Binding Path=Value, Source={x:Reference IterationSlider}}"
+                   VerticalContentAlignment="Center"
+                   HorizontalContentAlignment="Center"
+                   HorizontalAlignment="Stretch"/>
+            <Slider x:Name="IterationSlider"
+                    Grid.Column="2"
+                    Margin="5,5,5,5"
+                    Minimum="0"
+                    Maximum="{Binding Path=MaxIteration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Value="{Binding Path=CurrentIteration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    IsSelectionRangeEnabled="False"
+                    TickPlacement="BottomRight"
+                    TickFrequency="1"
+                    SmallChange="1"
+                    LargeChange="1"/>
+
+        </Grid>
+    </Grid>
+</UserControl>

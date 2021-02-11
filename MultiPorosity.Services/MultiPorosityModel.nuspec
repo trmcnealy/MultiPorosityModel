@@ -14,14 +14,25 @@
     <copyright>© Timothy R. McNealy</copyright>
     <tags></tags>
     <dependencies>
-      <group targetFramework="netcoreapp3.1">
-        <dependency id="Kokkos.NET"
-                    version="$KOKKOS$" />
-        <dependency id="OilGas.Data"
-                    version="$OILGAS_DATA$" />
-        <dependency id="System.Text.Json" version="4.7.2" />
-        <dependency id="native.MultiPorosity"
-                    version="$RUNTIME_MULTIPOROSITY$" />
+      <group targetFramework="net5.0">
+        <dependency id="Kokkos.NET" version="$KOKKOS$" />                    
+        <dependency id="PlatformApi" version="$PLATFORMAPI_VERSION$" />
+        <dependency id="Engineering.DataSource" version="$ENGINEERING_DATASOURCE_VERSION$" />
+        <dependency id="native.MultiPorosity" version="$RUNTIME_MULTIPOROSITY$" />
+      </group>
+      <group targetFramework="net5.0-windows">
+        <dependency id="Engineering.UI" version="$ENGINEERING_UI_VERSION$" />
+        <dependency id="Engineering.DataSource" version="$ENGINEERING_DATASOURCE_VERSION$" />
+        <dependency id="Plotly.WPF" version="$PLOTLY_WPF_VERSION$" />
+        <dependency id="Prism.WPF" version="8.0.0.1909" />        
+        <dependency id="HDF.PInvoke.1.10" version="1.10.613" />        
+        <dependency id="Kokkos.NET" version="$KOKKOS$" />   
+        <dependency id="native.MultiPorosity" version="$RUNTIME_MULTIPOROSITY_VERSION$" />
+        <dependency id="PlatformApi" version="$PLATFORMAPI_VERSION$" />
+        <dependency id="Engineering.DataSource" version="$ENGINEERING_DATASOURCE_VERSION$" />
+        <dependency id="Pvt" version="$PVT_VERSION$" />
+        <dependency id="Prism.WPF" version="8.0.0.1909" />
+        <reference id="Microsoft.Office.Interop.Excel" version="1.9" />        
       </group>
     </dependencies>
   </metadata>
@@ -29,19 +40,22 @@
     <file src="..\..\trmcnealy.github.io\Assets\nindra.png"
           target="" />
 
-    <file src="..\bin\$Configuration$\netcoreapp3.1\MultiPorosity.Models.dll"
-          target="lib\netcoreapp3.1" />
+    <file src="..\bin\Release\AnyCPU\net5.0\MultiPorosity.Models.dll"
+          target="lib\net5.0" />
 
-    <file src="..\bin\$Configuration$\netcoreapp3.1\MultiPorosity.Models.pdb"
-          target="lib\netcoreapp3.1" />
+    <!--<file src="..\bin\Release\net5.0\MultiPorosity.Models.pdb"
+          target="lib\net5.0" />-->
 
-    <file src="..\bin\$Configuration$\netcoreapp3.1\MultiPorosity.Services.dll"
-          target="lib\netcoreapp3.1" />
+    <file src="..\bin\Release\AnyCPU\net5.0-windows\MultiPorosity.Services.dll"
+          target="lib\net5.0-windows" />
 
-    <file src="..\bin\$Configuration$\netcoreapp3.1\MultiPorosity.Services.pdb"
-          target="lib\netcoreapp3.1" />
+    <file src="..\bin\Release\AnyCPU\net5.0-windows\MultiPorosity.Presentation.dll"
+          target="lib\net5.0-windows" />
 
-    <!-- <file src="bin\$Platform$\$Configuration$\netcoreapp3.1\Kokkos.NET.pdb" -->
-    <!--       target="lib\netcoreapp3.1\Kokkos.NET.pdb" /> -->
+    <!--<file src="..\bin\Release\net5.0\MultiPorosity.Services.pdb"
+          target="lib\net5.0" />-->
+
+    <!-- <file src="bin\$Platform$\Release\net5.0\Kokkos.NET.pdb" -->
+    <!--       target="lib\net5.0\Kokkos.NET.pdb" /> -->
   </files>
 </package>

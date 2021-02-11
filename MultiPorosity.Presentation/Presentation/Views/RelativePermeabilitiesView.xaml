@@ -1,0 +1,62 @@
+﻿<UserControl x:Class="MultiPorosity.Presentation.RelativePermeabilitiesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MultiPorosity.Presentation"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             FontFamily="Cascadia Code"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="1000">
+    <Grid>
+        <TabControl>
+            <TabItem Header="Matrix">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="550"/>
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="0" prism:RegionManager.RegionName="RelativePermeabilitiesMatrixChartRegion" />
+                    <GridSplitter Grid.Column="1"
+                                  Width="5"
+                                  HorizontalAlignment="Stretch"
+                                  BorderThickness="1,0,1,0"/>
+                    <ContentControl Grid.Column="2" prism:RegionManager.RegionName="RelativePermeabilityMatrixParametersRegion" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Hydraulic Fracture">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="550"/>
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="0" prism:RegionManager.RegionName="RelativePermeabilitiesHydraulicFractureChartRegion" />
+                    <GridSplitter Grid.Column="1"
+                                  Width="5"
+                                  HorizontalAlignment="Stretch"
+                                  BorderThickness="1,0,1,0"/>
+                    <ContentControl Grid.Column="2" prism:RegionManager.RegionName="RelativePermeabilityHydraulicFractureParametersRegion" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="Natural Fracture">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="550"/>
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="0" prism:RegionManager.RegionName="RelativePermeabilitiesNaturalFractureChartRegion" />
+                    <GridSplitter Grid.Column="1"
+                                  Width="5"
+                                  HorizontalAlignment="Stretch"
+                                  BorderThickness="1,0,1,0"/>
+                    <ContentControl Grid.Column="2" prism:RegionManager.RegionName="RelativePermeabilityNaturalFractureParametersRegion" />
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+
+</UserControl>

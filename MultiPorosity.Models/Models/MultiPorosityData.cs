@@ -22,6 +22,8 @@ namespace MultiPorosity.Models
         private static readonly int _NaturalFracturePropertiesOffset;
         
         private static readonly int _PvtOffset;
+        
+        private static readonly int _RelativePermeabilitiesOffset;
 
         static MultiPorosityData()
         {
@@ -30,10 +32,9 @@ namespace MultiPorosity.Models
             _FracturePropertiesOffset        = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_FractureProperties)).ToInt32();
             _NaturalFracturePropertiesOffset = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_NaturalFractureProperties)).ToInt32();
             _PvtOffset                       = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_Pvt)).ToInt32();
-            ThisSize                         = _PvtOffset + Unsafe.SizeOf<IntPtr>();
+            _RelativePermeabilitiesOffset    = Marshal.OffsetOf<MultiPorosityData<T>>(nameof(_RelativePermeability)).ToInt32();
+            ThisSize                         = _RelativePermeabilitiesOffset + Unsafe.SizeOf<IntPtr>();
         }
-        
-        private IntPtr _ProductionData;
         
         private IntPtr _ReservoirProperties;
         
@@ -44,6 +45,8 @@ namespace MultiPorosity.Models
         private IntPtr _NaturalFractureProperties;
         
         private IntPtr _Pvt;
+        
+        private IntPtr _RelativePermeability;
         
         private readonly NativePointer pointer;
         
@@ -86,6 +89,14 @@ namespace MultiPorosity.Models
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
             set { *(IntPtr*)(pointer.Data + _PvtOffset) = value.Instance; }
         }
+
+        public RelativePermeabilities<T> RelativePermeability
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+            get { return new RelativePermeabilities<T>(*(IntPtr*)(pointer.Data + _RelativePermeabilitiesOffset)); }
+            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+            set { *(IntPtr*)(pointer.Data + _RelativePermeabilitiesOffset) = value.Instance; }
+        }
         
         public NativePointer Instance
         {
@@ -98,20 +109,22 @@ namespace MultiPorosity.Models
             pointer = NativePointer.Allocate(ThisSize, executionSpace);
         }
 
-        public MultiPorosityData(ReservoirProperties <T >     reservoirProperties,
-                                 WellProperties<T>            wellProperties,
-                                 FractureProperties<T>        fractureProperties,
-                                 NaturalFractureProperties<T> naturalFractureProperties,
-                                 Pvt<T>                       pvt,
-                                 ExecutionSpaceKind           executionSpace = ExecutionSpaceKind.Cuda)
+        public MultiPorosityData(ReservoirProperties <T >          reservoirProperties,
+                                 WellProperties<T>                 wellProperties,
+                                 FractureProperties<T>             fractureProperties,
+                                 NaturalFractureProperties<T>      naturalFractureProperties,
+                                 Pvt<T>                            pvt,
+                                 RelativePermeabilities<T> relativePermeabilities,
+                                 ExecutionSpaceKind                executionSpace = ExecutionSpaceKind.Cuda)
         {
             pointer = NativePointer.Allocate(ThisSize, executionSpace);
 
-            ReservoirProperties = reservoirProperties;
-            WellProperties = wellProperties;
-            FractureProperties = fractureProperties;
+            ReservoirProperties       = reservoirProperties;
+            WellProperties            = wellProperties;
+            FractureProperties        = fractureProperties;
             NaturalFractureProperties = naturalFractureProperties;
-            Pvt = pvt;
+            Pvt                       = pvt;
+            RelativePermeability      = relativePermeabilities;
         }
 
         internal MultiPorosityData(NativePointer nativePointer)

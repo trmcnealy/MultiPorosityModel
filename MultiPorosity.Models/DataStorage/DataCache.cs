@@ -1,52 +1,23 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 
-using Microsoft.DotNet.Interactive.Formatting;
+using NumericalMethods.DataStorage;
 
-namespace NumericalMethods.DataStorage
+using LayoutKind = System.Runtime.InteropServices.LayoutKind;
+
+namespace MultiPorosity.DataStorage
 {
     [NonVersionable]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct DataCache
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        static DataCache()
-        {
-            Formatter<DataCache>.Register((dataCache,
-                                           writer) =>
-                                          {
-                                              writer.Write("<table style=\"width:100%\">");
-
-                                              for(ulong j = 0; j < dataCache.ColumnCount; j++)
-                                              {
-                                                  writer.Write($"<th>{dataCache.GetHeader((int)j)}</th>");
-                                              }
-
-                                              for(ulong i = 0; i < dataCache.RowCount; i++)
-                                              {
-                                                  writer.Write("<tr>");
-
-                                                  for(ulong j = 0; j < dataCache.ColumnCount; j++)
-                                                  {
-                                                      writer.Write($"<td>{dataCache[i, j]}</td>");
-                                                  }
-
-                                                  writer.Write("</tr>");
-                                              }
-
-                                              writer.Write("</table>");
-                                          },
-                                          HtmlFormatter.MimeType);
-        }
-
         public readonly ulong RowCount;
         public readonly ulong ColumnCount;
 
-        public readonly Array<IntPtr> Headers;
+        public readonly Array<nint> Headers;
         public readonly Array<double> Data;
 
         public double this[int i0]
@@ -62,7 +33,7 @@ namespace NumericalMethods.DataStorage
             get { return Data[column_index + ColumnCount * row_index]; }
         }
 
-        public string GetHeader(int i0)
+        public string? GetHeader(int i0)
         {
             return Marshal.PtrToStringAnsi(Headers[i0]);
         }

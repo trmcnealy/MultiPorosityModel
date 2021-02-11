@@ -1,0 +1,48 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#@ include file="../../../BuildTools/NativeStructBuilder.ttinclude" #>
+<#
+    string structName = "RelativePermeabilityProperties";
+    List<(string Name, string Constraint)> genericTypeList = new List<(string Name, string Constraint)>{("T", "unmanaged")};
+    List<(string type, string fieldName, string propertyName)> propertyList = new List<(string type, string fieldName, string propertyName)>
+    {
+        ("T", "_saturationWaterConnate", "SaturationWaterConnate"),
+        ("T", "_saturationWaterCritical", "SaturationWaterCritical"),
+
+        ("T", "_saturationOilIrreducibleWater", "SaturationOilIrreducibleWater"),
+        ("T", "_saturationOilResidualWater", "SaturationOilResidualWater"),
+        ("T", "_saturationOilIrreducibleGas", "SaturationOilIrreducibleGas"),
+        ("T", "_saturationOilResidualGas", "SaturationOilResidualGas"),
+
+        ("T", "_saturationGasConnate", "SaturationGasConnate"),
+        ("T", "_saturationGasCritical", "SaturationGasCritical"),
+
+        ("T", "_permeabilityRelativeWaterOilIrreducible", "PermeabilityRelativeWaterOilIrreducible"),
+        ("T", "_permeabilityRelativeOilWaterConnate", "PermeabilityRelativeOilWaterConnate"),
+        ("T", "_permeabilityRelativeGasLiquidConnate", "PermeabilityRelativeGasLiquidConnate"),
+
+        ("T", "_exponentPermeabilityRelativeWater", "ExponentPermeabilityRelativeWater"),
+        ("T", "_exponentPermeabilityRelativeOilWater", "ExponentPermeabilityRelativeOilWater"),
+        ("T", "_exponentPermeabilityRelativeGas", "ExponentPermeabilityRelativeGas"),
+        ("T", "_exponentPermeabilityRelativeOilGas", "ExponentPermeabilityRelativeOilGas")
+    };
+    int indentLevel = 1;
+    string executionSpace = "Cuda";
+#>
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Diagnostics.CodeAnalysis;
+
+using Kokkos;
+
+#pragma warning disable IDE0044
+namespace MultiPorosity.Models
+{
+    <#= NATIVE_STRUCT_BUILDER(structName, genericTypeList, propertyList, indentLevel, executionSpace)#>
+}
+#pragma warning restore IDE0044

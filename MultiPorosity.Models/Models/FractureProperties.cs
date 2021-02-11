@@ -8,7 +8,7 @@ using Kokkos;
 namespace MultiPorosity.Models
 {
     [StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public sealed unsafe class FractureProperties<T>
+    public sealed unsafe partial class FractureProperties<T> : IDisposable
         where T : unmanaged
     {
         private static readonly Type _T = typeof(T);
@@ -109,6 +109,15 @@ namespace MultiPorosity.Models
         public FractureProperties(ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)
         {
             pointer = NativePointer.Allocate(ThisSize, executionSpace);
+        }
+        
+        ~FractureProperties()
+        {
+        }
+        public void Dispose()
+        {
+            pointer.Dispose();
+            GC.SuppressFinalize(this);
         }
         
         internal FractureProperties(IntPtr intPtr, ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)

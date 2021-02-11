@@ -4,7 +4,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
-<#@ include file="NativeStructBuilder.ttinclude" #>
+<#@ include file="../../../BuildTools/NativeStructBuilder.ttinclude" #>
 <#
     string structName = "ReservoirProperties";
     List<(string Name, string Constraint)> genericTypeList = new List<(string Name, string Constraint)>{("T", "unmanaged")};
@@ -15,7 +15,8 @@
         ("T", "_thickness", "Thickness"),
         ("T", "_porosity", "Porosity"),
         ("T", "_permeability", "Permeability"),
-        ("T", "_temperature", "Temperature"),
+        ("T", "_compressibility", "Compressibility"),
+        ("T", "_bottomholeTemperature", "BottomholeTemperature"),
         ("T", "_initialPressure", "InitialPressure")
     };
     int indentLevel = 1;

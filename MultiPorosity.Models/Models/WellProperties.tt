@@ -4,7 +4,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
-<#@ include file="NativeStructBuilder.ttinclude" #>
+<#@ include file="../../../BuildTools/NativeStructBuilder.ttinclude" #>
 <#
     string structName = "WellProperties";
     List<(string Name, string Constraint)> genericTypeList = new List<(string Name, string Constraint)>{("T", "unmanaged")};

@@ -8,7 +8,7 @@ using Kokkos;
 namespace MultiPorosity.Models
 {
     [StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public sealed unsafe class ReservoirProperties<T>
+    public sealed unsafe partial class ReservoirProperties<T> : IDisposable
         where T : unmanaged
     {
         private static readonly Type _T = typeof(T);
@@ -19,7 +19,8 @@ namespace MultiPorosity.Models
         private static readonly int _thicknessOffset;
         private static readonly int _porosityOffset;
         private static readonly int _permeabilityOffset;
-        private static readonly int _temperatureOffset;
+        private static readonly int _compressibilityOffset;
+        private static readonly int _bottomholeTemperatureOffset;
         private static readonly int _initialPressureOffset;
         
         static ReservoirProperties()
@@ -29,7 +30,8 @@ namespace MultiPorosity.Models
             _thicknessOffset  = Marshal.OffsetOf<ReservoirProperties<T>>(nameof(_thickness)).ToInt32();
             _porosityOffset  = Marshal.OffsetOf<ReservoirProperties<T>>(nameof(_porosity)).ToInt32();
             _permeabilityOffset  = Marshal.OffsetOf<ReservoirProperties<T>>(nameof(_permeability)).ToInt32();
-            _temperatureOffset  = Marshal.OffsetOf<ReservoirProperties<T>>(nameof(_temperature)).ToInt32();
+            _compressibilityOffset  = Marshal.OffsetOf<ReservoirProperties<T>>(nameof(_compressibility)).ToInt32();
+            _bottomholeTemperatureOffset  = Marshal.OffsetOf<ReservoirProperties<T>>(nameof(_bottomholeTemperature)).ToInt32();
             _initialPressureOffset  = Marshal.OffsetOf<ReservoirProperties<T>>(nameof(_initialPressure)).ToInt32();
             ThisSize = _initialPressureOffset + Unsafe.SizeOf<T>();
         }
@@ -39,7 +41,8 @@ namespace MultiPorosity.Models
         private T _thickness;
         private T _porosity;
         private T _permeability;
-        private T _temperature;
+        private T _compressibility;
+        private T _bottomholeTemperature;
         private T _initialPressure;
         
         private readonly NativePointer pointer;
@@ -84,12 +87,20 @@ namespace MultiPorosity.Models
             set { *(T*)(pointer.Data + _permeabilityOffset) = value; }
         }
         
-        public T Temperature
+        public T Compressibility
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            get { return *(T*)(pointer.Data + _temperatureOffset); }
+            get { return *(T*)(pointer.Data + _compressibilityOffset); }
             [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-            set { *(T*)(pointer.Data + _temperatureOffset) = value; }
+            set { *(T*)(pointer.Data + _compressibilityOffset) = value; }
+        }
+        
+        public T BottomholeTemperature
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+            get { return *(T*)(pointer.Data + _bottomholeTemperatureOffset); }
+            [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+            set { *(T*)(pointer.Data + _bottomholeTemperatureOffset) = value; }
         }
         
         public T InitialPressure
@@ -109,6 +120,15 @@ namespace MultiPorosity.Models
         public ReservoirProperties(ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)
         {
             pointer = NativePointer.Allocate(ThisSize, executionSpace);
+        }
+        
+        ~ReservoirProperties()
+        {
+        }
+        public void Dispose()
+        {
+            pointer.Dispose();
+            GC.SuppressFinalize(this);
         }
         
         internal ReservoirProperties(IntPtr intPtr, ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)

@@ -2,6 +2,8 @@
 
 using Kokkos;
 
+using MultiPorosity.DataStorage;
+
 using LayoutKind = System.Runtime.InteropServices.LayoutKind;
 
 using NumericalMethods.DataStorage;

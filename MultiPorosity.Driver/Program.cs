@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 using Engineering.DataSource;
@@ -21,24 +24,15 @@ using OilGas.Data.RRC.Texas;
 
 using Engineering.DataSource.Tools;
 
+using HDF.PInvoke;
+
+using Unsafe = UnManaged.Unsafe;
+
 namespace MultiPorosity.Driver
 {
     internal class Program
     {
-        private readonly Random _rand = new Random();
-
-        [STAThread]
-        private static void Main(string[] args)
-        {
-            Test();
-
-#if DEBUG
-            Console.WriteLine("press any key to exit.");
-            Console.ReadKey();
-#endif
-        }
-
-        private static readonly ApiNumber[] TestWells = new ApiNumber[]
+        private static readonly ApiNumber[] TestWells =
         {
             new ApiNumber("42-025-33724-00-00"), new ApiNumber("42-297-35266-00-00"), new ApiNumber("42-123-32806-00-00"), new ApiNumber("42-123-32546-00-00"),
             new ApiNumber("42-123-32848-00-00"), new ApiNumber("42-297-35087-00-00"), new ApiNumber("42-297-35343-00-00"), new ApiNumber("42-297-34747-00-00"),
@@ -171,26 +165,329 @@ namespace MultiPorosity.Driver
             new ApiNumber("42-297-35345-00-00"), new ApiNumber("42-297-35523-00-00"), new ApiNumber("42-297-35315-00-00")
         };
 
-        readonly struct EagleFordLatLong
+        public static T QueryInterface<T>(object obj)
         {
-            public readonly ApiNumber Api;
-            public readonly double    SurfaceLatitude;
-            public readonly double    SurfaceLongitude;
-            public readonly double    BottomLatitude;
-            public readonly double    BottomLongitude;
-
-            public EagleFordLatLong(string[] row)
+            if(obj == null || !Marshal.IsComObject(obj))
             {
-                if(row.Length != 5)
+                return (T)obj;
+            }
+
+            Guid gUID = typeof(T).GUID;
+
+            if(Marshal.QueryInterface(Marshal.GetIUnknownForObject(obj), ref gUID, out IntPtr zero) >= 0 && zero != IntPtr.Zero)
+            {
+                return (T)Marshal.GetUniqueObjectForIUnknown(zero);
+            }
+
+            return default;
+        }
+
+        //private readonly Random _rand = new Random();
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        private static unsafe void* AddressOf<T>(ref T value) where T : unmanaged
+        {
+            fixed (T* pn = &value)
+            {
+                return pn;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        private static unsafe void TestAddressOf<T>(ref T value) where T : unmanaged
+        {
+            void* addr = AddressOf<T>(ref value);
+
+            Console.WriteLine($"addr 0x{((ulong)addr):X16}");
+
+            addr = Unsafe.AddressOf<T>(ref value);
+
+            Console.WriteLine($"addr 0x{((ulong)addr):X16}");
+
+        }
+
+
+        private static ulong value = 0xFF00FF00;
+
+
+        [STAThread]
+        private static void Main(string[] args)
+        {
+
+            
+            TestAddressOf(ref value);
+
+
+            //CreateADataset();
+
+            //TestRelativePermeability();
+            //TestMPM();
+
+#if DEBUG
+            Console.WriteLine("press any key to exit.");
+            Console.ReadKey();
+#endif
+        }
+
+
+        private static void CreateADataset()
+        {
+            unsafe
+            {
+                string FILE_NAME    = "h5tutr_dset.h5";
+                string DATASET_NAME = "dset";
+
+
+
+
+                long    file_id;
+                long    dataset_id;
+                long    dataspace_id;
+                ulong[] dims = new ulong[2];
+                int     status;
+
+
+                int[,] dset_data =new int[4,6];
+
+                /* Initialize the dataset. */
+                for (int i = 0; i < 4; i++)
                 {
-                    throw new InvalidDataException();
+                    for(int j = 0; j < 6; j++)
+                    {
+                        dset_data[i, j] = i * 6 + j + 1;
+                    }
                 }
 
-                Api              = row[0];
-                SurfaceLatitude  = double.Parse(row[1]);
-                SurfaceLongitude = double.Parse(row[2]);
-                BottomLatitude   = double.Parse(row[3]);
-                BottomLongitude  = double.Parse(row[4]);
+                /* Create a new file using default properties. */
+                file_id = H5F.create(FILE_NAME, H5F.ACC_RDWR, H5P.DEFAULT, H5P.DEFAULT);
+
+                /* Create the data space for the dataset. */
+                dims[0]      = 4;
+                dims[1]      = 6;
+                dataspace_id = H5S.create_simple(2, dims, null);
+
+                /* Create the dataset. */
+                dataset_id = H5D.create(file_id, "/dset", H5T.STD_I32BE, dataspace_id, H5P.DEFAULT, H5P.DEFAULT, H5P.DEFAULT);
+
+
+                status = H5D.write(dataset_id, H5T.NATIVE_INT, H5S.ALL, H5S.ALL, H5P.DEFAULT, (IntPtr)Unsafe.AsPointer(ref dset_data[0, 0]));
+
+                status = H5D.read(dataset_id, H5T.NATIVE_INT, H5S.ALL, H5S.ALL, H5P.DEFAULT, (IntPtr)Unsafe.AsPointer(ref dset_data[0, 0]));
+
+
+
+
+                /* End access to the dataset and release resources used by it. */
+                status = H5D.close(dataset_id);
+
+                /* Terminate access to the data space. */
+                status = H5S.close(dataspace_id);
+
+                /* Close the file. */
+                status = H5F.close(file_id);
+            }
+        }
+
+
+        private static void TestRelativePermeability()
+        {
+            InitArguments arguments = new InitArguments(8, -1, 0, true);
+
+            using(ScopeGuard.Get(arguments))
+            {
+                double saturation_water_connate  = 0.13;
+                double saturation_water_critical = 0.13;
+
+                double saturation_oil_irreducible_water = 0.2;
+                double saturation_oil_residual_water    = 0.2;
+
+                double saturation_oil_irreducible_gas = 0.1;
+                double saturation_oil_residual_gas    = 0.1;
+
+                double saturation_gas_connate  = 0.0;
+                double saturation_gas_critical = 0.0;
+
+                double permeability_relative_water_oil_irreducible = 0.45;
+
+                double permeability_relative_oil_water_connate  = 1.0;
+                double permeability_relative_gas_liquid_connate = 0.35;
+
+                double exponent_permeability_relative_water     = 2.0;
+                double exponent_permeability_relative_oil_water = 2.0;
+
+                double exponent_permeability_relative_gas     = 2.0;
+                double exponent_permeability_relative_oil_gas = 2.0;
+
+                double saturation_water;
+                double saturation_oil;
+                double saturation_gas;
+
+                //double[] saturations_water = Sequence.Linear(0.0, 1.0, 0.1);
+                //
+                double[] saturations_gas = Sequence.Linear(0.0, 1.0, 0.05);
+                double[] saturations_oil = Sequence.Linear(0.0, 1.0, 0.05);
+                
+                Console.WriteLine("saturation_water saturation_oil saturation_gas permeability_relative_water permeability_relative_oil permeability_relative_gas");
+
+                for(int k = 0; k < saturations_gas.Length; ++k)
+                {
+                    saturation_gas = saturations_gas[k];
+
+                    for(int j = 0; j < saturations_oil.Length; ++j)
+                    {
+                        saturation_oil = saturations_oil[j];
+
+                        if(saturation_oil + saturation_gas > 1.0)
+                        {
+                            continue;
+                        }
+
+                        saturation_water = System.Math.Max(0.0, 1.0 - saturation_oil - saturation_gas);
+
+                        (double permeability_relative_water, double permeability_relative_oil, double permeability_relative_gas) = RelativePermeability.StoneII(saturation_water,
+                            saturation_oil,
+                            saturation_gas,
+                            saturation_water_connate,
+                            saturation_water_critical,
+                            saturation_oil_irreducible_water,
+                            saturation_oil_residual_water,
+                            saturation_oil_irreducible_gas,
+                            saturation_oil_residual_gas,
+                            saturation_gas_connate,
+                            saturation_gas_critical,
+                            permeability_relative_water_oil_irreducible,
+                            permeability_relative_oil_water_connate,
+                            permeability_relative_gas_liquid_connate,
+                            exponent_permeability_relative_water,
+                            exponent_permeability_relative_oil_water,
+                            exponent_permeability_relative_gas,
+                            exponent_permeability_relative_oil_gas);
+
+                        Console.WriteLine($"{saturation_water} {saturation_oil} {saturation_gas} {permeability_relative_water} {permeability_relative_oil} {permeability_relative_gas}");
+                        
+                    }
+                }
+            }
+        }
+
+        private static void TestMPM()
+        {
+            InitArguments arguments = new InitArguments(8, -1, 0, true);
+
+            using(ScopeGuard.Get(arguments))
+            {
+                ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda;
+
+                ReservoirProperties<double> reservoir = new ReservoirProperties<double>(executionSpace);
+                reservoir.Length = 4800.0;
+                reservoir.Width  = 348.0;
+                // reservoir.Area                        = (reservoir.Length * reservoir.Width) / 43560;
+                reservoir.Thickness             = 150.0;
+                reservoir.Porosity              = 0.06;
+                reservoir.Permeability          = 0.003;
+                reservoir.Compressibility       = 6.11051E-05;
+                reservoir.BottomholeTemperature = 275.0;
+                reservoir.InitialPressure       = 7000.0;
+
+                WellProperties<double> wellProperties = new WellProperties<double>(executionSpace);
+                wellProperties.LateralLength      = 6500.0;
+                wellProperties.BottomholePressure = 3500.0;
+
+                FractureProperties<double> fracture = new FractureProperties<double>(executionSpace);
+                fracture.Count        = 60;
+                fracture.Width        = 0.1 / 12.0;
+                fracture.Height       = 150.0;
+                fracture.HalfLength   = 348.0;
+                fracture.Porosity     = 0.20;
+                fracture.Permeability = 184.0;
+                fracture.Skin         = 0.0;
+
+                NaturalFractureProperties<double> natural_fracture = new NaturalFractureProperties<double>(executionSpace);
+                natural_fracture.Count        = 10;
+                natural_fracture.Width        = 0.01 / 12.0;
+                natural_fracture.Porosity     = 0.10;
+                natural_fracture.Permeability = 0.8;
+
+                //Rs = 875.99506
+
+                Pvt<double> pvt = new Pvt<double>();
+                pvt.OilSaturation            = 0.8;
+                pvt.OilApiGravity            = 46.80;
+                pvt.OilViscosity             = 0.11;
+                pvt.OilFormationVolumeFactor = 1.56;
+                pvt.OilCompressibility       = 5.993058E-05;
+
+                pvt.WaterSaturation            = 0.0;
+                pvt.WaterSpecificGravity       = 1.0;
+                pvt.WaterViscosity             = 1.0;
+                pvt.WaterFormationVolumeFactor = 1.0;
+                pvt.WaterCompressibility       = 1.0;
+
+                pvt.GasSaturation            = 0.2;
+                pvt.GasSpecificGravity       = 0.75;
+                pvt.GasViscosity             = 0.0239;
+                pvt.GasFormationVolumeFactor = 1.2610E-003;
+                pvt.GasCompressibilityFactor = 1.5645;
+                pvt.GasCompressibility       = 2.3418E-004;
+
+                RelativePermeabilities<double> relativePermeabilities = new RelativePermeabilities<double>();
+                relativePermeabilities.MatrixOil            = 0.5;
+                relativePermeabilities.MatrixWater          = 0.0;
+                relativePermeabilities.MatrixGas            = 0.15;
+                relativePermeabilities.FractureOil          = 0.5;
+                relativePermeabilities.FractureWater        = 0.0;
+                relativePermeabilities.FractureGas          = 0.15;
+                relativePermeabilities.NaturalFractureOil   = 0.5;
+                relativePermeabilities.NaturalFractureWater = 0.0;
+                relativePermeabilities.NaturalFractureGas   = 0.15;
+
+                MultiPorosityData<double> mpd = new MultiPorosityData<double>(executionSpace);
+                mpd.ReservoirProperties       = reservoir;
+                mpd.WellProperties            = wellProperties;
+                mpd.FractureProperties        = fracture;
+                mpd.NaturalFractureProperties = natural_fracture;
+                mpd.Pvt                       = pvt;
+                mpd.RelativePermeability      = relativePermeabilities;
+
+                TriplePorosityModel<double, Cuda> tpm = new TriplePorosityModel<double, Cuda>(mpd);
+
+                View<double, Cuda> timeView = new View<double, Cuda>("timeView", 500);
+
+                for(ulong i0 = 0; i0 < timeView.Extent(0); ++i0)
+                {
+                    timeView[i0] = i0 + 1.0;
+                }
+
+                View<double, Cuda> argsView = new View<double, Cuda>("argsView", 7);
+
+                /*km*/
+                argsView[0] = 0.00019;
+                /*kF*/
+                argsView[1] = 184.0;
+                /*kf*/
+                argsView[2] = 0.8;
+                /*ye*/
+                argsView[3] = fracture.HalfLength;
+                /*LF*/
+                argsView[4] = reservoir.Length / 60.0;
+                /*Lf*/
+                argsView[5] = fracture.HalfLength / 10.0;
+                /*sk*/
+                argsView[6] = 0.0;
+
+                View<double, Cuda> resultsView = tpm.Calculate(timeView, argsView);
+
+                for(ulong i0 = 0; i0 < resultsView.Extent(0); ++i0)
+                {
+                    for(ulong i1 = 0; i1 < resultsView.Extent(1); ++i1)
+                    {
+                        Console.Write(resultsView[i0, i1]);
+                        Console.Write(" ");
+                    }
+
+                    Console.WriteLine();
+                }
             }
         }
 
@@ -204,95 +501,112 @@ namespace MultiPorosity.Driver
 
             //List<Well> wells = adapter.GetWellsByCounty("Karnes").Where(w => w.MonthlyProduction.Count > 0).ToList();
 
+            EagleFordLatLong[] EagleFordLatLongs;
+
+            using(MemoryMap mm = new MemoryMap("T:/EagleFordLatLongs.csv"))
+            {
+                MappedCsvReader csvReader = new MappedCsvReader(mm);
+
+                (_, List<string[]> rows) = csvReader.ReadFile(1);
+
+                EagleFordLatLongs = new EagleFordLatLong[rows.Count];
+
+                Parallel.ForEach(Partitioner.Create(0, rows.Count),
+                                 row =>
+                                 {
+                                     for(int i = row.Item1; i < row.Item2; i++)
+                                     {
+                                         EagleFordLatLongs[i] = new EagleFordLatLong(rows[i]);
+                                     }
+                                 });
+            }
+
+            //View<double, Cuda> latlongdegrees = new View<double, Cuda>("latlongdegrees", EagleFordLatLongs.Length, 2, 2);
+
+            //for(int i = 0; i < EagleFordLatLongs.Length; ++i)
+            //{
+            //    latlongdegrees[i, 0, 0] = EagleFordLatLongs[i].SurfaceLatitude;
+            //    latlongdegrees[i, 0, 1] = EagleFordLatLongs[i].SurfaceLongitude;
+            //    latlongdegrees[i, 1, 0] = EagleFordLatLongs[i].BottomLatitude;
+            //    latlongdegrees[i, 1, 1] = EagleFordLatLongs[i].BottomLongitude;
+            //}
+
+            //View<double, Cuda> neighbors = SpatialMethods<double, Cuda>.NearestNeighbor(latlongdegrees);
+
             InitArguments arguments = new InitArguments(8, -1, 0, true);
 
             using(ScopeGuard.Get(arguments))
             {
-                EagleFordLatLong[] EagleFordLatLongs;
-
-                using(MemoryMapped mm = new MemoryMapped("T:/EagleFordLatLongs.csv"))
-                {
-                    MappedCsvReader csvReader = new MappedCsvReader(mm);
-
-                    (_, List<string[]> rows) = csvReader.ReadFile(1);
-
-                    EagleFordLatLongs = new EagleFordLatLong[rows.Count];
-
-                    Parallel.ForEach(Partitioner.Create(0, rows.Count),
-                                     (row) =>
-                                     {
-                                         for(int i = row.Item1; i < row.Item2; i++)
-                                         {
-                                             EagleFordLatLongs[i] = new EagleFordLatLong(rows[i]);
-                                         }
-                                     });
-                }
-
-                //View<double, Cuda> latlongdegrees = new View<double, Cuda>("latlongdegrees", EagleFordLatLongs.Length, 2, 2);
-
-                //for(int i = 0; i < EagleFordLatLongs.Length; ++i)
-                //{
-                //    latlongdegrees[i, 0, 0] = EagleFordLatLongs[i].SurfaceLatitude;
-                //    latlongdegrees[i, 0, 1] = EagleFordLatLongs[i].SurfaceLongitude;
-                //    latlongdegrees[i, 1, 0] = EagleFordLatLongs[i].BottomLatitude;
-                //    latlongdegrees[i, 1, 1] = EagleFordLatLongs[i].BottomLongitude;
-                //}
-
-                //View<double, Cuda> neighbors = SpatialMethods<double, Cuda>.NearestNeighbor(latlongdegrees);
-
                 Well well;
 
                 foreach(EagleFordLatLong eagleFordLatLong in EagleFordLatLongs)
                 {
                     well = adapter.GetWellByApi(eagleFordLatLong.Api);
 
-                    if (well.MonthlyProduction.Count < 9)
+                    if(well.MonthlyProduction.Count < 9)
                     {
                         continue;
                     }
 
                     //    Console.WriteLine($"{well.Api}");
 
-                    //    ReservoirProperties<double> reservoir = new ReservoirProperties<double>(executionSpace);
-                    //    reservoir.Length = 6500.0;
-                    //    reservoir.Width  = 348.0;
-                    //    // reservoir.Area                        = (reservoir.Length * reservoir.Width) / 43560;
-                    //    reservoir.Thickness       = 50.0;
-                    //    reservoir.Porosity        = 0.06;
-                    //    reservoir.Permeability    = 0.002;
-                    //    reservoir.Temperature     = 275.0;
-                    //    reservoir.InitialPressure = 7000.0;
+                    ReservoirProperties<double> reservoir = new ReservoirProperties<double>(executionSpace);
+                    reservoir.Length = 6500.0;
+                    reservoir.Width  = 348.0;
+                    // reservoir.Area                        = (reservoir.Length * reservoir.Width) / 43560;
+                    reservoir.Thickness             = 50.0;
+                    reservoir.Porosity              = 0.06;
+                    reservoir.Permeability          = 0.002;
+                    reservoir.Compressibility       = 6.11051E-05;
+                    reservoir.BottomholeTemperature = 275.0;
+                    reservoir.InitialPressure       = 7000.0;
 
-                    //    WellProperties<double> wellProperties = new WellProperties<double>(executionSpace);
-                    //    wellProperties.LateralLength      = 6500.0;
-                    //    wellProperties.BottomholePressure = 3500.0;
+                    WellProperties<double> wellProperties = new WellProperties<double>(executionSpace);
+                    wellProperties.LateralLength      = 6500.0;
+                    wellProperties.BottomholePressure = 3500.0;
 
-                    //    FractureProperties<double> fracture = new FractureProperties<double>(executionSpace);
-                    //    fracture.Count        = 60;
-                    //    fracture.Width        = 0.1;
-                    //    fracture.Height       = 50.0;
-                    //    fracture.HalfLength   = 348.0;
-                    //    fracture.Porosity     = 0.20;
-                    //    fracture.Permeability = 184.0;
-                    //    fracture.Skin         = 0.0;
+                    FractureProperties<double> fracture = new FractureProperties<double>(executionSpace);
+                    fracture.Count        = 60;
+                    fracture.Width        = 0.1;
+                    fracture.Height       = 50.0;
+                    fracture.HalfLength   = 348.0;
+                    fracture.Porosity     = 0.20;
+                    fracture.Permeability = 184.0;
+                    fracture.Skin         = 0.0;
 
-                    //    NaturalFractureProperties<double> natural_fracture = new NaturalFractureProperties<double>(executionSpace);
-                    //    natural_fracture.Count        = 60;
-                    //    natural_fracture.Width        = 0.01;
-                    //    natural_fracture.Porosity     = 0.10;
-                    //    natural_fracture.Permeability = 1.0;
+                    NaturalFractureProperties<double> natural_fracture = new NaturalFractureProperties<double>(executionSpace);
+                    natural_fracture.Count        = 60;
+                    natural_fracture.Width        = 0.01;
+                    natural_fracture.Porosity     = 0.10;
+                    natural_fracture.Permeability = 1.0;
 
-                    //    Pvt<double> pvt = new Pvt<double>();
-                    //    pvt.OilViscosity             = 0.5;
-                    //    pvt.OilFormationVolumeFactor = 1.5;
-                    //    pvt.TotalCompressibility     = 0.00002;
+                    //Rs = 875.99506
+
+                    Pvt<double> pvt = new Pvt<double>();
+                    pvt.OilSaturation            = 0.5;
+                    pvt.OilApiGravity            = 50.0;
+                    pvt.OilViscosity             = 0.5;
+                    pvt.OilFormationVolumeFactor = 1.5;
+                    pvt.OilCompressibility       = 5.993058E-05;
+
+                    pvt.WaterSaturation            = 0.0;
+                    pvt.WaterSpecificGravity       = 1.0;
+                    pvt.WaterViscosity             = 1.0;
+                    pvt.WaterFormationVolumeFactor = 1.0;
+                    pvt.WaterCompressibility       = 1.0;
+
+                    pvt.GasSaturation            = 0.5;
+                    pvt.GasSpecificGravity       = 0.75;
+                    pvt.GasViscosity             = 0.043803267;
+                    pvt.GasFormationVolumeFactor = 0.004648912;
+                    pvt.GasCompressibility       = 1.5644999;
 
                     MultiPorosityData<double> mpd = new MultiPorosityData<double>(executionSpace);
-                    //mpd.ReservoirProperties = reservoir;
-                    //mpd.WellProperties = wellProperties;
-                    //mpd.FractureProperties = fracture;
-                    //mpd.NaturalFractureProperties = natural_fracture;
-                    //mpd.Pvt = pvt;
+                    mpd.ReservoirProperties       = reservoir;
+                    mpd.WellProperties            = wellProperties;
+                    mpd.FractureProperties        = fracture;
+                    mpd.NaturalFractureProperties = natural_fracture;
+                    mpd.Pvt                       = pvt;
 
                     BoundConstraints<double>[] arg_limits = new BoundConstraints<double>[7];
 
@@ -353,9 +667,6 @@ namespace MultiPorosity.Driver
                     ParticleSwarmOptimizationOptions options = new ParticleSwarmOptimizationOptions(20, estimatedSwarmSize, 150, 0.0, 0.1, 0.9, false);
 
                     MultiPorosityResult<double, Cuda> results = tpm.HistoryMatch(options, actual_data, actual_time, weights, arg_limits);
-
-
-
                 }
             }
         }
@@ -407,509 +718,516 @@ namespace MultiPorosity.Driver
 
         private static void TestHistoryMatch()
         {
-            //ParallelProcessor.Initialize(new InitArguments(8,
-            //                                               -1,
-            //                                               0,
-            //                                               true));
-
-            InitArguments arguments = new InitArguments(8, -1, 0, true);
-
-            double[] values = new double[7];
-
-            using(ScopeGuard.Get(arguments))
-            {
-                ProductionData<double> productionData = new ProductionData<double>(131);
-
-                for(int i = 0; i < 131; ++i)
-                {
-                    productionData[i].Time  = HunterDailyData.timeData[i];
-                    productionData[i].Qo    = HunterDailyData.qoData[i];
-                    productionData[i].Qw    = HunterDailyData.qwData[i];
-                    productionData[i].Qg    = HunterDailyData.qgData[i];
-                    productionData[i].QgBoe = HunterDailyData.qgData[i] / 5.8;
-                    productionData[i].Qt    = productionData[i].Qo + productionData[i].Qw + productionData[i].QgBoe;
-                }
-
-                ReservoirProperties<double> reservoir = new ReservoirProperties<double>();
-                reservoir.Length = 6500.0;
-                reservoir.Width  = 348.0;
-                // reservoir.Area                        = (reservoir.Length * reservoir.Width) / 43560;
-                reservoir.Thickness       = 50.0;
-                reservoir.Porosity        = 0.06;
-                reservoir.Permeability    = 0.002;
-                reservoir.Temperature     = 275.0;
-                reservoir.InitialPressure = 7000.0;
-
-                WellProperties<double> well = new WellProperties<double>();
-                well.LateralLength      = 6500.0;
-                well.BottomholePressure = 3500.0;
-
-                FractureProperties<double> fracture = new FractureProperties<double>();
-                fracture.Count        = 60;
-                fracture.Width        = 0.1;
-                fracture.Height       = 50.0;
-                fracture.HalfLength   = 348.0;
-                fracture.Porosity     = 0.20;
-                fracture.Permeability = 184.0;
-                fracture.Skin         = 0.0;
-
-                NaturalFractureProperties<double> natural_fracture = new NaturalFractureProperties<double>();
-                natural_fracture.Count        = 60;
-                natural_fracture.Width        = 0.01;
-                natural_fracture.Porosity     = 0.10;
-                natural_fracture.Permeability = 1.0;
-
-                Pvt<double> pvt = new Pvt<double>();
-                pvt.OilViscosity             = 0.5;
-                pvt.OilFormationVolumeFactor = 1.5;
-                pvt.TotalCompressibility     = 0.00002;
-
-                MultiPorosityData<double> mpd = new MultiPorosityData<double>();
-                mpd.ReservoirProperties       = reservoir;
-                mpd.WellProperties            = well;
-                mpd.FractureProperties        = fracture;
-                mpd.NaturalFractureProperties = natural_fracture;
-                mpd.Pvt                       = pvt;
-
-                BoundConstraints<double>[] arg_limits = new BoundConstraints<double>[7];
-
-                // LF      = xe/nF;
-                // Lf      = ye/nf;
-
-                // Hippo Hunter 1
-                // xe = 6500
-                // Matrix Perm (md)         1.900
-                // Hyd Frac Perm (md)       184
-                // # of Hyd Frac            60
-                // Frac Half Length (ft)    348
-                // Nat Frac Perm (md)       0.8
-                // Total # of Nat Frac      60*10
-                //
-                // Hippo Hunter 2
-                // Matrix Perm (md)         2.260
-                // Hyd Frac Perm (md)       86
-                // # of Hyd Frac            60
-                // Frac Half Length (ft)	533
-                // Nat Frac Perm (md)       0.5
-                // Total # of Nat Frac      60*18
-
-                /*km*/
-                arg_limits[0] = new BoundConstraints<double>(0.0001, 0.01);
-
-                /*kF*/
-                arg_limits[1] = new BoundConstraints<double>(100.0, 10000.0);
-
-                /*kf*/
-                arg_limits[2] = new BoundConstraints<double>(0.01, 100.0);
-
-                /*ye*/
-                arg_limits[3] = new BoundConstraints<double>(100.0, 1000.0);
-
-                /*LF*/
-                arg_limits[4] = new BoundConstraints<double>(50.0, 250.0);
-
-                /*Lf*/
-                arg_limits[5] = new BoundConstraints<double>(10.0, 150.0);
-
-                /*sk*/
-                arg_limits[6] = new BoundConstraints<double>(0.0, 0.0);
-
-                ///*km*/ arg_limits_mirror(0) = System.ValueLimits<double>(0.001, 0.002);
-                ///*kF*/ arg_limits_mirror(1) = System.ValueLimits<double>(100.0, 200.0);
-                ///*kf*/ arg_limits_mirror(2) = System.ValueLimits<double>(0.001, 10.0);
-                ///*ye*/ arg_limits_mirror(3) = System.ValueLimits<double>(100.0, 500.0);
-                ///*LF*/ arg_limits_mirror(4) = System.ValueLimits<double>(50.0, 150.0);
-                ///*Lf*/ arg_limits_mirror(5) = System.ValueLimits<double>(10.0, 100.0);
-                ///*sk*/ arg_limits_mirror(6) = System.ValueLimits<double>(-2.0, 2.0);
-
-                // Kokkos.deep_copy(arg_limits, arg_limits_mirror);
-
-                View<double, Cuda> actual_data = new View<double, Cuda>("actual_data", HunterDailyData.actualAvgDailyBoe.Length);
-
-                View<double, Cuda> actual_time = new View<double, Cuda>("actual_time", HunterDailyData.actualAvgDailyBoe.Length);
-
-                View<double, Cuda> weights = new View<double, Cuda>("weights", HunterDailyData.actualAvgDailyBoe.Length);
-
-                for(ulong i0 = 0; i0 < actual_data.Extent(0); ++i0)
-                {
-                    actual_data[i0] = HunterDailyData.actualAvgDailyBoe[i0]; //productionData[i0].Qt;
-                    actual_time[i0] = HunterDailyData.actualMonthlyTime[i0]; //timeData[i0];
-
-                    //if(i0 < 8 || i0 >= 16 && i0 <= 17 || i0 > 66 && i0 < 90 || i0 > 125)
-                    //{
-                    //    weights[i0] = 0.0001;
-                    //}
-                    //else if(i0 >= 119 && i0 <= 125)
-                    //{
-                    //    weights[i0] = 1.2;
-                    //}
-                    //else
-                    //{
-                    weights[i0] = 1.0;
-                    //}
-                }
-
-                TriplePorosityModel<double, Cuda> tpm = new TriplePorosityModel<double, Cuda>(mpd);
-
-                //NumericalMethods::Algorithms::ParticleSwarmOptimizationOptions<double> options;
-
-                //Vector<double> best_args = pso.Execute(arg_limits, options);
-
-                uint estimatedSwarmSize = ParticleSwarmOptimizationOptions.EstimateSwarmSize(7);
-
-                ParticleSwarmOptimizationOptions
-                    options = new ParticleSwarmOptimizationOptions(100, estimatedSwarmSize, 250, 0.0, 0.1, 0.9, true); //ParticleSwarmOptimizationOptions.Default;
-
-                MultiPorosityResult<double, Cuda> results = tpm.HistoryMatch(options, actual_data, actual_time, weights, arg_limits);
-
-                DataCache cachedData = results.CachedData;
-
-                cachedData.ExportToCsv("PSO.csv");
-
-                {
-                    //Dictionary<string, string> name_map = new Dictionary<string, string>
-                    //{
-                    //    {
-                    //        "Iteration", "Iteration"
-                    //    },
-                    //    {
-                    //        "SwarmIndex", "SwarmIndex"
-                    //    },
-                    //    {
-                    //        "Particle", "ParticleIndex"
-                    //    },
-                    //    {
-                    //        "Particle0Position", "km"
-                    //    },
-                    //    {
-                    //        "Particle1Position", "kF"
-                    //    },
-                    //    {
-                    //        "Particle2Position", "kf"
-                    //    },
-                    //    {
-                    //        "Particle3Position", "ye"
-                    //    },
-                    //    {
-                    //        "Particle4Position", "LF"
-                    //    },
-                    //    {
-                    //        "Particle5Position", "Lf"
-                    //    },
-                    //    {
-                    //        "Particle6Position", "sk"
-                    //    },
-                    //    {
-                    //        "Particle0Velocity", "kmVelocity"
-                    //    },
-                    //    {
-                    //        "Particle1Velocity", "kFVelocity"
-                    //    },
-                    //    {
-                    //        "Particle2Velocity", "kfVelocity"
-                    //    },
-                    //    {
-                    //        "Particle3Velocity", "yeVelocity"
-                    //    },
-                    //    {
-                    //        "Particle4Velocity", "LFVelocity"
-                    //    },
-                    //    {
-                    //        "Particle5Velocity", "LfVelocity"
-                    //    },
-                    //    {
-                    //        "Particle6Velocity", "skVelocity"
-                    //    }
-                    //};
-
-                    //List<TriplePorosityOptimizationResults> dataset = new List<TriplePorosityOptimizationResults>();
-
-                    //for(ulong i = 0; i < cachedData.RowCount; ++i)
-                    //{
-                    //    List<double> entry = new List<double>((int)cachedData.ColumnCount);
-
-                    //    for(ulong j = 0; j < cachedData.ColumnCount; ++j)
-                    //    {
-                    //        entry.Add(cachedData[i,
-                    //                             j]);
-                    //    }
-
-                    //    dataset.Add(new TriplePorosityOptimizationResults(entry.ToArray()));
-                    //}
-
-                    //List<string> columnNames = new List<string>();
-
-                    //for(ulong i = 3; i < cachedData.ColumnCount - 2;)
-                    //{
-                    //    columnNames.Add(name_map[cachedData.GetHeader((int)i)]);
-
-                    //    i += 2;
-                    //}
-
-                    ////{
-                    ////    "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
-                    ////    "description": "Drag the sliders to highlight points.",
-                    ////    "data": {"url": "data/cars.json"},
-                    ////    "transform": [{"calculate": "year(datum.Year)", "as": "Year"}],
-                    ////    "layer": [{
-                    ////        "selection": {
-                    ////            "CylYr": {
-                    ////                "type": "single", "fields": ["Cylinders", "Year"],
-                    ////                "init": {"Cylinders": 4, "Year": 1977},
-                    ////                "bind": {
-                    ////                    "Cylinders": {"input": "range", "min": 3, "max": 8, "step": 1},
-                    ////                    "Year": {"input": "range", "min": 1969, "max": 1981, "step": 1}
-                    ////                }
-                    ////            }
-                    ////        },
-                    ////        "mark": "circle",
-                    ////        "encoding": {
-                    ////            "x": {"field": "Horsepower", "type": "quantitative"},
-                    ////            "y": {"field": "Miles_per_Gallon", "type": "quantitative"},
-                    ////            "color": {
-                    ////                "condition": {"selection": "CylYr", "field": "Origin", "type": "nominal"},
-                    ////                "value": "grey"
-                    ////            }
-                    ////        }
-                    ////    }, {
-                    ////        "transform": [{"filter": {"selection": "CylYr"}}],
-                    ////        "mark": "circle",
-                    ////        "encoding": {
-                    ////            "x": {"field": "Horsepower", "type": "quantitative"},
-                    ////            "y": {"field": "Miles_per_Gallon", "type": "quantitative"},
-                    ////            "color": {"field": "Origin", "type": "nominal"},
-                    ////            "size": {"value": 100}
-                    ////        }
-                    ////    }]
-                    ////}
-
-                    //Specification specification = new Specification
-                    //{
-                    //    Transform = new List<Transform>
-                    //    {
-                    //        new Transform
-                    //        {
-                    //            Filter = new Predicate
-                    //            {
-                    //                Selection = "Iteration"
-                    //            }
-                    //        }
-                    //    },
-                    //    Repeat = new RepeatMapping
-                    //    {
-                    //        Row = columnNames, Column = columnNames
-                    //    },
-                    //    Spec = new SpecClass
-                    //    {
-                    //        DataSource = new DataSource
-                    //        {
-                    //            Name = nameof(dataset)
-                    //        },
-                    //        Mark = BoxPlot.Circle,
-                    //        Encoding = new Encoding
-                    //        {
-                    //            X = new XClass
-                    //            {
-                    //                Type = StandardType.Quantitative,
-                    //                Field = new RepeatRef
-                    //                {
-                    //                    Repeat = RepeatEnum.Column
-                    //                }
-                    //            },
-                    //            Y = new YClass
-                    //            {
-                    //                Type = StandardType.Quantitative,
-                    //                Field = new RepeatRef
-                    //                {
-                    //                    Repeat = RepeatEnum.Row
-                    //                }
-                    //            },
-                    //            Color = new DefWithConditionMarkPropFieldDefGradientStringNull
-                    //            {
-                    //                Type = StandardType.Nominal, Field = "SwarmIndex"
-                    //            }
-                    //        },
-                    //        Selection = new Dictionary<string, SelectionDef>
-                    //        {
-                    //            {
-                    //                "IterationSelection", new SelectionDef
-                    //                {
-                    //                    Type = SelectionDefType.Single,
-                    //                    Fields = new List<string>
-                    //                    {
-                    //                        "Iteration"
-                    //                    },
-                    //                    Init = new Dictionary<string, InitValue>
-                    //                    {
-                    //                        {
-                    //                            "Iteration", 0
-                    //                        }
-                    //                    },
-                    //                    Bind = new Dictionary<string, AnyStream>
-                    //                    {
-                    //                        {
-                    //                            "Iteration", new AnyBinding
-                    //                            {
-                    //                                Input = "range",
-                    //                                Min   = 0.0,
-                    //                                Max   = 99.0
-                    //                            }
-                    //                        }
-                    //                    }
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-                    //};
-
-                    ////Chart chart = new Chart($"TriplePorosityModel",
-                    ////                        specification,
-                    ////                        1000,
-                    ////                        750);
-
-                    ////chart.ShowInBrowser();
-                }
-
-                //Console.WriteLine("RMS Error");
-                //Console.WriteLine(results.Error);
-
-                View<double, Cuda> best_args = results.Args;
-
-                Console.WriteLine("best_args");
-
-                for(ulong i = 0; i < best_args.Size(); ++i)
-                {
-                    values[i] = best_args[i];
-
-                    Console.WriteLine(values[i]);
-                }
-
-                //Console.WriteLine();
-
-                ////View<double, Cuda> timeView = new View<double, Cuda>("time",
-                ////                                                     4);
-
-                ////for(ulong i0 = 0; i0 < timeView.Extent(0); ++i0)
-                ////{
-                ////    timeView[i0] = 15 + 30 * i0;
-                ////}
-
-                //View<double, Cuda> best_args = new View<double, Cuda>("args",
-                //                                                      7);
-
-                //double[] values =
-                //{
-                //    0.006064035, 451.7930851, 4.277795829, 177.2940392, 77.86379899, 73.58321739 ,0.0
-                //};
-
-                //best_args[0] = values[0];
-                //best_args[1] = values[1];
-                //best_args[2] = values[2];
-                //best_args[3] = values[3];
-                //best_args[4] = values[4];
-                //best_args[5] = values[5];
-                //best_args[6] = values[6];
-
-                View<double, Cuda> simulated_data = tpm.Calculate(actual_time, best_args);
-
-                Console.WriteLine("simulated_data");
-
-                for(ulong i0 = 0; i0 < simulated_data.Size(); ++i0)
-                {
-                    Console.WriteLine(simulated_data[i0]);
-                }
-
-                {
-                    //List<InlineDatasetElement> dataset = new List<InlineDatasetElement>();
-
-                    //for(ulong i = 0; i < actual_data.Size(); ++i)
-                    //{
-                    //    dataset.Add(new Dictionary<string, object>(4)
-                    //    {
-                    //        {
-                    //            "API", "##-###-#####"
-                    //        },
-                    //        {
-                    //            "Day", actual_time[i]
-                    //        },
-                    //        {
-                    //            "Type", "Actual"
-                    //        },
-                    //        {
-                    //            "Rate", actual_data[i]
-                    //        }
-                    //    });
-                    //}
-
-                    //for(ulong i = 0; i < simulated_data.Size(); ++i)
-                    //{
-                    //    dataset.Add(new Dictionary<string, object>(4)
-                    //    {
-                    //        {
-                    //            "API", "##-###-#####"
-                    //        },
-                    //        {
-                    //            "Day", actual_time[i]
-                    //        },
-                    //        {
-                    //            "Type", "Simulated"
-                    //        },
-                    //        {
-                    //            "Rate", simulated_data[i]
-                    //        }
-                    //    });
-                    //}
-
-                    //Specification specification = new Specification
-                    //{
-                    //    Data = new DataSource
-                    //    {
-                    //        Values = dataset
-                    //    },
-                    //    Layer = new List<LayerSpec>
-                    //    {
-                    //        new LayerSpec
-                    //        {
-                    //            Encoding = new LayerEncoding
-                    //            {
-                    //                X = new XClass
-                    //                {
-                    //                    Type = StandardType.Quantitative, Field = "Day"
-                    //                },
-                    //                Y = new YClass
-                    //                {
-                    //                    Type = StandardType.Quantitative, Field = "Rate"
-                    //                },
-                    //                Color = new DefWithConditionMarkPropFieldDefGradientStringNull
-                    //                {
-                    //                    Type = StandardType.Nominal, Field = "Type"
-                    //                }
-                    //            },
-                    //            Layer = new List<LayerSpec>
-                    //            {
-                    //                new LayerSpec
-                    //                {
-                    //                    Mark = BoxPlot.Line
-                    //                },
-                    //                new LayerSpec
-                    //                {
-                    //                    Mark = BoxPlot.Circle
-                    //                }
-                    //            }
-                    //        }
-                    //    }
-                    //};
-
-                    //Chart chart = new Chart("TriplePorosityModel",
-                    //                        specification,
-                    //                        1000,
-                    //                        750);
-
-                    //chart.ShowInBrowser();
-                }
-            }
-
-            //ParallelProcessor.Shutdown();
+            ////ParallelProcessor.Initialize(new InitArguments(8,
+            ////                                               -1,
+            ////                                               0,
+            ////                                               true));
+
+            //InitArguments arguments = new InitArguments(8, -1, 0, true);
+
+            //double[] values = new double[7];
+
+            //using(ScopeGuard.Get(arguments))
+            //{
+            //    ProductionData<double> productionData = new ProductionData<double>(131);
+
+            //    for(int i = 0; i < 131; ++i)
+            //    {
+            //        productionData[i].Time  = HunterDailyData.timeData[i];
+            //        productionData[i].Qo    = HunterDailyData.qoData[i];
+            //        productionData[i].Qw    = HunterDailyData.qwData[i];
+            //        productionData[i].Qg    = HunterDailyData.qgData[i];
+            //        productionData[i].QgBoe = HunterDailyData.qgData[i] / 5.8;
+            //        productionData[i].Qt    = productionData[i].Qo + productionData[i].Qw + productionData[i].QgBoe;
+            //    }
+
+            //    ReservoirProperties<double> reservoir = new ReservoirProperties<double>();
+            //    reservoir.Length = 6500.0;
+            //    reservoir.Width  = 348.0;
+            //    // reservoir.Area                        = (reservoir.Length * reservoir.Width) / 43560;
+            //    reservoir.Thickness       = 50.0;
+            //    reservoir.Porosity        = 0.06;
+            //    reservoir.Permeability    = 0.002;
+            //    reservoir.Temperature     = 275.0;
+            //    reservoir.InitialPressure = 7000.0;
+
+            //    WellProperties<double> well = new WellProperties<double>();
+            //    well.LateralLength      = 6500.0;
+            //    well.BottomholePressure = 3500.0;
+
+            //    FractureProperties<double> fracture = new FractureProperties<double>();
+            //    fracture.Count        = 60;
+            //    fracture.Width        = 0.1;
+            //    fracture.Height       = 50.0;
+            //    fracture.HalfLength   = 348.0;
+            //    fracture.Porosity     = 0.20;
+            //    fracture.Permeability = 184.0;
+            //    fracture.Skin         = 0.0;
+
+            //    NaturalFractureProperties<double> natural_fracture = new NaturalFractureProperties<double>();
+            //    natural_fracture.Count        = 60;
+            //    natural_fracture.Width        = 0.01;
+            //    natural_fracture.Porosity     = 0.10;
+            //    natural_fracture.Permeability = 1.0;
+
+            //    Pvt<double> pvt = new Pvt<double>();
+            //    pvt.OilViscosity             = 0.5;
+            //    pvt.OilFormationVolumeFactor = 1.5;
+            //    pvt.TotalCompressibility     = 0.00002;
+
+            //    MultiPorosityData<double> mpd = new MultiPorosityData<double>();
+            //    mpd.ReservoirProperties       = reservoir;
+            //    mpd.WellProperties            = well;
+            //    mpd.FractureProperties        = fracture;
+            //    mpd.NaturalFractureProperties = natural_fracture;
+            //    mpd.Pvt                       = pvt;
+
+            //    BoundConstraints<double>[] arg_limits = new BoundConstraints<double>[7];
+
+            //    // LF      = xe/nF;
+            //    // Lf      = ye/nf;
+
+            //    // Hippo Hunter 1
+            //    // xe = 6500
+            //    // Matrix Perm (md)         1.900
+            //    // Hyd Frac Perm (md)       184
+            //    // # of Hyd Frac            60
+            //    // Frac Half Length (ft)    348
+            //    // Nat Frac Perm (md)       0.8
+            //    // Total # of Nat Frac      60*10
+            //    //
+            //    // Hippo Hunter 2
+            //    // Matrix Perm (md)         2.260
+            //    // Hyd Frac Perm (md)       86
+            //    // # of Hyd Frac            60
+            //    // Frac Half Length (ft)	533
+            //    // Nat Frac Perm (md)       0.5
+            //    // Total # of Nat Frac      60*18
+
+            //    /*km*/
+            //    arg_limits[0] = new BoundConstraints<double>(0.0001, 0.01);
+
+            //    /*kF*/
+            //    arg_limits[1] = new BoundConstraints<double>(100.0, 10000.0);
+
+            //    /*kf*/
+            //    arg_limits[2] = new BoundConstraints<double>(0.01, 100.0);
+
+            //    /*ye*/
+            //    arg_limits[3] = new BoundConstraints<double>(100.0, 1000.0);
+
+            //    /*LF*/
+            //    arg_limits[4] = new BoundConstraints<double>(50.0, 250.0);
+
+            //    /*Lf*/
+            //    arg_limits[5] = new BoundConstraints<double>(10.0, 150.0);
+
+            //    /*sk*/
+            //    arg_limits[6] = new BoundConstraints<double>(0.0, 0.0);
+
+            //    ///*km*/ arg_limits_mirror(0) = System.ValueLimits<double>(0.001, 0.002);
+            //    ///*kF*/ arg_limits_mirror(1) = System.ValueLimits<double>(100.0, 200.0);
+            //    ///*kf*/ arg_limits_mirror(2) = System.ValueLimits<double>(0.001, 10.0);
+            //    ///*ye*/ arg_limits_mirror(3) = System.ValueLimits<double>(100.0, 500.0);
+            //    ///*LF*/ arg_limits_mirror(4) = System.ValueLimits<double>(50.0, 150.0);
+            //    ///*Lf*/ arg_limits_mirror(5) = System.ValueLimits<double>(10.0, 100.0);
+            //    ///*sk*/ arg_limits_mirror(6) = System.ValueLimits<double>(-2.0, 2.0);
+
+            //    // Kokkos.deep_copy(arg_limits, arg_limits_mirror);
+
+            //    View<double, Cuda> actual_data = new View<double, Cuda>("actual_data", HunterDailyData.qoData.Length, 3);
+
+            //    View<double, Cuda> actual_time = new View<double, Cuda>("actual_time", HunterDailyData.actualAvgDailyBoe.Length);
+
+            //    View<double, Cuda> weights = new View<double, Cuda>("weights", HunterDailyData.actualAvgDailyBoe.Length);
+
+            //    for(ulong i0 = 0; i0 < actual_data.Extent(0); ++i0)
+            //    {
+            //        actual_data[i0, 0] = HunterDailyData.qoData[i0];
+            //        actual_data[i0, 1] = HunterDailyData.qwData[i0];
+            //        actual_data[i0, 2] = HunterDailyData.qgData[i0];
+
+            //        actual_time[i0]    = HunterDailyData.timeData[i0];
+
+            //        //if(i0 < 8 || i0 >= 16 && i0 <= 17 || i0 > 66 && i0 < 90 || i0 > 125)
+            //        //{
+            //        //    weights[i0] = 0.0001;
+            //        //}
+            //        //else if(i0 >= 119 && i0 <= 125)
+            //        //{
+            //        //    weights[i0] = 1.2;
+            //        //}
+            //        //else
+            //        //{
+            //        weights[i0] = 1.0;
+            //        //}
+            //    }
+
+            //    TriplePorosityModel<double, Cuda> tpm = new TriplePorosityModel<double, Cuda>(mpd);
+
+            //    //NumericalMethods::Algorithms::ParticleSwarmOptimizationOptions<double> options;
+
+            //    //Vector<double> best_args = pso.Execute(arg_limits, options);
+
+            //    uint estimatedSwarmSize = ParticleSwarmOptimizationOptions.EstimateSwarmSize(7);
+
+            //    ParticleSwarmOptimizationOptions
+            //        options = new ParticleSwarmOptimizationOptions(100, estimatedSwarmSize, 250, 0.0, 0.1, 0.9, true); //ParticleSwarmOptimizationOptions.Default;
+
+            //    MultiPorosityResult<double, Cuda> results = tpm.HistoryMatch(options, actual_data, actual_time, weights, arg_limits);
+
+            //    DataCache cachedData = results.CachedData;
+
+            //    cachedData.ExportToCsv("PSO.csv");
+
+            //    {
+            //        //Dictionary<string, string> name_map = new Dictionary<string, string>
+            //        //{
+            //        //    {
+            //        //        "Iteration", "Iteration"
+            //        //    },
+            //        //    {
+            //        //        "SwarmIndex", "SwarmIndex"
+            //        //    },
+            //        //    {
+            //        //        "Particle", "ParticleIndex"
+            //        //    },
+            //        //    {
+            //        //        "Particle0Position", "km"
+            //        //    },
+            //        //    {
+            //        //        "Particle1Position", "kF"
+            //        //    },
+            //        //    {
+            //        //        "Particle2Position", "kf"
+            //        //    },
+            //        //    {
+            //        //        "Particle3Position", "ye"
+            //        //    },
+            //        //    {
+            //        //        "Particle4Position", "LF"
+            //        //    },
+            //        //    {
+            //        //        "Particle5Position", "Lf"
+            //        //    },
+            //        //    {
+            //        //        "Particle6Position", "sk"
+            //        //    },
+            //        //    {
+            //        //        "Particle0Velocity", "kmVelocity"
+            //        //    },
+            //        //    {
+            //        //        "Particle1Velocity", "kFVelocity"
+            //        //    },
+            //        //    {
+            //        //        "Particle2Velocity", "kfVelocity"
+            //        //    },
+            //        //    {
+            //        //        "Particle3Velocity", "yeVelocity"
+            //        //    },
+            //        //    {
+            //        //        "Particle4Velocity", "LFVelocity"
+            //        //    },
+            //        //    {
+            //        //        "Particle5Velocity", "LfVelocity"
+            //        //    },
+            //        //    {
+            //        //        "Particle6Velocity", "skVelocity"
+            //        //    }
+            //        //};
+
+            //        //List<TriplePorosityOptimizationResults> dataset = new List<TriplePorosityOptimizationResults>();
+
+            //        //for(ulong i = 0; i < cachedData.RowCount; ++i)
+            //        //{
+            //        //    List<double> entry = new List<double>((int)cachedData.ColumnCount);
+
+            //        //    for(ulong j = 0; j < cachedData.ColumnCount; ++j)
+            //        //    {
+            //        //        entry.Add(cachedData[i,
+            //        //                             j]);
+            //        //    }
+
+            //        //    dataset.Add(new TriplePorosityOptimizationResults(entry.ToArray()));
+            //        //}
+
+            //        //List<string> columnNames = new List<string>();
+
+            //        //for(ulong i = 3; i < cachedData.ColumnCount - 2;)
+            //        //{
+            //        //    columnNames.Add(name_map[cachedData.GetHeader((int)i)]);
+
+            //        //    i += 2;
+            //        //}
+
+            //        ////{
+            //        ////    "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+            //        ////    "description": "Drag the sliders to highlight points.",
+            //        ////    "data": {"url": "data/cars.json"},
+            //        ////    "transform": [{"calculate": "year(datum.Year)", "as": "Year"}],
+            //        ////    "layer": [{
+            //        ////        "selection": {
+            //        ////            "CylYr": {
+            //        ////                "type": "single", "fields": ["Cylinders", "Year"],
+            //        ////                "init": {"Cylinders": 4, "Year": 1977},
+            //        ////                "bind": {
+            //        ////                    "Cylinders": {"input": "range", "min": 3, "max": 8, "step": 1},
+            //        ////                    "Year": {"input": "range", "min": 1969, "max": 1981, "step": 1}
+            //        ////                }
+            //        ////            }
+            //        ////        },
+            //        ////        "mark": "circle",
+            //        ////        "encoding": {
+            //        ////            "x": {"field": "Horsepower", "type": "quantitative"},
+            //        ////            "y": {"field": "Miles_per_Gallon", "type": "quantitative"},
+            //        ////            "color": {
+            //        ////                "condition": {"selection": "CylYr", "field": "Origin", "type": "nominal"},
+            //        ////                "value": "grey"
+            //        ////            }
+            //        ////        }
+            //        ////    }, {
+            //        ////        "transform": [{"filter": {"selection": "CylYr"}}],
+            //        ////        "mark": "circle",
+            //        ////        "encoding": {
+            //        ////            "x": {"field": "Horsepower", "type": "quantitative"},
+            //        ////            "y": {"field": "Miles_per_Gallon", "type": "quantitative"},
+            //        ////            "color": {"field": "Origin", "type": "nominal"},
+            //        ////            "size": {"value": 100}
+            //        ////        }
+            //        ////    }]
+            //        ////}
+
+            //        //Specification specification = new Specification
+            //        //{
+            //        //    Transform = new List<Transform>
+            //        //    {
+            //        //        new Transform
+            //        //        {
+            //        //            Filter = new Predicate
+            //        //            {
+            //        //                Selection = "Iteration"
+            //        //            }
+            //        //        }
+            //        //    },
+            //        //    Repeat = new RepeatMapping
+            //        //    {
+            //        //        Row = columnNames, Column = columnNames
+            //        //    },
+            //        //    Spec = new SpecClass
+            //        //    {
+            //        //        DataSource = new DataSource
+            //        //        {
+            //        //            Name = nameof(dataset)
+            //        //        },
+            //        //        Mark = BoxPlot.Circle,
+            //        //        Encoding = new Encoding
+            //        //        {
+            //        //            X = new XClass
+            //        //            {
+            //        //                Type = StandardType.Quantitative,
+            //        //                Field = new RepeatRef
+            //        //                {
+            //        //                    Repeat = RepeatEnum.Column
+            //        //                }
+            //        //            },
+            //        //            Y = new YClass
+            //        //            {
+            //        //                Type = StandardType.Quantitative,
+            //        //                Field = new RepeatRef
+            //        //                {
+            //        //                    Repeat = RepeatEnum.Row
+            //        //                }
+            //        //            },
+            //        //            Color = new DefWithConditionMarkPropFieldDefGradientStringNull
+            //        //            {
+            //        //                Type = StandardType.Nominal, Field = "SwarmIndex"
+            //        //            }
+            //        //        },
+            //        //        Selection = new Dictionary<string, SelectionDef>
+            //        //        {
+            //        //            {
+            //        //                "IterationSelection", new SelectionDef
+            //        //                {
+            //        //                    Type = SelectionDefType.Single,
+            //        //                    Fields = new List<string>
+            //        //                    {
+            //        //                        "Iteration"
+            //        //                    },
+            //        //                    Init = new Dictionary<string, InitValue>
+            //        //                    {
+            //        //                        {
+            //        //                            "Iteration", 0
+            //        //                        }
+            //        //                    },
+            //        //                    Bind = new Dictionary<string, AnyStream>
+            //        //                    {
+            //        //                        {
+            //        //                            "Iteration", new AnyBinding
+            //        //                            {
+            //        //                                Input = "range",
+            //        //                                Min   = 0.0,
+            //        //                                Max   = 99.0
+            //        //                            }
+            //        //                        }
+            //        //                    }
+            //        //                }
+            //        //            }
+            //        //        }
+            //        //    }
+            //        //};
+
+            //        ////Chart chart = new Chart($"TriplePorosityModel",
+            //        ////                        specification,
+            //        ////                        1000,
+            //        ////                        750);
+
+            //        ////chart.ShowInBrowser();
+            //    }
+
+            //    //Console.WriteLine("RMS Error");
+            //    //Console.WriteLine(results.Error);
+
+            //    View<double, Cuda> best_args = results.Args;
+
+            //    Console.WriteLine("best_args");
+
+            //    for(ulong i = 0; i < best_args.Size(); ++i)
+            //    {
+            //        values[i] = best_args[i];
+
+            //        Console.WriteLine(values[i]);
+            //    }
+
+            //    //Console.WriteLine();
+
+            //    ////View<double, Cuda> timeView = new View<double, Cuda>("time",
+            //    ////                                                     4);
+
+            //    ////for(ulong i0 = 0; i0 < timeView.Extent(0); ++i0)
+            //    ////{
+            //    ////    timeView[i0] = 15 + 30 * i0;
+            //    ////}
+
+            //    //View<double, Cuda> best_args = new View<double, Cuda>("args",
+            //    //                                                      7);
+
+            //    //double[] values =
+            //    //{
+            //    //    0.006064035, 451.7930851, 4.277795829, 177.2940392, 77.86379899, 73.58321739 ,0.0
+            //    //};
+
+            //    //best_args[0] = values[0];
+            //    //best_args[1] = values[1];
+            //    //best_args[2] = values[2];
+            //    //best_args[3] = values[3];
+            //    //best_args[4] = values[4];
+            //    //best_args[5] = values[5];
+            //    //best_args[6] = values[6];
+
+            //    View<double, Cuda> simulated_data = tpm.Calculate(actual_time, best_args);
+
+            //    Console.WriteLine("simulated_data");
+
+            //    for(ulong i0 = 0; i0 < simulated_data.Size(); ++i0)
+            //    {
+            //        Console.Write(simulated_data[i0, 0]);
+            //        Console.Write(" ");
+            //        Console.Write(simulated_data[i0, 1]);
+            //        Console.Write(" ");
+            //        Console.Write(simulated_data[i0, 2]);
+            //    }
+
+            //    {
+            //        //List<InlineDatasetElement> dataset = new List<InlineDatasetElement>();
+
+            //        //for(ulong i = 0; i < actual_data.Size(); ++i)
+            //        //{
+            //        //    dataset.Add(new Dictionary<string, object>(4)
+            //        //    {
+            //        //        {
+            //        //            "API", "##-###-#####"
+            //        //        },
+            //        //        {
+            //        //            "Day", actual_time[i]
+            //        //        },
+            //        //        {
+            //        //            "Type", "Actual"
+            //        //        },
+            //        //        {
+            //        //            "Rate", actual_data[i]
+            //        //        }
+            //        //    });
+            //        //}
+
+            //        //for(ulong i = 0; i < simulated_data.Size(); ++i)
+            //        //{
+            //        //    dataset.Add(new Dictionary<string, object>(4)
+            //        //    {
+            //        //        {
+            //        //            "API", "##-###-#####"
+            //        //        },
+            //        //        {
+            //        //            "Day", actual_time[i]
+            //        //        },
+            //        //        {
+            //        //            "Type", "Simulated"
+            //        //        },
+            //        //        {
+            //        //            "Rate", simulated_data[i]
+            //        //        }
+            //        //    });
+            //        //}
+
+            //        //Specification specification = new Specification
+            //        //{
+            //        //    Data = new DataSource
+            //        //    {
+            //        //        Values = dataset
+            //        //    },
+            //        //    Layer = new List<LayerSpec>
+            //        //    {
+            //        //        new LayerSpec
+            //        //        {
+            //        //            Encoding = new LayerEncoding
+            //        //            {
+            //        //                X = new XClass
+            //        //                {
+            //        //                    Type = StandardType.Quantitative, Field = "Day"
+            //        //                },
+            //        //                Y = new YClass
+            //        //                {
+            //        //                    Type = StandardType.Quantitative, Field = "Rate"
+            //        //                },
+            //        //                Color = new DefWithConditionMarkPropFieldDefGradientStringNull
+            //        //                {
+            //        //                    Type = StandardType.Nominal, Field = "Type"
+            //        //                }
+            //        //            },
+            //        //            Layer = new List<LayerSpec>
+            //        //            {
+            //        //                new LayerSpec
+            //        //                {
+            //        //                    Mark = BoxPlot.Line
+            //        //                },
+            //        //                new LayerSpec
+            //        //                {
+            //        //                    Mark = BoxPlot.Circle
+            //        //                }
+            //        //            }
+            //        //        }
+            //        //    }
+            //        //};
+
+            //        //Chart chart = new Chart("TriplePorosityModel",
+            //        //                        specification,
+            //        //                        1000,
+            //        //                        750);
+
+            //        //chart.ShowInBrowser();
+            //    }
+            //}
+
+            ////ParallelProcessor.Shutdown();
         }
 
         private static void TestPrediction()
@@ -1567,6 +1885,29 @@ namespace MultiPorosity.Driver
             //{
             //    Console.WriteLine($"{predict_results["Predicted"][i0].Day} {predict_results["Predicted"][i0].Rate}");
             //}
+        }
+
+        private readonly struct EagleFordLatLong
+        {
+            public readonly ApiNumber Api;
+            public readonly double    SurfaceLatitude;
+            public readonly double    SurfaceLongitude;
+            public readonly double    BottomLatitude;
+            public readonly double    BottomLongitude;
+
+            public EagleFordLatLong(string[] row)
+            {
+                if(row.Length != 5)
+                {
+                    throw new InvalidDataException();
+                }
+
+                Api              = row[0];
+                SurfaceLatitude  = double.Parse(row[1]);
+                SurfaceLongitude = double.Parse(row[2]);
+                BottomLatitude   = double.Parse(row[3]);
+                BottomLongitude  = double.Parse(row[4]);
+            }
         }
     }
 }

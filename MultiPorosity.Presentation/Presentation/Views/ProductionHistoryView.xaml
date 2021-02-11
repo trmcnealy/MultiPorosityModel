@@ -1,0 +1,181 @@
+﻿<UserControl x:Class="MultiPorosity.Presentation.ProductionHistoryView"
+                                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                                xmlns:interactivity="http://schemas.microsoft.com/xaml/behaviors"
+                                xmlns:prism="http://prismlibrary.com/"
+                                prism:ViewModelLocator.AutoWireViewModel="True"
+                                xmlns:local="clr-namespace:MultiPorosity.Presentation"
+                                mc:Ignorable="d"
+                                d:DesignHeight="200"
+                                d:DesignWidth="500">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/ProductionHistoryResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!--<i:Interaction.Triggers>
+        <i:EventTrigger EventName="Unloaded">
+            <i:InvokeCommandAction Command="{Binding Path=SelectedItemChangedCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>-->
+
+    <DockPanel LastChildFill="True">
+
+        <ToolBar DockPanel.Dock="Top"
+                 ToolTip="Import">
+            <Button Command="{Binding Path=ConnectToDatabaseCommand}">
+                <Image Source="{DynamicResource ConnectToDatabaseIcon}"
+                       Width="25"
+                       Height="25"
+                       Margin="0,0,0,0"/>
+            </Button>
+            <Button Command="{Binding Path=ImportCommand}">
+                <Image Source="{DynamicResource ImportButtonIcon}"
+                       Width="25"
+                       Height="25"
+                       Margin="0,0,0,0"/>
+            </Button>
+            <Button Command="{Binding Path=ExportCommand}"
+                    ToolTip="Export">
+                <Image Source="{DynamicResource ExportButtonIcon}"
+                       Width="25"
+                       Height="25"
+                       Margin="0,0,0,0"/>
+            </Button>
+            <Button Command="{Binding Path=ConvertCommand}"
+                    ToolTip="Convert Monthly to Daily">
+                <Image Source="{DynamicResource ConvertButtonIcon}"
+                       Width="25"
+                       Height="25"
+                       Margin="0,0,0,0"/>
+            </Button>
+        </ToolBar>
+
+        <DataGrid x:Name="HistoryViewDataGrid"
+                  AutoGenerateColumns="False"
+                  ItemsSource="{Binding Path=ProductionHistory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged }"
+                  SelectionUnit="CellOrRowHeader"
+                  SelectionMode="Extended"
+                  CanUserResizeRows="False"
+                  CanUserAddRows="True"
+                  CanUserDeleteRows="True"
+                  AlternatingRowBackground="#FFE8E8E8"
+                  HeadersVisibility="All"
+                  KeyDown="HistoryViewDataGrid_OnItemOverride"
+                  PreviewKeyDown="HistoryViewDataGrid_PreviewKeyDown">
+
+            <interactivity:Interaction.Triggers>
+                <interactivity:EventTrigger EventName="Loaded">
+                    <interactivity:InvokeCommandAction Command="{Binding Path=HistoryView_DataGridCommand, Mode=OneWay}"
+                                                        CommandParameter="{Binding ElementName=HistoryViewDataGrid}"/>
+                </interactivity:EventTrigger>
+
+                <interactivity:EventTrigger EventName="CellEditEnding">
+                    <interactivity:InvokeCommandAction Command="{Binding Path=CellEditEndingCommand, Mode=OneWay}"/>
+                </interactivity:EventTrigger>
+
+                <interactivity:KeyTrigger Key="V"
+                                          Modifiers="Control"
+                                          FiredOn="KeyDown">
+                    <interactivity:InvokeCommandAction Command="{Binding Path=KeyDownCommand}"
+                                                       CommandParameter="{Binding ElementName=HistoryViewDataGrid}"/>
+                </interactivity:KeyTrigger>
+
+                <interactivity:KeyTrigger Key="Enter"
+                                          FiredOn="KeyDown">
+                    <interactivity:InvokeCommandAction Command="{Binding Path=KeyUpCommand, Mode=OneWay}"
+                                                       CommandParameter="{Binding ElementName=HistoryViewDataGrid, Path=SelectedItems}"/>
+                </interactivity:KeyTrigger>
+                <!--<interactivity:KeyTrigger Key="Delete"
+                                          FiredOn="KeyDown">
+                    <interactivity:InvokeCommandAction Command="{Binding Path=DeleteRowsCommand, Mode=OneWay}"
+                                                       CommandParameter="{Binding ElementName=HistoryViewDataGrid, Path=SelectedCells}"/>
+                </interactivity:KeyTrigger>-->
+
+                <interactivity:EventTrigger EventName="MouseUp">
+                    <interactivity:InvokeCommandAction Command="{Binding Path=SelectedModelsCommand, Mode=OneWay}"
+                                                       CommandParameter="{Binding ElementName=HistoryViewDataGrid, Path=SelectedCells}"/>
+                </interactivity:EventTrigger>
+            </interactivity:Interaction.Triggers>
+
+            <DataGrid.RowHeaderStyle>
+                <Style TargetType="DataGridRowHeader">
+                    <Setter Property="Content"
+                            Value="{Binding Path=Index, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Setter Property="Width"
+                            Value="20"/>
+                </Style>
+            </DataGrid.RowHeaderStyle>
+
+            <!--<DataGrid.RowHeaderTemplate>
+                <DataTemplate>
+                    <Label Content="lijolipoipojp"></Label>
+                    --><!--<TextBox Width="50" Text="{Binding Path=Index, UpdateSourceTrigger=PropertyChanged}"/>--><!--
+                </DataTemplate>
+            </DataGrid.RowHeaderTemplate>-->
+
+            <DataGrid.Columns>
+                <!--<DataGridTextColumn x:Name="DataGrid_History_Index_Col"
+                                    Binding="{Binding Path=Index}"
+                                    Header="Index"
+                                    Width="40"
+                                    IsReadOnly="True"
+                                    Binding="{Binding Path=Date, StringFormat='{}{0:MM/dd/yyyy}', Delay=250}"
+                                    />-->
+                <DataGridTextColumn x:Name="DataGrid_History_Date_Col"
+                                    Header="Date"
+                                    Width="75">
+                    <DataGridTextColumn.Binding>
+                        <Binding Path="Date"
+                                 StringFormat='{}{0:MM/dd/yyyy}'
+                                 Delay="250">
+                            <!--<Binding.ValidationRules>
+                                <local:PositivePriceRule Max="999.99" />
+                            </Binding.ValidationRules>-->
+                        </Binding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTextColumn x:Name="DataGrid_History_Days_Col"
+                                    Binding="{Binding Path=Days, StringFormat={}{0:N2}, Delay=250}"
+                                    Header="Days"
+                                    Width="55"/>
+                <DataGridTextColumn x:Name="DataGrid_History_Gas_Col"
+                                    Binding="{Binding Path=Gas, StringFormat={}{0:N2}, Delay=250}"
+                                    Header="Gas"
+                                    Width="70"/>
+                <DataGridTextColumn x:Name="DataGrid_History_Oil_Col"
+                                    Binding="{Binding Path=Oil, StringFormat={}{0:N2}, Delay=250}"
+                                    Header="Oil"
+                                    Width="70"/>
+                <DataGridTextColumn x:Name="DataGrid_History_Water_Col"
+                                    Binding="{Binding Path=Water, StringFormat={}{0:N2}, Delay=250}"
+                                    Header="Water"
+                                    Width="70"/>
+                <DataGridTextColumn x:Name="DataGrid_History_WellheadPressure_Col"
+                                    Binding="{Binding Path=WellheadPressure, StringFormat={}{0:N2}, Delay=250}"
+                                    Header="WHP"
+                                    Width="65"/>
+                <DataGridTextColumn x:Name="DataGrid_History_Weight_Col"
+                                    Binding="{Binding Path=Weight, StringFormat={}{0:N2}, Delay=250}"
+                                    Header="Weight"
+                                    Width="70"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <!--<StatusBar Grid.Row="1"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center">
+            <Label Content="#:"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"/>
+            <Label Content="{Binding Path=HistoryCount}"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"/>
+        </StatusBar>-->
+    </DockPanel>
+</UserControl>

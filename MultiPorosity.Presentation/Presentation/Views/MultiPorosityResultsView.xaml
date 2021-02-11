@@ -1,0 +1,170 @@
+﻿<UserControl x:Class="MultiPorosity.Presentation.MultiPorosityResultsView"
+                                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                                xmlns:prism="http://prismlibrary.com/"
+                                prism:ViewModelLocator.AutoWireViewModel="True"
+                                                                xmlns:local="clr-namespace:MultiPorosity.Presentation"
+                                mc:Ignorable="d"
+                                d:DesignHeight="450"
+                                d:DesignWidth="400">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="125"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Label Content="Parameter"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="0"
+               Grid.Column="0"/>
+        <Label Content="Value"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Center"
+               VerticalContentAlignment="Center"
+               Grid.Row="0"
+               Grid.Column="1"/>
+
+        <Label Content="Matrix Permeability (md)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="1"
+               Grid.Column="0"/>
+        <TextBox Height="20"
+                 Grid.Row="1"
+                 Grid.Column="1"
+                 HorizontalContentAlignment="Right"
+                 Text="{Binding Path=MatrixPermeability, StringFormat={}{0:N6}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5"
+                 IsReadOnly="True"/>
+
+        <Label Content="Hydraulic Fracture Permeability (md)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="2"
+               Grid.Column="0"/>
+        <TextBox Height="20"
+                 Grid.Row="2"
+                 Grid.Column="1"
+                 HorizontalContentAlignment="Right"
+                 Text="{Binding Path=HydraulicFracturePermeability, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5"
+                 IsReadOnly="True"/>
+
+        <Label Content="Natural Fracture Permeability (md)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="3"
+               Grid.Column="0"/>
+        <TextBox Height="20"
+                 Grid.Row="3"
+                 Grid.Column="1"
+                 HorizontalContentAlignment="Right"
+                 Text="{Binding Path=NaturalFracturePermeability, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5"
+                 IsReadOnly="True"/>
+
+        <Label Content="Hydraulic Fracture Half Length (ft)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="4"
+               Grid.Column="0"/>
+        <TextBox Height="20"
+                 Grid.Row="4"
+                 Grid.Column="1"
+                 HorizontalContentAlignment="Right"
+                 Text="{Binding Path=HydraulicFractureHalfLength, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5"
+                 IsReadOnly="True"/>
+
+        <Label Content="Hydraulic Fracture Spacing (ft)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="5"
+               Grid.Column="0"/>
+        <TextBox Height="20"
+                 Grid.Row="5"
+                 Grid.Column="1"
+                 HorizontalContentAlignment="Right"
+                 Text="{Binding Path=HydraulicFractureSpacing, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5"
+                 IsReadOnly="True"/>
+
+        <Label Content="Natural Fracture Spacing (ft)"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="6"
+               Grid.Column="0"/>
+        <TextBox Height="20"
+                 Grid.Row="6"
+                 Grid.Column="1"
+                 HorizontalContentAlignment="Right"
+                 Text="{Binding Path=NaturalFractureSpacing, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5"
+                 IsReadOnly="True"/>
+
+        <Label Content="Skin ()"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch"
+               HorizontalContentAlignment="Right"
+               VerticalContentAlignment="Center"
+               Grid.Row="7"
+               Grid.Column="0"/>
+        <TextBox Height="20"
+                 Grid.Row="7"
+                 Grid.Column="1"
+                 HorizontalContentAlignment="Right"
+                 Text="{Binding Path=Skin, StringFormat={}{0:N2}, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                 Margin="5"
+                 IsReadOnly="True"/>
+
+        <Grid Grid.Row="9"
+              Grid.Column="0"
+              Grid.ColumnSpan="2"
+              HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            
+            <Button Grid.Column="1"
+                    Command="{Binding Path=ExportCachedResultsCommand}"
+                    Content="Export Cached Results"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Width="Auto"
+                    Height="32"
+                    Margin="5"/>
+        </Grid>
+    </Grid>
+</UserControl>

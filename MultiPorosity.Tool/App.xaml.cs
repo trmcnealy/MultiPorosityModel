@@ -1,51 +1,293 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Pipes;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Controls;
 
-using ReactiveUI;
+using Engineering.UI.Controls;
 
-using SciChart.Charting.Visuals;
+using MultiPorosity.Models;
+using MultiPorosity.Services;
+using MultiPorosity.Tool;
 
-namespace MultiPorosity.Tool
+using Prism.Events;
+using Prism.Ioc;
+using Prism.Modularity;
+
+namespace MultiPorosity
 {
-    public sealed partial class App : Application
+    public class ConsoleWriter : TextWriter
     {
-        private MainViewModel _mainViewModel;
+        private readonly IEventAggregator _eventAggregator;
 
-        static App()
+        private readonly StringBuilder _stringBuilder;
+
+        public ConsoleWriter(IEventAggregator eventAggregator)
         {
-            InstallExceptionHandlers();
+            _eventAggregator = eventAggregator;
+            _stringBuilder   = new();
         }
+
+        public override void WriteLine(string? value)
+        {
+            _stringBuilder.AppendLine(value);
+
+            Flush();
+        }
+
+        public override void Write(string? value)
+        {
+            _stringBuilder.Append(value);
+        }
+
+        public override void WriteLine(object? value)
+        {
+            WriteLine(value?.ToString());
+        }
+
+        public override void WriteLine(string           format,
+                                       params object?[] args)
+        {
+            WriteLine(string.Format(null, format, args));
+        }
+
+        public override void Write(object? value)
+        {
+            Write(value?.ToString());
+        }
+
+        #region Overrides of TextWriter
+
+        public override void Close()
+        {
+            Debug.Close();
+        }
+
+        public override void Flush()
+        {
+            _eventAggregator.GetEvent<EventConsoleWrite>().Publish(new ConsoleWritePayload(_stringBuilder.ToString()));
+
+            _stringBuilder.Clear();
+        }
+
+        public override void Write(bool value)
+        {
+            _stringBuilder.Append(value);
+        }
+
+        public override void Write(char value)
+        {
+            _stringBuilder.Append(value);
+        }
+
+        public override void Write(char[]? buffer)
+        {
+            _stringBuilder.Append(new string(buffer));
+        }
+
+        public override void Write(decimal value)
+        {
+            _stringBuilder.Append(value);
+        }
+
+        public override void Write(double value)
+        {
+            _stringBuilder.Append(value);
+        }
+
+        public override void Write(int value)
+        {
+            _stringBuilder.Append(value);
+        }
+
+        public override void Write(long value)
+        {
+            _stringBuilder.Append(value);
+        }
+
+        public override void Write(float value)
+        {
+            _stringBuilder.Append(value);
+        }
+
+        public override void Write(StringBuilder? value)
+        {
+            _stringBuilder.Append(value);
+        }
+
+        public override void Write(uint value)
+        {
+            _stringBuilder.Append(value);
+        }
+
+        public override void Write(ulong value)
+        {
+            _stringBuilder.Append(value);
+        }
+
+        public override void WriteLine()
+        {
+            _stringBuilder.AppendLine();
+
+            Flush();
+        }
+
+        public override void WriteLine(bool value)
+        {
+            _stringBuilder.AppendLine($"{value}");
+
+            Flush();
+        }
+
+        public override void WriteLine(char value)
+        {
+            _stringBuilder.AppendLine($"{value}");
+
+            Flush();
+        }
+
+        public override void WriteLine(char[]? buffer)
+        {
+            _stringBuilder.AppendLine(new string(buffer));
+
+            Flush();
+        }
+
+        public override void WriteLine(decimal value)
+        {
+            _stringBuilder.AppendLine($"{value}");
+
+            Flush();
+        }
+
+        public override void WriteLine(double value)
+        {
+            _stringBuilder.AppendLine($"{value}");
+
+            Flush();
+        }
+
+        public override void WriteLine(int value)
+        {
+            _stringBuilder.AppendLine($"{value}");
+
+            Flush();
+        }
+
+        public override void WriteLine(long value)
+        {
+            _stringBuilder.AppendLine($"{value}");
+
+            Flush();
+        }
+
+        public override void WriteLine(float value)
+        {
+            _stringBuilder.AppendLine($"{value}");
+
+            Flush();
+        }
+
+        public override void WriteLine(string  format,
+                                       object? arg0)
+        {
+            _stringBuilder.AppendLine(string.Format(format, arg0));
+
+            Flush();
+        }
+
+        public override void WriteLine(string  format,
+                                       object? arg0,
+                                       object? arg1)
+        {
+            _stringBuilder.AppendLine(string.Format(format, arg0, arg1));
+
+            Flush();
+        }
+
+        public override void WriteLine(string  format,
+                                       object? arg0,
+                                       object? arg1,
+                                       object? arg2)
+        {
+            _stringBuilder.AppendLine(string.Format(format, arg0, arg1, arg2));
+
+            Flush();
+        }
+
+        public override void WriteLine(StringBuilder? value)
+        {
+            _stringBuilder.Append(value?.ToString());
+
+            Flush();
+        }
+
+        public override void WriteLine(uint value)
+        {
+            _stringBuilder.AppendLine($"{value}");
+
+            Flush();
+        }
+
+        public override void WriteLine(ulong value)
+        {
+            _stringBuilder.AppendLine($"{value}");
+
+            Flush();
+        }
+
+        #endregion
+
+        public override Encoding Encoding
+        {
+            get { return Encoding.ASCII; }
+        }
+    }
+
+    public sealed partial class App //: ConfiguredPrismApplication<ShellWindow, ShellViewModel>
+    {
+        //private static void InstallExceptionHandlers()
+        //{
+        //    AppDomain.CurrentDomain.UnhandledException += (s,
+        //                                                   e) => ShowException(e.ExceptionObject as Exception);
+        //}
+
+        //private static void ShowException(Exception? ex)
+        //{
+        //    string msg = ex?.ToString() ?? "Unknown exception";
+        //    MessageBox.Show(msg, "MultiPorosity.Tool", MessageBoxButton.OK, MessageBoxImage.Error);
+        //}
+
+        private ConsoleWriter _consoleWriter;
 
         public App()
         {
-            _mainViewModel = new MainViewModel();
-
-            // Set this code once in App.xaml.cs or application startup
-            SciChartSurface.SetRuntimeLicenseKey("4PYKF1IQWzEuyRbu3oeMphUq2gHFfsF8r+f3gwQvgJomt7K73Oz/pgMqA3g2HX4ZlsjPnAGfWEf4iIvQtAMRCcCJQc2J+MpxaLnNXY5ifa5AEU+6CPMbRIholeXKsHLGt338qOJ/vjm58w/W0/io2O8fLtY9Fcei1cFZiHuHkxrs0Yl9ferpNvdUZknm3AxPIrcuuGLvWc19VcO7xD0z2D+lEcUVVpcamJzr+jprW6jgQfvcQZBGjx2zlfXtBJ18/MTyKJ/6N7PwxfPJhj++FKgaXZTgRZX2C3BsK8I1f7FlKYAmiYz6Bxb2nPmIvdUQUG8btosqGyaDge2/3TKkF3tJwuNARqXvUry5ILeCKYrx9bbDrkRJhtLe3+5fCTiUgwkoaeRCTpHl7nMcpYdUKuAYeuz0lmbGHWvQcf5HHm7umAsA9p6K3oyxlXH2eNv6Oa9cv8W8r7jjf/f+AkTUMSVCMNhGs863unuOr3nHel0/ecVaIqLtv9q/4qWYBovpTRX0bWAuJW2H1VUnkeCN0CHJRIq+JMCG7luNjfxl6T5jCKxsrPzj8r3g0ooeW/3sQU7dLUwkzg==");
         }
 
-        static void InstallExceptionHandlers()
+        protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            AppDomain.CurrentDomain.UnhandledException += (s,
-                                                           e) => ShowException(e.ExceptionObject as Exception);
+            base.RegisterTypes(containerRegistry);
+
+            //containerRegistry.RegisterForNavigation<ShellView, MainViewModel>(PageKeys.MAIN);
+            containerRegistry.RegisterForNavigation<SettingsPage, SettingsViewModel>(PageKeys.SETTINGS);
+            containerRegistry.RegisterForNavigation<OutputView, OutputViewModel>(PageKeys.OUTPUT);
+
+            _consoleWriter = Container.Resolve<ConsoleWriter>();
+
+            //ConsoleRedirector.Attach(_consoleWriter);
+
+            Console.SetOut(_consoleWriter);
+            Console.SetError(_consoleWriter);
         }
 
-        static void ShowException(Exception ex)
+        protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
-            string msg = ex?.ToString() ?? "Unknown exception";
-            MessageBox.Show(msg, "MultiPorosity.Tool", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-
-        protected override void OnStartup(StartupEventArgs e)
-        {
-            base.OnStartup(e);
-
-            new MainWindow().Show();
+            moduleCatalog.AddModule<Presentation.Module>();
         }
     }
 }

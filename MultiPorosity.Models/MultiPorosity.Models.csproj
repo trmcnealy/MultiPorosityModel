@@ -1,135 +1,203 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="$([MSBuild]::GetPathOfFileAbove(GlobalVersioning.props))" />
+    <Import Project="$([MSBuild]::GetPathOfFileAbove(GlobalVersioning.props))" />
 
+    <PropertyGroup>
+        <LangVersion>9.0</LangVersion>
+        <Version>$(MULTIPOROSITY_MODELS_VERSION)</Version>
+        <TargetFramework>net5.0</TargetFramework>
+        <RootNamespace>MultiPorosity</RootNamespace>
+        <Nullable>enable</Nullable>
+        <Platforms>AnyCPU;x86;x64</Platforms>
+        <Authors>Timothy R. McNealy</Authors>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Copyright>© Timothy R. McNealy</Copyright>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <PackageProjectUrl>https://github.com/trmcnealy/MultiPorosityModel</PackageProjectUrl>
+        <PackageIcon>nindra.png</PackageIcon>
+        <PackageIconUrl />
+        <RepositoryUrl>https://github.com/trmcnealy/MultiPorosityModel</RepositoryUrl>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <PackageOutputPath Condition="'$(PACKAGE_CACHE)'!=''">$(PACKAGE_CACHE)</PackageOutputPath>
+        <PackageOutputPath Condition="'$(PACKAGE_CACHE)'==''">$(OutputPath)</PackageOutputPath>
+        <Configurations>Debug;Release;Mixed</Configurations>
+    </PropertyGroup>
+  
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Artifacts.props))\Artifacts.props" Condition="'$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Artifacts.props))' != '' " />
 
-  <PropertyGroup>
-    <Version>$(MULTIPOROSITY_MODELS_VERSION)</Version>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>MultiPorosity</RootNamespace>
-    <Platforms>AnyCPU;x64</Platforms>
-    <Authors>Timothy R. McNealy</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Copyright>© Timothy R. McNealy</Copyright>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageProjectUrl>https://github.com/trmcnealy/MultiPorosityModel</PackageProjectUrl>
-    <PackageIcon>nindra.png</PackageIcon>
-    <PackageIconUrl />
-    <RepositoryUrl>https://github.com/trmcnealy/MultiPorosityModel</RepositoryUrl>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PackageOutputPath Condition="'$(PACKAGE_CACHE)'!=''">$(PACKAGE_CACHE)</PackageOutputPath>
-    <PackageOutputPath Condition="'$(PACKAGE_CACHE)'==''">$(OutputPath)</PackageOutputPath>
-  </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Kokkos.NET" Version="$(KOKKOS_VERSION)" />
+        <PackageReference Include="PlatformApi" Version="$(PLATFORMAPI_VERSION)" />
+        <PackageReference Include="Engineering.DataSource" Version="$(ENGINEERING_DATASOURCE_VERSION)" />
+        <!--<PackageReference Include="Engineering.UI"
+                          Version="$(ENGINEERING_UI_VERSION)"/>-->
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Models\MultipleWellAnalysis.cs" />
-    <Compile Remove="Models\TODO\DataPoints.cs" />
-    <Compile Remove="Models\TODO\MultipleWellAnalysis.cs" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Remove="MultiPorosity.Models.csproj.DotSettings" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\..\trmcnealy.github.io\Assets\nindra.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+      <Compile Update="Models\BoundConstraints.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>BoundConstraints.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Models\FractureProperties.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>FractureProperties.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Models\NaturalFractureProperties.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>NaturalFractureProperties.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Models\ProductionDataRecord.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ProductionDataRecord.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Models\ProductionDataSet.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ProductionDataSet.xsd</DependentUpon>
+      </Compile>
+      <Compile Update="Models\Pvt.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Pvt.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Models\RelativePermeabilities.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>RelativePermeabilities.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Models\RelativePermeabilityProperties.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>RelativePermeabilityProperties.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Models\ReservoirProperties.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ReservoirProperties.tt</DependentUpon>
+      </Compile>
+      <Compile Update="Models\WellProperties.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>WellProperties.tt</DependentUpon>
+      </Compile>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Include="Models\BoundConstraints.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>BoundConstraints.tt</DependentUpon>
-    </None>
-    <None Include="Models\ReservoirProperties.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ReservoirProperties.tt</DependentUpon>
-    </None>
-    <None Include="Models\TODO\DataPoints.cs" />
-    <None Include="Models\TODO\MultipleWellAnalysis.cs" />
-  </ItemGroup>
+    <!--<ItemGroup>
+      <Compile Include="Models\BoundConstraints.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>BoundConstraints.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\FractureProperties.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>FractureProperties.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\NaturalFractureProperties.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>NaturalFractureProperties.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\ProductionDataRecord.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ProductionDataRecord.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\Pvt.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Pvt.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\RelativePermeabilities.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>RelativePermeabilities.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\RelativePermeabilityProperties.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>RelativePermeabilityProperties.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\ReservoirProperties.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ReservoirProperties.tt</DependentUpon>
+      </Compile>
+      <Compile Include="Models\WellProperties.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>WellProperties.tt</DependentUpon>
+      </Compile>
+    </ItemGroup>-->
 
-  <ItemGroup>
-    <PackageReference Include="Kokkos.NET" Version="$(KOKKOS_VERSION)" />
-    <PackageReference Include="Microsoft.DotNet.Interactive.Formatting" Version="1.0.0-beta.20154.7" />
-    <PackageReference Include="System.Text.Json" Version="4.7.2" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Include="..\..\trmcnealy.github.io\Assets\nindra.png">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+        </None>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Models\BoundConstraints.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>BoundConstraints.cs</LastGenOutput>
-    </None>
-    <None Update="Models\FractureProperties.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>FractureProperties.cs</LastGenOutput>
-    </None>
-    <None Update="Models\NaturalFractureProperties.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>NaturalFractureProperties.cs</LastGenOutput>
-    </None>
-    <None Update="Models\ProductionDataRecord.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ProductionDataRecord.cs</LastGenOutput>
-    </None>
-    <None Update="Models\Pvt.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Pvt.cs</LastGenOutput>
-    </None>
-    <None Update="Models\ReservoirProperties.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ReservoirProperties.cs</LastGenOutput>
-    </None>
-    <None Update="Models\WellProperties.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>WellProperties.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <None Update="Models\BoundConstraints.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>BoundConstraints.cs</LastGenOutput>
+        </None>
+        <None Update="Models\FractureProperties.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>FractureProperties.cs</LastGenOutput>
+        </None>
+        <None Update="Models\NaturalFractureProperties.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>NaturalFractureProperties.cs</LastGenOutput>
+        </None>
+        <None Update="Models\ProductionDataRecord.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>ProductionDataRecord.cs</LastGenOutput>
+        </None>
+        <None Update="Models\Pvt.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>Pvt.cs</LastGenOutput>
+        </None>
+        <None Update="Models\RelativePermeabilities.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>RelativePermeabilities.cs</LastGenOutput>
+        </None>
+        <None Update="Models\RelativePermeabilityProperties.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>RelativePermeabilityProperties.cs</LastGenOutput>
+        </None>
+        <None Update="Models\ReservoirProperties.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>ReservoirProperties.cs</LastGenOutput>
+        </None>
+        <None Update="Models\WellProperties.tt">
+            <Generator>TextTemplatingFileGenerator</Generator>
+            <LastGenOutput>WellProperties.cs</LastGenOutput>
+        </None>
+        <None Update="Models\ProductionDataSet.xsd">
+            <Generator>MSDataSetGenerator</Generator>
+            <LastGenOutput>ProductionDataSet.Designer.cs</LastGenOutput>
+            <CustomToolNamespace>MultiPorosity.Models</CustomToolNamespace>
+        </None>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
+    <ItemGroup>
+        <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Models\BoundConstraints.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>BoundConstraints.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Models\FractureProperties.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>FractureProperties.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Models\NaturalFractureProperties.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>NaturalFractureProperties.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Models\ProductionDataRecord.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ProductionDataRecord.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Models\Pvt.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Pvt.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Models\ReservoirProperties.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ReservoirProperties.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Models\WellProperties.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>WellProperties.tt</DependentUpon>
-    </Compile>
-  </ItemGroup>
+    <ItemGroup>
+    </ItemGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="dotnet restore" />
-  </Target>
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+        <Exec Command="dotnet restore" />
+    </Target>
 
 </Project>

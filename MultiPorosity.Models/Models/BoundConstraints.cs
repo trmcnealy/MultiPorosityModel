@@ -1,17 +1,21 @@
 ﻿
 using System;
+using System.Runtime.Versioning;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 using LayoutKind = System.Runtime.InteropServices.LayoutKind;
 using ValueType = System.ValueType;
 
+using Engineering.DataSource;
 using Kokkos;
 
 namespace MultiPorosity.Models
 {
     namespace BoundConstraints
     {
+        //[SkipLocalsInit]
+        [NonVersionable]
         [StructLayout(LayoutKind.Explicit)]
         public struct BoundConstraintsSingle
         {
@@ -22,6 +26,8 @@ namespace MultiPorosity.Models
             public float Upper;
         }
 
+        //[SkipLocalsInit]
+        [NonVersionable]
         [StructLayout(LayoutKind.Explicit)]
         public struct BoundConstraintsDouble
         {
@@ -32,7 +38,9 @@ namespace MultiPorosity.Models
             public double Upper;
         }
     }
-
+    
+    //[SkipLocalsInit]
+    [NonVersionable]
     public sealed class BoundConstraints<T>
         where T : unmanaged
     {
@@ -78,6 +86,13 @@ namespace MultiPorosity.Models
         {
             Lower = (T)(ValueType)boundConstraints.Lower;
             Upper = (T)(ValueType)boundConstraints.Upper;
+        }
+
+        public static implicit operator BoundConstraints<T>(Range<T> range)
+        {
+            BoundConstraints<T> bc = new (range.Lower, range.Upper);
+
+            return bc;
         }
 
         public static implicit operator BoundConstraints.BoundConstraintsSingle(BoundConstraints<T> boundConstraints)

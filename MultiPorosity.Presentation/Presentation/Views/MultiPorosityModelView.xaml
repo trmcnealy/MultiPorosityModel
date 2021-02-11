@@ -1,0 +1,135 @@
+﻿<UserControl x:Class="MultiPorosity.Presentation.MultiPorosityModelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:MultiPorosity.Presentation"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:eui="http://www.engineering.ui"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+                          mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="1000">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="500*"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="500"/>
+        </Grid.ColumnDefinitions>
+
+        <TabControl Grid.Column="0"
+                    SelectedIndex="{Binding Path=SelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    >
+            <TabItem Header="Chart">
+                <ContentControl prism:RegionManager.RegionName="MultiPorosityChartRegion"/>
+            </TabItem>
+            <TabItem Header="LogLog">
+                <ContentControl prism:RegionManager.RegionName="MultiPorosityChartLogLogRegion"/>
+            </TabItem>
+            <TabItem Header="Cumulative">
+                <ContentControl prism:RegionManager.RegionName="MultiPorosityCumulativeChartRegion"/>
+            </TabItem>
+            <TabItem Header="Results">
+                <ContentControl prism:RegionManager.RegionName="MultiPorosityResultsChartRegion"/>
+            </TabItem>
+        </TabControl>
+
+        <GridSplitter Grid.Column="1"
+                      Width="5"
+                      HorizontalAlignment="Stretch"
+                      BorderThickness="1,1,1,1"/>
+
+        <TabControl Grid.Column="2">
+
+            <TabItem Header="Properties">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="709*"/>
+                        <RowDefinition Height="50"/>
+                    </Grid.RowDefinitions>
+                    <eui:PropertyGrid x:Name="OptionsPropertyGrid"
+                                      Grid.Row="0"
+                                      NameColumnWidth="250"
+                                      HorizontalContentAlignment="Stretch"
+                                      SelectedObject="{Binding Path=MultiPorosityProperties}"
+                                      ShowTitle="False"
+                                      ShowSortOptions="False"
+                                      IsCategorized="True"
+                                      AutoGenerateProperties="True"
+                                      ShowSearchBox="True"
+                                      ShowSummary="True"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      ScrollViewer.CanContentScroll="True"/>
+                    <Grid Grid.Row="1"
+                          HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Command="{Binding Path=CalcPvtCommand}"
+                                Content="Calc Pvt"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Width="100"
+                                Height="32"
+                                Margin="5"/>
+
+                        <Button Grid.Column="1"
+                                Command="{Binding Path=CalcRelPermCommand}"
+                                Content="Calc Rel. Perm."
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Width="100"
+                                Height="32"
+                                Margin="5"/>
+
+                        <Button Grid.Column="2"
+                                Command="{Binding Path=RunModelCommand}"
+                                Content="Run Model"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Width="100"
+                                Height="32"
+                                Margin="5"/>
+
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="History Matching">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="709*"/>
+                        <RowDefinition Height="50"/>
+                    </Grid.RowDefinitions>
+                    <ContentControl prism:RegionManager.RegionName="MultiPorosityHistoryMatchParametersRegion"
+                                    Grid.Row="0"/>
+                    <Grid Grid.Row="1"
+                          HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Command="{Binding Path=HistoryMatchCommand}"
+                                Content="History Match"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Width="100"
+                                Height="32"
+                                Margin="5"/>
+
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Results">
+                <Grid>
+                    <ContentControl prism:RegionManager.RegionName="MultiPorosityResultsRegion"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</UserControl>

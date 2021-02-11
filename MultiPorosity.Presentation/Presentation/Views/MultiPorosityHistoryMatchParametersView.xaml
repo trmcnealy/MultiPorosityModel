@@ -1,0 +1,233 @@
+﻿<UserControl x:Class="MultiPorosity.Presentation.MultiPorosityHistoryMatchParametersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+                          xmlns:local="clr-namespace:MultiPorosity.Presentation"
+             xmlns:eui="http://www.engineering.ui"
+             mc:Ignorable="d"
+             d:DesignHeight="650"
+             d:DesignWidth="450">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200*"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+
+            <Label Content="Parameter"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   HorizontalContentAlignment="Right"
+                   VerticalContentAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="0"/>
+            <Label Content="Lower Value"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   HorizontalContentAlignment="Center"
+                   VerticalContentAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="1"/>
+            <Label Content="Upper Value"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   HorizontalContentAlignment="Center"
+                   VerticalContentAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="2"/>
+
+            <eui:DoubleRange Grid.Row="1"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="3"
+                             ValueName="Matrix Permeability (md)"
+                             LowerValue="{Binding Path=MultiPorosityHistoryMatchParameters.MatrixPermeability.Lower, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             UpperValue="{Binding Path=MultiPorosityHistoryMatchParameters.MatrixPermeability.Upper, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             Increment="0.0001"
+                             FormatString="0.0000"/>
+
+            <eui:DoubleRange Grid.Row="2"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="3"
+                             ValueName="Hydraulic Fracture Permeability (md)"
+                             LowerValue="{Binding Path=MultiPorosityHistoryMatchParameters.HydraulicFracturePermeability.Lower, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             UpperValue="{Binding Path=MultiPorosityHistoryMatchParameters.HydraulicFracturePermeability.Upper, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             Increment="0.0001"
+                             FormatString="0.0000"/>
+
+            <eui:DoubleRange Grid.Row="3"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="3"
+                             ValueName="Natural Fracture Permeability (md)"
+                             LowerValue="{Binding Path=MultiPorosityHistoryMatchParameters.NaturalFracturePermeability.Lower, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             UpperValue="{Binding Path=MultiPorosityHistoryMatchParameters.NaturalFracturePermeability.Upper, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             Increment="0.0001"
+                             FormatString="0.0000"/>
+
+            <eui:DoubleRange Grid.Row="4"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="3"
+                             ValueName="Hydraulic Fracture Half Length (ft)"
+                             LowerValue="{Binding Path=MultiPorosityHistoryMatchParameters.HydraulicFractureHalfLength.Lower, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             UpperValue="{Binding Path=MultiPorosityHistoryMatchParameters.HydraulicFractureHalfLength.Upper, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             Increment="1.0"
+                             FormatString="0.0"/>
+
+            <eui:DoubleRange Grid.Row="5"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="3"
+                             ValueName="Hydraulic Fracture Spacing (ft)"
+                             LowerValue="{Binding Path=MultiPorosityHistoryMatchParameters.HydraulicFractureSpacing.Lower, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             UpperValue="{Binding Path=MultiPorosityHistoryMatchParameters.HydraulicFractureSpacing.Upper, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             Increment="1.0"
+                             FormatString="0.0"/>
+
+            <eui:DoubleRange Grid.Row="6"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="3"
+                             ValueName="Natural Fracture Spacing (ft)"
+                             LowerValue="{Binding Path=MultiPorosityHistoryMatchParameters.NaturalFractureSpacing.Lower, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             UpperValue="{Binding Path=MultiPorosityHistoryMatchParameters.NaturalFractureSpacing.Upper, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             Increment="1.0"
+                             FormatString="0.0"/>
+
+            <eui:DoubleRange Grid.Row="7"
+                             Grid.Column="0"
+                             Grid.ColumnSpan="3"
+                             ValueName="Skin ()"
+                             LowerValue="{Binding Path=MultiPorosityHistoryMatchParameters.Skin.Lower, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             UpperValue="{Binding Path=MultiPorosityHistoryMatchParameters.Skin.Upper, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                             Increment="0.01"
+                             FormatString="0.0"/>
+
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200*"/>
+                <ColumnDefinition Width="125"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+
+            <Label Content="Parameter"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   HorizontalContentAlignment="Right"
+                   VerticalContentAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="0"/>
+            <Label Content="Value"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   HorizontalContentAlignment="Center"
+                   VerticalContentAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="1"/>
+
+            <eui:NumericValue Grid.Row="1"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              LabelText="Swarm Size ()"
+                              Value="{Binding Path=SwarmSize, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                              Increment="1"
+                              FormatString="0"/>
+
+            <eui:NumericValue Grid.Row="2"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              LabelText="Particles In Swarm ()"
+                              Value="{Binding Path=ParticlesInSwarm, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                              Increment="1"
+                              FormatString="0"/>
+
+            <eui:NumericValue Grid.Row="3"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              LabelText="Iteration Max ()"
+                              Value="{Binding Path=IterationMax, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                              Increment="1"
+                              FormatString="0"/>
+
+            <eui:NumericValue Grid.Row="4"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              LabelText="Error Threshold ()"
+                              Value="{Binding Path=ErrorThreshold, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                              Increment="0.01"
+                              FormatString="0.00"/>
+
+            <eui:NumericValue Grid.Row="5"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              LabelText="Min Inert Weight ()"
+                              Value="{Binding Path=MinInertWeight, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                              Increment="0.01"
+                              FormatString="0.00"/>
+
+            <eui:NumericValue Grid.Row="6"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              LabelText="Max Inert Weight ()"
+                              Value="{Binding Path=MaxInertWeight, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                              Increment="0.01"
+                              FormatString="0.00"/>
+
+            <Label Grid.Row="7"
+                   Grid.Column="0"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Center"
+                   HorizontalContentAlignment="Right"
+                   VerticalContentAlignment="Center"
+                   Margin="5,5,5,5"
+                   Content="CacheResults ()"/>
+
+            <CheckBox Grid.Row="7"
+                      Grid.Column="1"
+                      Height="20"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Stretch"
+                      HorizontalContentAlignment="Center"
+                      VerticalContentAlignment="Center"
+                      IsChecked="{Binding Path=CacheResults, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                      Margin="5,5,5,5" />
+        </Grid>
+        <Grid Grid.Row="2"
+              HorizontalAlignment="Stretch">
+
+            <Button Command="{Binding Path=ParticlesInSwarmCommand}"
+                    Content="Calc Particles In Swarm"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Width="160"
+                    Height="32"
+                    Margin="5"/>
+
+        </Grid>
+    </Grid>
+</UserControl>

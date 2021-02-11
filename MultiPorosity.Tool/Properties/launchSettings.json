@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MultiPorosity.Tool": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

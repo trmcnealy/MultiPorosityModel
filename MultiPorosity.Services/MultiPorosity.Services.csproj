@@ -1,66 +1,74 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <Import Project="$([MSBuild]::GetPathOfFileAbove(GlobalVersioning.props))" />
 
-  <PropertyGroup>
-    <Version>$(MULTIPOROSITY_SERVICES_VERSION)</Version>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>MultiPorosity</RootNamespace>
-    <Platforms>AnyCPU;x64</Platforms>
-    <Company>Timothy R. McNealy</Company>
-    <Copyright>© Timothy R. McNealy</Copyright>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/trmcnealy/MultiPorosityModel</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/trmcnealy/MultiPorosityModel</RepositoryUrl>
-    <PackageIcon>nindra.png</PackageIcon>
-    <PackageIconUrl />
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+    <PropertyGroup>
+        <LangVersion>9.0</LangVersion>
+        <Version>$(MULTIPOROSITY_SERVICES_VERSION)</Version>
+        <TargetFramework>net5.0-$(TargetPlatformIdentifier)$(TargetPlatformVersion)</TargetFramework>
+        <RootNamespace>MultiPorosity</RootNamespace>
+        <Platforms>AnyCPU;x86;x64</Platforms>
+        <Company>Timothy R. McNealy</Company>
+        <Copyright>© Timothy R. McNealy</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/trmcnealy/MultiPorosityModel</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/trmcnealy/MultiPorosityModel</RepositoryUrl>
+        <PackageIcon>nindra.png</PackageIcon>
+        <PackageIconUrl />
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <NuspecFile>MultiPorosityModel.nuspec</NuspecFile>
+        <Configurations>Debug;Release;Mixed</Configurations>
+    </PropertyGroup>
   
-  <PropertyGroup>
-    <NuspecFile>MultiPorosityModel.nuspec</NuspecFile>
-    <NuspecProperties>$(NUGET_PROPERTIES)</NuspecProperties>
-    <GeneratePackageOnBuild Condition="'$(Configuration)'!='Release'">false</GeneratePackageOnBuild>
-    <GeneratePackageOnBuild Condition="'$(Configuration)'=='Release'">true</GeneratePackageOnBuild>
-    <PackageOutputPath Condition="'$(PACKAGE_CACHE)'!=''">$(PACKAGE_CACHE)</PackageOutputPath>
-    <PackageOutputPath Condition="'$(PACKAGE_CACHE)'==''">$(OutputPath)</PackageOutputPath>  
-  </PropertyGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Artifacts.props))\Artifacts.props" Condition="'$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Artifacts.props))' != '' " />
 
   <ItemGroup>
-    <Compile Remove="Services\ProductionService.cs" />
-    <Compile Remove="Services\Sequence.cs" />
-    <Compile Remove="Services\TODO\MultiWellCsvReader.cs" />
-    <Compile Remove="Services\TODO\ProductionService.cs" />
-    <Compile Remove="Services\TODO\RowData.cs" />
-  </ItemGroup>
+      <Compile Remove="Services\TODO\**" />
+      <EmbeddedResource Remove="Services\TODO\**" />
+      <None Remove="Services\TODO\**" />
+    </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="HDF.PInvoke.1.10" Version="1.10.613" />
+        <PackageReference Include="Kokkos.NET" Version="$(KOKKOS_VERSION)" />
+        <PackageReference Include="native.MultiPorosity" Version="$(RUNTIME_MULTIPOROSITY_VERSION)" />
+        <PackageReference Include="PlatformApi" Version="$(PLATFORMAPI_VERSION)" />
+        <PackageReference Include="Engineering.DataSource" Version="$(ENGINEERING_DATASOURCE_VERSION)" />
+        <PackageReference Include="Pvt" Version="$(PVT_VERSION)" />
+        <!--<PackageReference Include="Engineering.UI"
+                          Version="$(ENGINEERING_UI_VERSION)"/>-->
+        <PackageReference Include="Prism.WPF" Version="8.0.0.1909" />
+
+        <ProjectReference Include="..\MultiPorosity.Models\MultiPorosity.Models.csproj" />
+
+        <COMReference Include="Microsoft.Office.Interop.Excel">
+            <Guid>{00020813-0000-0000-C000-000000000046}</Guid>
+            <VersionMajor>1</VersionMajor>
+            <VersionMinor>9</VersionMinor>
+            <Lcid>0</Lcid>
+            <WrapperTool>primary</WrapperTool>
+            <Isolated>False</Isolated>
+            <EmbedInteropTypes>True</EmbedInteropTypes>
+        </COMReference>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <None Remove="MultiPorosity.Services.csproj.DotSettings" />
+    </ItemGroup>
+    
   <ItemGroup>
-    <None Include="..\..\trmcnealy.github.io\Assets\nindra.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-    <None Include="Services\Sequence.cs" />
-    <None Include="Services\TODO\MultiWellCsvReader.cs" />
-    <None Include="Services\ProductionService.cs" />
-    <None Include="Services\TODO\RowData.cs" />
-  </ItemGroup>
+        <None Include="..\..\trmcnealy.github.io\Assets\nindra.png">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+        </None>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Kokkos.NET" Version="$(KOKKOS_VERSION)" />
-    <PackageReference Include="native.MultiPorosity" Version="$(RUNTIME_MULTIPOROSITY_VERSION)" />
-    <PackageReference Include="OilGas.Data" Version="$(OILGAS_DATA_VERSION)" />
-    <PackageReference Include="PlatformApi" Version="$(PLATFORMAPI_VERSION)" />
-  </ItemGroup>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="REM NuGet.exe pack &quot;$(ProjectDir)MultiPorosityModel.nuspec&quot; -Properties Configuration=$(Configuration);Platform=$(Platform);Version=$(MUTLIPOROSITY_VERSION);RuntimeVersion=$(RUNTIME_MUTLIPOROSITY_VERSION) -OutputDirectory $(PACKAGE_CACHE)&#xA;&#xD;&#xA;rd /s /q C:\Users\trmcnealy\.nuget\packages\multiporositymodel" />
+    </Target>
 
-  <ItemGroup>
-    <ProjectReference Include="..\MultiPorosity.Models\MultiPorosity.Models.csproj" />
-  </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="REM NuGet.exe pack &quot;$(ProjectDir)MultiPorosityModel.nuspec&quot; -Properties Configuration=$(Configuration);Platform=$(Platform);Version=$(MUTLIPOROSITY_VERSION);RuntimeVersion=$(RUNTIME_MUTLIPOROSITY_VERSION) -OutputDirectory C:\AssemblyCache\_packages&#xA;&#xD;&#xA;rd /s /q C:\Users\tehgo\.nuget\packages\multiporositymodel" />
-  </Target>
-
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="dotnet restore" />
-  </Target>
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+        <Exec Command="dotnet restore" />
+    </Target>
 
 </Project>

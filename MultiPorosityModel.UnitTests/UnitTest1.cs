@@ -79,7 +79,7 @@ namespace MultiPorosityModel.UnitTests
                 reservoirProperties.Thickness       = thickness;
                 reservoirProperties.Porosity        = porosity;
                 reservoirProperties.Permeability    = permeability;
-                reservoirProperties.Temperature     = temperature;
+                reservoirProperties.BottomholeTemperature     = temperature;
                 reservoirProperties.InitialPressure = initialPressure;
 
                 Assert.AreEqual(reservoirProperties.Length,
@@ -97,7 +97,7 @@ namespace MultiPorosityModel.UnitTests
                 Assert.AreEqual(reservoirProperties.Permeability,
                                 permeability);
 
-                Assert.AreEqual(reservoirProperties.Temperature,
+                Assert.AreEqual(reservoirProperties.BottomholeTemperature,
                                 temperature);
 
                 Assert.AreEqual(reservoirProperties.InitialPressure,
@@ -262,8 +262,7 @@ namespace MultiPorosityModel.UnitTests
                 Pvt<double> pvt = new Pvt<double>
                 {
                     OilViscosity             = 1.0,
-                    OilFormationVolumeFactor = 2.0,
-                    TotalCompressibility     = 4.0
+                    OilFormationVolumeFactor = 2.0
                 };
 
                 Assert.AreEqual(pvt.OilViscosity,
@@ -271,9 +270,6 @@ namespace MultiPorosityModel.UnitTests
 
                 Assert.AreEqual(pvt.OilFormationVolumeFactor,
                                 2.0);
-
-                Assert.AreEqual(pvt.TotalCompressibility,
-                                4.0);
             }
 
             {
@@ -325,8 +321,7 @@ namespace MultiPorosityModel.UnitTests
                 Pvt<double> pvt = new Pvt<double>
                 {
                     OilViscosity             = 1.0,
-                    OilFormationVolumeFactor = 2.0,
-                    TotalCompressibility     = 4.0
+                    OilFormationVolumeFactor = 2.0
                 };
 
                 ReservoirProperties<double> reservoir = new ReservoirProperties<double>
@@ -336,7 +331,7 @@ namespace MultiPorosityModel.UnitTests
                     Thickness       = 4.0,
                     Porosity        = 5.0,
                     Permeability    = 6.0,
-                    Temperature     = 7.0,
+                    BottomholeTemperature     = 7.0,
                     InitialPressure = 8.0
                 };
 
@@ -346,13 +341,26 @@ namespace MultiPorosityModel.UnitTests
                     LateralLength      = 2.0,
                     BottomholePressure = 4.0
                 };
+                
+                RelativePermeabilities<double> relativePermeabilities = new RelativePermeabilities<double>
+                {
+                    MatrixOil            = 1,
+                    MatrixWater          = 2.0,
+                    MatrixGas            = 4.0,
+                    FractureOil          = 1,
+                    FractureWater        = 2.0,
+                    FractureGas          = 4.0,
+                    NaturalFractureOil   = 1,
+                    NaturalFractureWater = 2.0,
+                    NaturalFractureGas   = 4.0
+                };
 
-                MultiPorosityData<double> mpd = new MultiPorosityData<double>(productionData,
-                                                                              reservoir,
+                MultiPorosityData<double> mpd = new MultiPorosityData<double>(reservoir,
                                                                               well,
                                                                               fractureProperties,
                                                                               naturalFractureProperties,
-                                                                              pvt);
+                                                                              pvt,
+                                                                              relativePermeabilities);
 
                 Assert.AreEqual(mpd.WellProperties.API,
                                 1ul);
@@ -385,7 +393,7 @@ namespace MultiPorosityModel.UnitTests
             reservoir.Thickness       = 125.0;
             reservoir.Porosity        = 0.06;
             reservoir.Permeability    = 0.002;
-            reservoir.Temperature     = 275.0;
+            reservoir.BottomholeTemperature     = 275.0;
             reservoir.InitialPressure = 7000.0;
 
             WellProperties<double> well = new WellProperties<double>();
@@ -410,15 +418,27 @@ namespace MultiPorosityModel.UnitTests
             Pvt<double> pvt = new Pvt<double>();
             pvt.OilViscosity             = 0.5;
             pvt.OilFormationVolumeFactor = 1.5;
-            pvt.TotalCompressibility     = 0.00002;
+
+            RelativePermeabilities<double> relativePermeabilities = new RelativePermeabilities<double>();
+
+            relativePermeabilities.MatrixOil            = 1;
+            relativePermeabilities.MatrixWater          = 2.0;
+            relativePermeabilities.MatrixGas            = 4.0;
+            relativePermeabilities.FractureOil          = 1;
+            relativePermeabilities.FractureWater        = 2.0;
+            relativePermeabilities.FractureGas          = 4.0;
+            relativePermeabilities.NaturalFractureOil   = 1;
+            relativePermeabilities.NaturalFractureWater = 2.0;
+            relativePermeabilities.NaturalFractureGas   = 4.0;
+            
 
             MultiPorosityData<double> mpd = new MultiPorosityData<double>();
-            mpd.ProductionData            = productionData;
             mpd.ReservoirProperties       = reservoir;
             mpd.WellProperties            = well;
             mpd.FractureProperties        = fracture;
             mpd.NaturalFractureProperties = natural_fracture;
             mpd.Pvt                       = pvt;
+            mpd.RelativePermeability    = relativePermeabilities;
 
             BoundConstraints<double>[] arg_limits = new BoundConstraints<double>[7];
 
@@ -504,21 +524,22 @@ namespace MultiPorosityModel.UnitTests
                 }
             }
 
-            TriplePorosityModel<double, Cuda> tpm = new TriplePorosityModel<double, Cuda>(mpd,
-                                                                                          actual_data,
-                                                                                          actual_time);
+            TriplePorosityModel<double, Cuda> tpm = new TriplePorosityModel<double, Cuda>(mpd);
 
-            //NumericalMethods::Algorithms::ParticleSwarmOptimizationOptions<double> options;
+            ParticleSwarmOptimizationOptions options = new ParticleSwarmOptimizationOptions();
 
             //Vector<double> best_args = pso.Execute(arg_limits, options);
-            double[] best_args = tpm.Solve(weights,
-                                           arg_limits);
+            MultiPorosityResult<double, Cuda> best_args = tpm.HistoryMatch(options,
+                                                                           actual_data,
+                                                                           actual_time,
+                                                                           weights,
+                                                                           arg_limits);
 
             Console.WriteLine("best_args");
 
-            for(int i = 0; i < best_args.Length; ++i)
+            for(ulong i = 0; i < best_args.Args.Extent(0); ++i)
             {
-                Console.WriteLine(best_args[i]);
+                Console.WriteLine(best_args.Args[i]);
             }
 
             Console.WriteLine();
@@ -542,10 +563,10 @@ namespace MultiPorosityModel.UnitTests
             argsView[5] = 92.80;
             argsView[6] = 0.00;
 
-            double[] simulated_data = tpm.Calculate(actual_time,
-                                                    argsView);
+            View<double, Cuda> simulated_data = tpm.Calculate(actual_time,
+                                                              argsView);
 
-            for(int i0 = 0; i0 < simulated_data.Length; ++i0)
+            for(ulong i0 = 0; i0 < simulated_data.Extent(0); ++i0)
             {
                 Console.WriteLine(simulated_data[i0]);
             }

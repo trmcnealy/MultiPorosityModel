@@ -1,81 +1,107 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+﻿using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MultiPorosity.Models
 {
+    public sealed class TriplePorosityOptimizationResultsColumn
+    {
+        private static readonly PropertyInfo[] properties;
+
+        static TriplePorosityOptimizationResultsColumn()
+        {
+            properties = typeof(TriplePorosityOptimizationResults).GetProperties().Where(prop => prop.GetIndexParameters().Length == 0).ToArray();
+        }
+
+        private readonly int                                       _columnIndex;
+        private readonly TriplePorosityOptimizationResults[] _triplePorosityOptimizationResultsRecords;
+
+        public string Type { get; init; }
+
+        public TriplePorosityOptimizationResultsColumn(int                                 columnIndex,
+                                                       TriplePorosityOptimizationResults[] triplePorosityOptimizationResults)
+        {
+            _columnIndex                              = columnIndex;
+            _triplePorosityOptimizationResultsRecords = triplePorosityOptimizationResults;
+
+            Type = properties[_columnIndex].PropertyType.Name;
+        }
+
+        public TriplePorosityOptimizationResultsColumn(int                                                                                  columnIndex,
+                                                       Engineering.DataSource.Array<TriplePorosityOptimizationResults> triplePorosityOptimizationResults)
+        {
+            _columnIndex                              = columnIndex;
+            _triplePorosityOptimizationResultsRecords = triplePorosityOptimizationResults.ToArray();
+
+            Type = properties[_columnIndex].PropertyType.Name;
+        }
+
+        public object this[int index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return _triplePorosityOptimizationResultsRecords[index][_columnIndex];
+            }
+        }
+
+        public object[] ToArray()
+        {
+            object[] array = new object[_triplePorosityOptimizationResultsRecords.Length];
+
+            for(int i = 0; i < _triplePorosityOptimizationResultsRecords.Length; ++i)
+            {
+                array[i] = this[i];
+            }
+
+            return array;
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct TriplePorosityOptimizationResults
     {
-        [JsonProperty(nameof(Iteration),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public int Iteration { get; set; }
+        public long Iteration { get; set; }
 
-        [JsonProperty(nameof(SwarmIndex),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public int SwarmIndex { get; set; }
+        public long SwarmIndex { get; set; }
 
-        [JsonProperty(nameof(ParticleIndex),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public int ParticleIndex { get; set; }
+        public long ParticleIndex { get; set; }
 
-        [JsonProperty(nameof(km),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float km { get; set; }
+        public double Residual { get; set; }
 
-        [JsonProperty(nameof(kmVelocity),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float kmVelocity { get; set; }
+        public double km { get; set; }
 
-        [JsonProperty(nameof(kF),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float kF { get; set; }
+        public double kmVelocity { get; set; }
 
-        [JsonProperty(nameof(kFVelocity),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float kFVelocity { get; set; }
+        public double kF { get; set; }
 
-        [JsonProperty(nameof(kf),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float kf { get; set; }
+        public double kFVelocity { get; set; }
 
-        [JsonProperty(nameof(kfVelocity),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float kfVelocity { get; set; }
+        public double kf { get; set; }
 
-        [JsonProperty(nameof(ye),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float ye { get; set; }
+        public double kfVelocity { get; set; }
 
-        [JsonProperty(nameof(yeVelocity),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float yeVelocity { get; set; }
+        public double ye { get; set; }
 
-        [JsonProperty(nameof(LF),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float LF { get; set; }
+        public double yeVelocity { get; set; }
 
-        [JsonProperty(nameof(LFVelocity),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float LFVelocity { get; set; }
+        public double LF { get; set; }
 
-        [JsonProperty(nameof(Lf),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float Lf { get; set; }
+        public double LFVelocity { get; set; }
 
-        [JsonProperty(nameof(LfVelocity),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float LfVelocity { get; set; }
+        public double Lf { get; set; }
 
-        [JsonProperty(nameof(sk),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float sk { get; set; }
+        public double LfVelocity { get; set; }
 
-        [JsonProperty(nameof(skVelocity),
-                      NamingStrategyType = typeof(DefaultNamingStrategy))]
-        public float skVelocity { get; set; }
+        public double sk { get; set; }
+
+        public double skVelocity { get; set; }
 
         public TriplePorosityOptimizationResults(double iteration,
                                                  double swarmIndex,
                                                  double particleIndex,
+                                                 double residual,
                                                  double km,
                                                  double kmVelocity,
                                                  double kF,
@@ -91,45 +117,297 @@ namespace MultiPorosity.Models
                                                  double sk,
                                                  double skVelocity)
         {
-            Iteration       = (int)iteration;
-            SwarmIndex      = (int)swarmIndex;
-            ParticleIndex   = (int)particleIndex;
-            this.km         = (float)km;
-            this.kmVelocity = (float)kmVelocity;
-            this.kF         = (float)kF;
-            this.kFVelocity = (float)kFVelocity;
-            this.kf         = (float)kf;
-            this.kfVelocity = (float)kfVelocity;
-            this.ye         = (float)ye;
-            this.yeVelocity = (float)yeVelocity;
-            LF              = (float)lF;
-            LFVelocity      = (float)lFVelocity;
-            Lf              = (float)lf;
-            LfVelocity      = (float)lfVelocity;
-            this.sk         = (float)sk;
-            this.skVelocity = (float)skVelocity;
+            Iteration       = (long)iteration;
+            SwarmIndex      = (long)swarmIndex;
+            ParticleIndex   = (long)particleIndex;
+            Residual        = residual;
+            this.km         = km;
+            this.kmVelocity = kmVelocity;
+            this.kF         = kF;
+            this.kFVelocity = kFVelocity;
+            this.kf         = kf;
+            this.kfVelocity = kfVelocity;
+            this.ye         = ye;
+            this.yeVelocity = yeVelocity;
+            LF              = lF;
+            LFVelocity      = lFVelocity;
+            Lf              = lf;
+            LfVelocity      = lfVelocity;
+            this.sk         = sk;
+            this.skVelocity = skVelocity;
         }
 
         public TriplePorosityOptimizationResults(double[] values)
         {
             int index = 0;
-            Iteration     = (int)values[index++];
-            SwarmIndex    = (int)values[index++];
-            ParticleIndex = (int)values[index++];
-            km            = (float)values[index++];
-            kmVelocity    = (float)values[index++];
-            kF            = (float)values[index++];
-            kFVelocity    = (float)values[index++];
-            kf            = (float)values[index++];
-            kfVelocity    = (float)values[index++];
-            ye            = (float)values[index++];
-            yeVelocity    = (float)values[index++];
-            LF            = (float)values[index++];
-            LFVelocity    = (float)values[index++];
-            Lf            = (float)values[index++];
-            LfVelocity    = (float)values[index++];
-            sk            = (float)values[index++];
-            skVelocity    = (float)values[index];
+            Iteration     = (long)values[index++];
+            SwarmIndex    = (long)values[index++];
+            ParticleIndex = (long)values[index++];
+            Residual      = values[index++];
+            km            = values[index++];
+            kmVelocity    = values[index++];
+            kF            = values[index++];
+            kFVelocity    = values[index++];
+            kf            = values[index++];
+            kfVelocity    = values[index++];
+            ye            = values[index++];
+            yeVelocity    = values[index++];
+            LF            = values[index++];
+            LFVelocity    = values[index++];
+            Lf            = values[index++];
+            LfVelocity    = values[index++];
+            sk            = values[index++];
+            skVelocity    = values[index];
+        }
+
+        public object this[int index]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                switch(index)
+                {
+                    case 0:
+                    {
+                        return Iteration;
+                    }
+                    case 1:
+                    {
+                        return SwarmIndex;
+                    }
+                    case 2:
+                    {
+                        return ParticleIndex;
+                    }
+                    case 3:
+                    {
+                        return Residual;
+                    }
+                    case 4:
+                    {
+                        return km;
+                    }
+                    case 5:
+                    {
+                        return kmVelocity;
+                    }
+                    case 6:
+                    {
+                        return kF;
+                    }
+                    case 7:
+                    {
+                        return kFVelocity;
+                    }
+                    case 8:
+                    {
+                        return kf;
+                    }
+                    case 9:
+                    {
+                        return kfVelocity;
+                    }
+                    case 10:
+                    {
+                        return ye;
+                    }
+                    case 11:
+                    {
+                        return yeVelocity;
+                    }
+                    case 12:
+                    {
+                        return LF;
+                    }
+                    case 13:
+                    {
+                        return LFVelocity;
+                    }
+                    case 14:
+                    {
+                        return Lf;
+                    }
+                    case 15:
+                    {
+                        return LfVelocity;
+                    }
+                    case 16:
+                    {
+                        return sk;
+                    }
+                    case 17:
+                    {
+                        return skVelocity;
+                    }
+                    default:
+                    {
+                        return Iteration;
+                    }
+                }
+            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                switch(index)
+                {
+                    case 0:
+                    {
+                        if(value is long longValue)
+                        {
+                            Iteration = longValue;
+                        }
+                        else if(value is double newValue)
+                        {
+                            Iteration = (long)newValue;
+                        }
+                        break;
+                    }
+                    case 1:
+                    {
+                        if(value is long longValue)
+                        {
+                            SwarmIndex = longValue;
+                        }
+                        else if(value is double newValue)
+                        {
+                            SwarmIndex = (long)newValue;
+                        }
+                        break;
+                    }
+                    case 2:
+                    {
+                        if(value is long longValue)
+                        {
+                            ParticleIndex = longValue;
+                        }
+                        else if(value is double newValue)
+                        {
+                            ParticleIndex = (long)newValue;
+                        }
+                        break;
+                    }
+                    case 3:
+                    {
+                        if(value is double newValue)
+                        {
+                            Residual = newValue;
+                        }
+                        break;
+                    }
+                    case 4:
+                    {
+                        if(value is double newValue)
+                        {
+                            km = newValue;
+                        }
+                        break;
+                    }
+                    case 5:
+                    {
+                        if(value is double newValue)
+                        {
+                            kmVelocity = (long)newValue;
+                        }
+                        break;
+                    }
+                    case 6:
+                    {
+                        if(value is double newValue)
+                        {
+                            kF = newValue;
+                        }
+                        break;
+                    }
+                    case 7:
+                    {
+                        if(value is double newValue)
+                        {
+                            kFVelocity = newValue;
+                        }
+                        break;
+                    }
+                    case 8:
+                    {
+                        if(value is double newValue)
+                        {
+                            kf = newValue;
+                        }
+                        break;
+                    }
+                    case 9:
+                    {
+                        if(value is double newValue)
+                        {
+                            kfVelocity = newValue;
+                        }
+                        break;
+                    }
+                    case 10:
+                    {
+                        if(value is double newValue)
+                        {
+                            ye = newValue;
+                        }
+                        break;
+                    }
+                    case 11:
+                    {
+                        if(value is double newValue)
+                        {
+                            yeVelocity = newValue;
+                        }
+                        break;
+                    }
+                    case 12:
+                    {
+                        if(value is double newValue)
+                        {
+                            LF = newValue;
+                        }
+                        break;
+                    }
+                    case 13:
+                    {
+                        if(value is double newValue)
+                        {
+                            LFVelocity = newValue;
+                        }
+                        break;
+                    }
+                    case 14:
+                    {
+                        if(value is double newValue)
+                        {
+                            Lf = newValue;
+                        }
+                        break;
+                    }
+                    case 15:
+                    {
+                        if(value is double newValue)
+                        {
+                            LfVelocity = newValue;
+                        }
+                        break;
+                    }
+                    case 16:
+                    {
+                        if(value is double newValue)
+                        {
+                            sk = newValue;
+                        }
+                        break;
+                    }
+                    case 17:
+                    {
+                        if(value is double newValue)
+                        {
+                            skVelocity = newValue;
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 }

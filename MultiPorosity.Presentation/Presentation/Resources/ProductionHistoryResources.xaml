@@ -1,0 +1,61 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <DrawingImage x:Key="ConnectToDatabaseIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                    <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M16,5.9053L16,13.0943C16,14.8593 14.037,16.0003 11,16.0003 7.962,16.0003 6,14.8593 6,13.0943L6,9.4563C5.84,9.5483,5.674,9.6313,5.5,9.7013L5.5,12.0003 2.5,12.0003 2.5,9.7013C1.012,9.1033,0,7.6593,0,6.0003L0,2.0003 1,2.0003 1,0.000300000000000189 7,0.000300000000000189 7,2.0003 8,2.0003 8,3.4923C8.804,3.1773 9.817,3.0003 11,3.0003 14.037,3.0003 16,4.1403 16,5.9053" />
+                    <GeometryDrawing Brush="#FFF0EFF1" Geometry="F1M2,6C2,7.103 2.897,8 4,8 5.103,8 6,7.103 6,6L6,4 2,4z M14,6C14,6.552 12.657,7 11,7 9.343,7 8,6.552 8,6 8,5.448 9.343,5 11,5 12.657,5 14,5.448 14,6" />
+                    <GeometryDrawing Brush="#FF1AA1E2" Geometry="F1M15,5.9053L15,13.0943C15,14.4043 12.927,15.0003 11,15.0003 9.073,15.0003 7,14.4043 7,13.0943L7,8.6353C7.624,7.9283 8,7.0063 8,6.0003 8,6.5523 9.343,7.0003 11,7.0003 12.657,7.0003 14,6.5523 14,6.0003 14,5.4473 12.657,5.0003 11,5.0003 9.343,5.0003 8,5.4473 8,6.0003L8,4.6033C8.782,4.1993 9.908,4.0003 11,4.0003 12.927,4.0003 15,4.5953 15,5.9053" />
+                    <GeometryDrawing Brush="#FF388934" Geometry="F1M6,6C6,7.103 5.103,8 4,8 2.897,8 2,7.103 2,6L2,4 6,4z M6,3L6,1 5,1 5,3 3,3 3,1 2,1 2,3 1,3 1,6C1,7.483,2.084,8.709,3.5,8.949L3.5,11 4.5,11 4.5,8.949C5.916,8.709,7,7.483,7,6L7,3z" />
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <DrawingImage x:Key="ImportButtonIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Brush="#F6F6F6" Geometry="M16 16h-16v-16h16v16z"/>
+                    <GeometryDrawing Brush="#F6F6F6" Geometry="M14 4.556v8.444c0 .97-.701 2-2 2h-8c-.97 0-2-.701-2-2v-6.351c-1.178-.564-2-1.758-2-3.149 0-1.93 1.57-3.5 3.5-3.5h1.5v1h5.06l3.94 3.556z"/>
+                    <GeometryDrawing Brush="#424242" Geometry="M13 5v8s-.035 1-1.035 1h-8s-.965 0-.965-1v-4h1v4h8v-7h-2.603l.517-.52-.914-.908v-1.572h-1.581l-1.006-1h3.228l3.359 3z"/>
+                    <GeometryDrawing Brush="#F0EFF1" Geometry="M7.419 3h1.581v1.572l-1.581-1.572zm1.978 3l-2.981 3h-2.416v4h8v-7h-2.603z"/>
+                    <GeometryDrawing Brush="#00539C" Geometry="M5.988 6h-2.488c-1.381 0-2.5-1.119-2.5-2.5s1.119-2.5 2.5-2.5h.5v1h-.5c-.827 0-1.5.673-1.5 1.5s.673 1.5 1.5 1.5h2.513l-2.013-2h2l2.5 2.484-2.5 2.516h-2l1.988-2z"/>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <DrawingImage x:Key="ExportButtonIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Brush="#F6F6F6" Geometry="M16 16h-16v-16h16v16z"/>
+                    <GeometryDrawing Brush="#F6F6F6" Geometry="M14 4.556v8.444c0 .97-.701 2-2 2h-8c-.97 0-2-.701-2-2v-4.344c-1.185-.562-2.013-1.76-2.013-3.156 0-1.45.886-2.696 2.145-3.227.152-.417.426-.738.765-.951l-1.314-1.322h4.82l.994 1h2.663l3.94 3.556z"/>
+                    <GeometryDrawing Brush="#424242" Geometry="M13 5v8s-.035 1-1.035 1h-8s-.965 0-.965-1v-4.049c.161.022.32.049.487.049h.513v4h8v-7h-3v-1.584l.901-.896-1.51-1.52h1.25l3.359 3z"/>
+                    <GeometryDrawing Brush="#F0EFF1" Geometry="M12 6v7h-8v-4h.987v-2h1.413l2.6-2.584v1.584h3z"/>
+                    <GeometryDrawing Brush="#00539C" Geometry="M3.487 8c-1.381 0-2.5-1.119-2.5-2.5s1.119-2.5 2.5-2.5h2.488l-1.988-2h2l2.5 2.516-2.5 2.484h-2l2.013-2h-2.513c-.827 0-1.5.673-1.5 1.5s.673 1.5 1.5 1.5h.5v1h-.5z"/>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <DrawingImage x:Key="ConvertButtonIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Brush="#F6F6F6" Geometry="M16 16h-16v-16h16v16z"/>
+                    <GeometryDrawing Brush="#F6F6F6" Geometry="M16 0v16h-10v-6.604l-6-5.983v-.827l2.586-2.586h.837l2.577 2.522v-2.522h10z"/>
+                    <GeometryDrawing Brush="#424242" Geometry="M15 1v14h-8v-4.607l.609.607h.391v3h6v-3h-3v-1h3v-3h-3.426l-1.021-1h4.447v-3h-6v1.48l-1-.979v-2.501h8z"/>
+                    <GeometryDrawing Brush="#F0EFF1" Geometry="M10.574 7h3.426v3h-3v-2.583l-.426-.417zm-2.574 4v3h6v-3h-6zm0-8v1.48l1.553 1.52h4.447v-3h-6z"/>
+                    <GeometryDrawing Brush="#00539C" Geometry="M9 6.999l-2 2-4-3.999 2-2 4 3.999zm-6-5.999l-2 2 1 1 2-2-1-1zm5 9l2-.001v-1.999l-2 2z"/>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+
+</ResourceDictionary>
