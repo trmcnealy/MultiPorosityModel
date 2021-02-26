@@ -63,9 +63,10 @@
                     <Grid Grid.Row="1"
                           HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*"/>
-                            <ColumnDefinition Width="1*"/>
-                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
                         <Button Grid.Column="0"
@@ -89,6 +90,15 @@
                         <Button Grid.Column="2"
                                 Command="{Binding Path=RunModelCommand}"
                                 Content="Run Model"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Width="100"
+                                Height="32"
+                                Margin="5"/>
+
+                        <Button Grid.Column="3"
+                                Command="{Binding Path=ExportModelCommand}"
+                                Content="Export Model"
                                 VerticalAlignment="Center"
                                 HorizontalAlignment="Center"
                                 Width="100"

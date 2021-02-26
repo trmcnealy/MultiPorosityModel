@@ -28,6 +28,9 @@
         public const string RelativePermeabilitiesNaturalFractureChart    = "RelativePermeabilitiesNaturalFractureChartRegion";
         public const string RelativePermeabilityNaturalFractureParameters = "RelativePermeabilityNaturalFractureParametersRegion";
         
-        public const string ConnectToDatabase = "ConnectToDatabase";
+        public const string ConnectToDatabase  = "ConnectToDatabase";
+
+        public const string ProductionSmoother      = "ProductionSmootherView";
+        public const string ProductionSmootherChart = "ProductionSmootherChartRegion";
     }
 }

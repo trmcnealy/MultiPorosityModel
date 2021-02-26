@@ -69,6 +69,8 @@ namespace MultiPorosity.Presentation
 
         public DelegateCommand ExportCachedResultsCommand { get; }
 
+        public DelegateCommand CopyResultsCommand { get; }
+
         private readonly MultiPorosityModelService _multiPorosityModelService;
 
         public MultiPorosityResultsViewModel(MultiPorosityModelService multiPorosityModelService)
@@ -76,6 +78,7 @@ namespace MultiPorosity.Presentation
             _multiPorosityModelService = multiPorosityModelService;
 
             ExportCachedResultsCommand = new DelegateCommand(OnExportCachedResults);
+            CopyResultsCommand         = new DelegateCommand(OnCopyResults);
 
             _multiPorosityModelService.PropertyChanged -= OnPropertyChanged;
             _multiPorosityModelService.PropertyChanged += OnPropertyChanged;
@@ -119,7 +122,7 @@ namespace MultiPorosity.Presentation
                                                                  saveFileDialog.FileName);
 
                                            MessageBox.Show($"{saveFileDialog.FileName} saved.");
-                                       });
+                                       }).ConfigureAwait(true);
 
                         break;
                     }
@@ -132,7 +135,7 @@ namespace MultiPorosity.Presentation
                                                                  saveFileDialog.FileName);
 
                                            MessageBox.Show($"{saveFileDialog.FileName} saved.");
-                                       });
+                                       }).ConfigureAwait(true);
 
                         break;
                     }
@@ -144,6 +147,17 @@ namespace MultiPorosity.Presentation
                     }
                 }
             }
+        }
+
+        private void OnCopyResults()
+        {
+            _multiPorosityModelService.ActiveProject.MultiPorosityProperties.MultiPorosityModelParameters.MatrixPermeability            = MatrixPermeability;
+            _multiPorosityModelService.ActiveProject.MultiPorosityProperties.MultiPorosityModelParameters.HydraulicFracturePermeability = HydraulicFracturePermeability;
+            _multiPorosityModelService.ActiveProject.MultiPorosityProperties.MultiPorosityModelParameters.NaturalFracturePermeability   = NaturalFracturePermeability;
+            _multiPorosityModelService.ActiveProject.MultiPorosityProperties.MultiPorosityModelParameters.HydraulicFractureHalfLength   = HydraulicFractureHalfLength;
+            _multiPorosityModelService.ActiveProject.MultiPorosityProperties.MultiPorosityModelParameters.HydraulicFractureSpacing      = HydraulicFractureSpacing;
+            _multiPorosityModelService.ActiveProject.MultiPorosityProperties.MultiPorosityModelParameters.NaturalFractureSpacing        = NaturalFractureSpacing;
+            _multiPorosityModelService.ActiveProject.MultiPorosityProperties.MultiPorosityModelParameters.Skin                          = Skin;
         }
 
         private void OnPropertyChanged(object?                   sender,

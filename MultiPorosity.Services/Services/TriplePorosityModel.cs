@@ -17,6 +17,7 @@ using NumericalMethods.DataStorage;
 using PlatformApi;
 
 using Prism.Events;
+using Prism.Ioc;
 
 using ParticleSwarmOptimizationOptions = MultiPorosity.Models.ParticleSwarmOptimizationOptions;
 using TriplePorosityOptimizationResults = MultiPorosity.Services.Models.TriplePorosityOptimizationResults;
@@ -79,11 +80,11 @@ namespace MultiPorosity.Services
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        public TriplePorosityModel(IEventAggregator             eventAggregator,
-                                   MultiPorosityData<T>         mpd,
+        public TriplePorosityModel(MultiPorosityData<T>         mpd,
                                    in InverseTransformPrecision inverseTransformPrecision = InverseTransformPrecision.High)
         {
-            _eventAggregator           = eventAggregator;
+            _eventAggregator           = Prism.Ioc.ContainerLocator.Container?.Resolve<IEventAggregator>();
+
             _inverseTransformPrecision = inverseTransformPrecision;
 
             if(typeof(T) == typeof(float))
@@ -308,8 +309,8 @@ namespace MultiPorosity.Services
                     lF            = data[ResultCallbackOffset(row, index++, nColumns)];
                     lFVelocity    = data[ResultCallbackOffset(row, index++, nColumns)];
                     lf            = data[ResultCallbackOffset(row, index++, nColumns)];
-                    lfVelocity    = data[ResultCallbackOffset(row, index, nColumns)];
-                    
+                    lfVelocity    = data[ResultCallbackOffset(row, index,   nColumns)];
+
                     results.Add(new MultiPorosity.Services.Models.TriplePorosityOptimizationResults(iteration,
                                                                                                     swarmIndex,
                                                                                                     particleIndex,
@@ -353,7 +354,7 @@ namespace MultiPorosity.Services
                     lf            = data[ResultCallbackOffset(row, index++, nColumns)];
                     lfVelocity    = data[ResultCallbackOffset(row, index++, nColumns)];
                     sk            = data[ResultCallbackOffset(row, index++, nColumns)];
-                    skVelocity    = data[ResultCallbackOffset(row, index, nColumns)];
+                    skVelocity    = data[ResultCallbackOffset(row, index,   nColumns)];
 
                     results.Add(new MultiPorosity.Services.Models.TriplePorosityOptimizationResults(iteration,
                                                                                                     swarmIndex,
@@ -384,8 +385,7 @@ namespace MultiPorosity.Services
     {
         private static volatile bool isRunning;
 
-        public static MultiPorosityModelResults Calculate(IEventAggregator   eventAggregator,
-                                                          Project            project,
+        public static MultiPorosityModelResults Calculate(Project            project,
                                                           ExecutionSpaceKind ExecutionSpace)
         {
             MultiPorosityModelResults results = new();
@@ -471,7 +471,7 @@ namespace MultiPorosity.Services
                     {
                         case ExecutionSpaceKind.OpenMP:
                         {
-                            using(TriplePorosityModel<double, OpenMP> tpm = new(eventAggregator, mpd))
+                            using(TriplePorosityModel<double, OpenMP> tpm = new(mpd))
                             {
                                 using View<double, OpenMP> timeView = new("timeView", (int)project.MultiPorosityModelParameters.Days);
 
@@ -521,7 +521,7 @@ namespace MultiPorosity.Services
                         }
                         case ExecutionSpaceKind.Cuda:
                         {
-                            using(TriplePorosityModel<double, Cuda> tpm = new(eventAggregator, mpd))
+                            using(TriplePorosityModel<double, Cuda> tpm = new(mpd))
                             {
                                 using View<double, Cuda> timeView = new("timeView", (int)project.MultiPorosityModelParameters.Days);
 
@@ -572,7 +572,7 @@ namespace MultiPorosity.Services
                         case ExecutionSpaceKind.Serial:
                         default:
                         {
-                            using(TriplePorosityModel<double, Serial> tpm = new(eventAggregator, mpd))
+                            using(TriplePorosityModel<double, Serial> tpm = new(mpd))
                             {
                                 using View<double, Serial> timeView = new("timeView", (int)project.MultiPorosityModelParameters.Days);
 
@@ -629,8 +629,7 @@ namespace MultiPorosity.Services
             return results;
         }
 
-        public static MultiPorosityModelResults HistoryMatch(IEventAggregator   eventAggregator,
-                                                             Project            project,
+        public static MultiPorosityModelResults HistoryMatch(Project            project,
                                                              ExecutionSpaceKind ExecutionSpace)
         {
             MultiPorosityModelResults results = new();
@@ -725,7 +724,7 @@ namespace MultiPorosity.Services
                     {
                         case ExecutionSpaceKind.OpenMP:
                         {
-                            using(TriplePorosityModel<double, OpenMP> tpm = new(eventAggregator, mpd))
+                            using(TriplePorosityModel<double, OpenMP> tpm = new(mpd))
                             {
                                 ulong days = (ulong)project.ProductionHistory.Count;
 
@@ -793,7 +792,7 @@ namespace MultiPorosity.Services
 
                                 if(resultsView.CachedData.RowCount > 0)
                                 {
-                                    ResultCallback(eventAggregator, resultsView.CachedData);
+                                    ResultCallback(resultsView.CachedData);
                                 }
 
                                 using View<double, OpenMP> productionView = tpm.Calculate(timeView, resultsView.Args);
@@ -812,7 +811,7 @@ namespace MultiPorosity.Services
                         }
                         case ExecutionSpaceKind.Cuda:
                         {
-                            using(TriplePorosityModel<double, Cuda> tpm = new(eventAggregator, mpd))
+                            using(TriplePorosityModel<double, Cuda> tpm = new(mpd))
                             {
                                 ulong days = (ulong)project.ProductionHistory.Count;
 
@@ -880,7 +879,7 @@ namespace MultiPorosity.Services
 
                                 if(resultsView.CachedData.RowCount > 0)
                                 {
-                                    ResultCallback(eventAggregator, resultsView.CachedData);
+                                    ResultCallback(resultsView.CachedData);
                                 }
 
                                 using View<double, Cuda> productionView = tpm.Calculate(timeView, resultsView.Args);
@@ -900,7 +899,7 @@ namespace MultiPorosity.Services
                         case ExecutionSpaceKind.Serial:
                         default:
                         {
-                            using(TriplePorosityModel<double, Serial> tpm = new(eventAggregator, mpd))
+                            using(TriplePorosityModel<double, Serial> tpm = new(mpd))
                             {
                                 ulong days = (ulong)project.ProductionHistory.Count;
 
@@ -968,7 +967,7 @@ namespace MultiPorosity.Services
 
                                 if(resultsView.CachedData.RowCount > 0)
                                 {
-                                    ResultCallback(eventAggregator, resultsView.CachedData);
+                                    ResultCallback(resultsView.CachedData);
                                 }
 
                                 using View<double, Serial> productionView = tpm.Calculate(timeView, resultsView.Args);
@@ -994,9 +993,10 @@ namespace MultiPorosity.Services
             return results;
         }
 
-        public static unsafe void ResultCallback(IEventAggregator eventAggregator,
-                                                 DataCache        cache)
+        public static void ResultCallback(DataCache cache)
         {
+            IEventAggregator eventAggregator = Prism.Ioc.ContainerLocator.Container.Resolve<IEventAggregator>();
+
             ulong nRows    = cache.RowCount;
             ulong nColumns = cache.ColumnCount;
 

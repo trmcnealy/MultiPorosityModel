@@ -9,10 +9,13 @@ using Engineering.DataSource.Tools;
 
 using MultiPorosity.Models;
 
+using System.Threading.Algorithms;
+
 namespace MultiPorosity.Services
 {
     public static class ProductionService
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static List<ProductionRecord> GenerateDailyAverages(MonthlyProductionUnit mpu)
         {
             List<ProductionRecord> dailyAverages = new(mpu.MonthlyProductionRecords.Count);
@@ -86,6 +89,7 @@ namespace MultiPorosity.Services
         //End.OilVolume   = FindStartY(MonthlyProductionRecord.Oil,   End.Days, (Middle.Days, Middle.OilVolume),   (Start.Days, Start.OilVolume));
         //End.WaterVolume = FindStartY(MonthlyProductionRecord.Water, End.Days, (Middle.Days, Middle.WaterVolume), (Start.Days, Start.WaterVolume));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         public static List<ProductionRecord> ConvertMonthlyToDaily(List<ProductionRecord> monthlyProductionRecords)
         {
             List<ProductionRecord> monthlyProduction = monthlyProductionRecords.OrderBy(o => o.Date).ToList();
@@ -231,6 +235,127 @@ namespace MultiPorosity.Services
             }
 
             return output;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        private static double[] MovingAverage(double[] x,
+                                              double[] y,
+                                              int      avgSize)
+        {
+            int j = y.Length;
+            int i = avgSize / 2;
+
+            double[] new_y = new double[j];
+            Array.Copy(y, new_y, j);
+
+            // Left-most region of data
+            for (int n = 0; n < i; ++n)
+            {
+                for (int m = 0; m <= n + i; ++m)
+                {
+                    new_y[n] += y[m];
+                }
+                new_y[n] /= (i + 1 + n);
+            }
+
+            // Central region (full average width available)
+            for (int n = i; n < j - i; ++n)
+            {
+                for (int m = n - i; m <= n + i; ++m)
+                {
+                    new_y[n] += y[m];
+                }
+                new_y[n] /= avgSize;
+            }
+
+            // Right-most region of data
+            for (int n = j - i; n < j; ++n)
+            {
+                for (int m = n - i; m < j; ++m)
+                {
+                    new_y[n] += y[m];
+                }
+                new_y[n] /= (j - n + i);
+            }
+
+            return new_y;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        private static double abs_trapezoid(double[] x,
+                                            double[] y)
+        {
+            if ((x.Length < 2 || y.Length < 2) && (x.Length != y.Length))
+            {
+                throw new Exception("abs_trapezoid: x & y set size must be greater then 2 and the same size.");
+                return 0.0;
+            }
+
+            double total = 0.0;
+
+            for (int i = 1; i < x.Length; ++i)
+            {
+                total += Math.Abs((x[i] - x[i - 1]) * (y[i - 1] + y[i]) * 0.5);
+            }
+
+            return total;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        private static double[] NormalisedMovingAverage(double[] x,
+                                                        double[] y,
+                                                        int      avgSize)
+        {
+            // Calculate the original integral
+            double originalIntegral = abs_trapezoid(x, y);
+
+            // Perform the smoothing
+            double[] new_y = MovingAverage(x, y, avgSize);
+
+            // Calculate the new integral
+            double newIntegral = abs_trapezoid(x, y);
+
+            for (int i = 0; i < new_y.Length; i++)
+            {
+                new_y[i] *= originalIntegral / newIntegral;
+            }
+
+            return new_y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        public static double[] KolmogorovZurbenko(double[] x,
+                                                  double[] y,
+                                                  int m,
+                                                  int k = 3,
+                                                  bool normalized = false)
+        {
+            int avgSize = m;
+
+            // Make sure avgSize is odd
+            if (avgSize % 2 == 0)
+            {
+                --avgSize;
+            }
+
+            double[] new_y = new double[0];
+
+            if (normalized)
+            {
+                for (int iteration = 0; iteration < k; ++iteration)
+                {
+                    new_y = NormalisedMovingAverage(x, y, avgSize);
+                }
+            }
+            else
+            {
+                for (int iteration = 0; iteration < k; ++iteration)
+                {
+                    new_y = MovingAverage(x, y, avgSize);
+                }
+            }
+
+            return new_y;
         }
     }
 }

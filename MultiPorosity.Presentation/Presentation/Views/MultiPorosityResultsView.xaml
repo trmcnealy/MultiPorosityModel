@@ -152,14 +152,24 @@
               Grid.ColumnSpan="2"
               HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             
             <Button Grid.Column="1"
                     Command="{Binding Path=ExportCachedResultsCommand}"
                     Content="Export Cached Results"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Width="Auto"
+                    Height="32"
+                    Margin="5"/>
+            
+            <Button Grid.Column="2"
+                    Command="{Binding Path=CopyResultsCommand}"
+                    Content="Copy Results"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center"
                     Width="Auto"

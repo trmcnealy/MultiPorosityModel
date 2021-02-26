@@ -11,25 +11,25 @@ namespace MultiPorosity.Presentation.Models
 {
     public sealed class ProductionHistoryModel : BindableBase
     {
-        private int      _Index;
-        private DateTime _Date;
+        private int      _index;
+        private DateTime _date;
         private double   _days;
         private double   _gas;
         private double   _oil;
         private double   _water;
-        private double   _WellheadPressure;
-        private double   _Weight;
+        private double   _wellheadPressure;
+        private double   _weight;
 
         public int Index
         {
-            get { return _Index; }
-            set { this.SetProperty(ref _Index, value); }
+            get { return _index; }
+            set { this.SetProperty(ref _index, value); }
         }
 
         public DateTime Date
         {
-            get { return _Date; }
-            set { this.SetProperty(ref _Date, value); }
+            get { return _date; }
+            set { this.SetProperty(ref _date, value); }
         }
 
         public double Days
@@ -58,14 +58,14 @@ namespace MultiPorosity.Presentation.Models
 
         public double WellheadPressure
         {
-            get { return _WellheadPressure; }
-            set { this.SetProperty(ref _WellheadPressure, value); }
+            get { return _wellheadPressure; }
+            set { this.SetProperty(ref _wellheadPressure, value); }
         }
 
         public double Weight
         {
-            get { return _Weight; }
-            set { this.SetProperty(ref _Weight, value); }
+            get { return _weight; }
+            set { this.SetProperty(ref _weight, value); }
         }
 
         private bool _isSelected;
@@ -89,14 +89,14 @@ namespace MultiPorosity.Presentation.Models
                                       double   wellheadPressure,
                                       double   weight)
         {
-            _Index            = index;
-            _Date             = date;
+            _index            = index;
+            _date             = date;
             _days             = days;
             _gas              = gas;
             _oil              = oil;
             _water            = water;
-            _WellheadPressure = wellheadPressure;
-            _Weight           = weight;
+            _wellheadPressure = wellheadPressure;
+            _weight           = weight;
         }
 
         public ProductionHistoryModel(ProductionRecord model)

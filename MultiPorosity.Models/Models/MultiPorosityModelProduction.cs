@@ -6,11 +6,11 @@ namespace MultiPorosity.Models
     public sealed class MultiPorosityModelProduction
     {
         public double Days { get; set; }
-        
+
         public double Gas { get; set; }
-        
+
         public double Oil { get; set; }
-        
+
         public double Water { get; set; }
 
         public MultiPorosityModelProduction(double days,
@@ -23,7 +23,7 @@ namespace MultiPorosity.Models
             Oil   = oil;
             Water = water;
         }
-        
+
         public double this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,6 +84,11 @@ namespace MultiPorosity.Models
                     }
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{Days},{Gas},{Oil},{Water}";
         }
     }
 }

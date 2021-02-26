@@ -4,8 +4,6 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 
-using Engineering.UI.Collections;
-
 using MultiPorosity.Models;
 using MultiPorosity.Presentation.Services;
 
@@ -22,31 +20,11 @@ using Title = Plotly.Models.Layouts.Title;
 
 namespace MultiPorosity.Presentation
 {
-    public class ProductionChartViewModel : BindableBase
+    public class ProductionSmootherChartViewModel : BindableBase
     {
         #region Chart Properties
 
-        private ObservableDictionary<string, (string type, object[] array)> dataSource = new ObservableDictionary<string, (string type, object[] array)>
-        {
-            {
-                "Date", ("string", new object[0])
-            },
-            {
-                "Days", ("float", new object[0])
-            },
-            {
-                "Gas", ("float", new object[0])
-            },
-            {
-                "Oil", ("float", new object[0])
-            },
-            {
-                "Water", ("float", new object[0])
-            },
-            {
-                "Weight", ("float", new object[0])
-            }
-        };
+        private ObservableDictionary<string, (string type, object[] array)> dataSource = new ();
 
         public ObservableDictionary<string, (string type, object[] array)> DataSource
         {
@@ -79,16 +57,6 @@ namespace MultiPorosity.Presentation
             {
                 if(SetProperty(ref selected, value))
                 {
-                    List<ProductionRecord> selectedProductionRecords = new(selected.Length);
-
-                    for (int i = 0; i < selected.Length; ++i)
-                    {
-                        selectedProductionRecords.Add(_multiPorosityModelService.ActiveProject.ProductionRecords[selected[i].PointIndex]);
-                    }
-
-                    _multiPorosityModelService.ActiveProject.SelectedProductionRecords = new BindableCollection<ProductionRecord>(selectedProductionRecords);
-
-                    //this.RaisePropertyChanged(nameof(SelectedProductionRecords));
                 }
             }
         }
@@ -96,14 +64,14 @@ namespace MultiPorosity.Presentation
         #endregion
 
        
-        private readonly MultiPorosityModelService _multiPorosityModelService;
+        private readonly ProductionSmootherService _productionSmootherService;
 
-        public ProductionChartViewModel(MultiPorosityModelService multiPorosityModelService)
+        public ProductionSmootherChartViewModel(ProductionSmootherService? productionSmootherService)
         {
-            _multiPorosityModelService = multiPorosityModelService;
+            _productionSmootherService = productionSmootherService;
             
-            _multiPorosityModelService.PropertyChanged -= OnPropertyChanged;
-            _multiPorosityModelService.PropertyChanged += OnPropertyChanged;
+            _productionSmootherService.PropertyChanged -= OnPropertyChanged;
+            _productionSmootherService.PropertyChanged += OnPropertyChanged;
 
             OnPropertyChanged(this, new PropertyChangedEventArgs("ActiveProject"));
 
@@ -112,55 +80,91 @@ namespace MultiPorosity.Presentation
                 new ScatterGl
                 {
                     Name = "Gas",
-                    Mode = ScatterGl.ModeFlag.Lines | ScatterGl.ModeFlag.Markers,
-                    XSrc = "Date",
+                    Mode = ScatterGl.ModeFlag.Markers | ScatterGl.ModeFlag.Lines,
+                    XSrc = "Days",
                     YSrc = "Gas",
-                    Marker = new Marker()
-                    {
-                        Color   = "#CC0000",
-                        Size    = 8,
-                        SizeSrc = "Weight"
-                    },
                     Line = new Line()
                     {
                         Color = "#CC0000",
-                        Width = 1
+                        Width = 2
+                    },
+                    Marker = new Marker()
+                    {
+                        Color   = "#CC0000",
+                        Size    = 10,
+                        SizeSrc = "Weight"
                     }
                 },
                 new ScatterGl
                 {
                     Name = "Oil",
-                    Mode = ScatterGl.ModeFlag.Lines | ScatterGl.ModeFlag.Markers,
-                    XSrc = "Date",
+                    Mode = ScatterGl.ModeFlag.Markers | ScatterGl.ModeFlag.Lines,
+                    XSrc = "Days",
                     YSrc = "Oil",
-                    Marker = new Marker()
-                    {
-                        Color   = "#00CC00",
-                        Size    = 8,
-                        SizeSrc = "Weight"
-                    },
                     Line = new Line()
                     {
                         Color = "#00CC00",
-                        Width = 1
+                        Width = 2
+                    },
+                    Marker = new Marker()
+                    {
+                        Color   = "#00CC00",
+                        Size    = 10,
+                        SizeSrc = "Weight"
                     }
                 },
                 new ScatterGl
                 {
                     Name = "Water",
-                    Mode = ScatterGl.ModeFlag.Lines | ScatterGl.ModeFlag.Markers,
-                    XSrc = "Date",
+                    Mode = ScatterGl.ModeFlag.Markers | ScatterGl.ModeFlag.Lines,
+                    XSrc = "Days",
                     YSrc = "Water",
-                    Marker = new Marker()
-                    {
-                        Color   = "#0000CC",
-                        Size    = 8,
-                        SizeSrc = "Weight"
-                    },
                     Line = new Line()
                     {
                         Color = "#0000CC",
-                        Width = 1
+                        Width = 2
+                    },
+                    Marker = new Marker()
+                    {
+                        Color   = "#0000CC",
+                        Size    = 10,
+                        SizeSrc = "Weight"
+                    }
+                },
+                new ScatterGl
+                {
+                    Name = "Smooth Gas",
+                    Mode = ScatterGl.ModeFlag.Lines,
+                    XSrc = "SmoothDays",
+                    YSrc = "SmoothGas",
+                    Line = new Line()
+                    {
+                        Color = "#CC0000",
+                        Width = 7
+                    }
+                },
+                new ScatterGl
+                {
+                    Name = "Smooth Oil",
+                    Mode = ScatterGl.ModeFlag.Lines,
+                    XSrc = "SmoothDays",
+                    YSrc = "SmoothOil",
+                    Line = new Line()
+                    {
+                        Color = "#00CC00",
+                        Width = 7
+                    }
+                },
+                new ScatterGl
+                {
+                    Name = "Smooth Water",
+                    Mode = ScatterGl.ModeFlag.Lines,
+                    XSrc = "SmoothDays",
+                    YSrc = "SmoothWater",
+                    Line = new Line()
+                    {
+                        Color = "#0000CC",
+                        Width = 7
                     }
                 }
             };
@@ -172,7 +176,6 @@ namespace MultiPorosity.Presentation
                     Text = "Production"
                 },
                 ShowLegend = true,
-                AutoSize =  true,
                 Legend = new Legend()
                 {
                     Orientation = OrientationEnum.H,
@@ -185,10 +188,9 @@ namespace MultiPorosity.Presentation
                 {
                     new XAxis
                     {
-                        Type = Plotly.Models.Layouts.XAxes.TypeEnum.Date,
                         Title = new Plotly.Models.Layouts.XAxes.Title
                         {
-                            Text = "Date"
+                            Text = "Days"
                         }
                     }
                 },
@@ -218,14 +220,25 @@ namespace MultiPorosity.Presentation
             {
                 case "ActiveProject":
                 {
-                    _multiPorosityModelService.ActiveProject.PropertyChanged                     -= OnPropertyChanged;
-                    _multiPorosityModelService.ActiveProject.PropertyChanged                     += OnPropertyChanged;
-                    _multiPorosityModelService.ActiveProject.ProductionRecords.CollectionChanged -= OnProductionRecordsChanged;
-                    _multiPorosityModelService.ActiveProject.ProductionRecords.CollectionChanged += OnProductionRecordsChanged;
+                    _productionSmootherService.PropertyChanged -= OnPropertyChanged;
+                    _productionSmootherService.PropertyChanged += OnPropertyChanged;
+                    
+                    _productionSmootherService.Model.ProductionRecords.CollectionChanged -= OnProductionRecordsChanged;
+                    _productionSmootherService.Model.ProductionRecords.CollectionChanged += OnProductionRecordsChanged;
+                    
+                    _productionSmootherService.Model.SmoothedProductionRecords.CollectionChanged -= OnProductionRecordsChanged;
+                    _productionSmootherService.Model.SmoothedProductionRecords.CollectionChanged += OnProductionRecordsChanged;
+                    
                     OnProductionRecordsChanged(sender, null);
                     break;
                 }
                 case "ProductionRecords":
+                {
+                    OnProductionRecordsChanged(sender, null);
+
+                    break;
+                }
+                case "SmoothedProductionRecords":
                 {
                     OnProductionRecordsChanged(sender, null);
 
@@ -237,7 +250,9 @@ namespace MultiPorosity.Presentation
         private void OnProductionRecordsChanged(object?                          sender,
                                                 NotifyCollectionChangedEventArgs? e)
         {
-            ProductionRecord[]? productionRecordArray = _multiPorosityModelService.ActiveProject.ProductionRecords.ToArray();
+            ProductionRecord[]? productionRecordArray = _productionSmootherService.Model.ProductionRecords.ToArray();
+            
+            ProductionRecord[]? smoothedProductionRecordArray = _productionSmootherService.Model.SmoothedProductionRecords.ToArray();
 
             DataSource = new ObservableDictionary<string, (string type, object[] array)>
             {
@@ -258,6 +273,18 @@ namespace MultiPorosity.Presentation
                 },
                 {
                     "Weight", ("float", new ProductionRecordColumn(7, productionRecordArray).ToArray())
+                },
+                {
+                    "SmoothDays", ("float", new ProductionRecordColumn(2, smoothedProductionRecordArray).ToArray())
+                },
+                {
+                    "SmoothGas", ("float", new ProductionRecordColumn(3, smoothedProductionRecordArray).ToArray())
+                },
+                {
+                    "SmoothOil", ("float", new ProductionRecordColumn(4, smoothedProductionRecordArray).ToArray())
+                },
+                {
+                    "SmoothWater", ("float", new ProductionRecordColumn(5, smoothedProductionRecordArray).ToArray())
                 }
             };
         }

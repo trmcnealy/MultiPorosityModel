@@ -46,6 +46,8 @@ namespace MultiPorosity.Presentation
         public DelegateCommand CalcRelPermCommand { get; }
         
         public DelegateCommand RunModelCommand { get; }
+        
+        public DelegateCommand ExportModelCommand { get; }
 
         public DelegateCommand HistoryMatchCommand { get; }
         
@@ -65,6 +67,7 @@ namespace MultiPorosity.Presentation
             CalcPvtCommand      = new DelegateCommand(_multiPorosityModelService.CalcPvt);
             CalcRelPermCommand  = new DelegateCommand(_multiPorosityModelService.CalcRelPerm);
             RunModelCommand     = new DelegateCommand(_multiPorosityModelService.RunModel);
+            ExportModelCommand  = new DelegateCommand(_multiPorosityModelService.ExportModel);
             HistoryMatchCommand = new DelegateCommand(_multiPorosityModelService.HistoryMatch);
             
             _multiPorosityModelService.PropertyChanged               -= OnPropertyChanged;

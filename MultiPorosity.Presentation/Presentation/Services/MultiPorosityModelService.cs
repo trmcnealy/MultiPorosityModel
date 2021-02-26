@@ -12,6 +12,8 @@ using Engineering.UI.Collections;
 
 using Kokkos;
 
+using Microsoft.Win32;
+
 using MultiPorosity.Models;
 using MultiPorosity.Services;
 using MultiPorosity.Services.Models;
@@ -397,7 +399,7 @@ namespace MultiPorosity.Presentation.Services
                          {
                              _eventAggregator.GetEvent<ProjectIsBusyEvent>().Publish(true);
 
-                             MultiPorosityModelResults results = TriplePorosityModel.Calculate(_eventAggregator, ActiveProject, ExecutionSpace);
+                             MultiPorosityModelResults results = TriplePorosityModel.Calculate(ActiveProject, ExecutionSpace);
 
                              ActiveProject.UpdateModel(results);
 
@@ -406,6 +408,38 @@ namespace MultiPorosity.Presentation.Services
 
                 _isRunnning = false;
             }
+        }
+        public void ExportModel()
+        {
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter           = "Csv file (*.csv)|*.csv|All files (*.*)|*.*",
+                InitialDirectory = RepositoryPath ?? Environment.GetFolderPath(Environment.SpecialFolder.Recent)
+            };
+
+            if(saveFileDialog.ShowDialog() == true)
+            {
+                switch(Path.GetExtension(saveFileDialog.FileName))
+                {
+                    case ".csv":
+                    {
+                        DataSources.ExportCsv(ActiveProject.MultiPorosityModelResults, ActiveProject.MultiPorosityModelProduction.ToList(), saveFileDialog.FileName);
+
+                        break;
+                    }
+                    default:
+                    {
+                        MessageBox.Show("Invalid file format.");
+
+                        break;
+                    }
+                }
+            }
+
+
+
+            
         }
 
         public void HistoryMatch()
@@ -420,7 +454,7 @@ namespace MultiPorosity.Presentation.Services
                          {
                              _eventAggregator.GetEvent<ProjectIsBusyEvent>().Publish(true);
 
-                             MultiPorosityModelResults results = TriplePorosityModel.HistoryMatch(_eventAggregator, ActiveProject, ExecutionSpace);
+                             MultiPorosityModelResults results = TriplePorosityModel.HistoryMatch(ActiveProject, ExecutionSpace);
 
                              if(TriplePorosityOptimizationResults.Count > 0)
                              {

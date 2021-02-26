@@ -1,0 +1,124 @@
+﻿<UserControl x:Class="MultiPorosity.Presentation.Windows.ProductionSmootherView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:eui="http://www.engineering.ui"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:texas="clr-namespace:OilGas.Data.RRC.Texas;assembly=OilGas.Data.RRC.Texas"
+             xmlns:presentation="clr-namespace:MultiPorosity.Presentation"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d"
+             d:DesignHeight="600"
+             d:DesignWidth="1200">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="300"/>
+        </Grid.ColumnDefinitions>
+
+        <ContentControl Grid.Column="0"
+                        prism:RegionManager.RegionName="ProductionSmootherChartRegion"/>
+
+        <Grid Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="125"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Label Content="Parameter"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   HorizontalContentAlignment="Right"
+                   VerticalContentAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="0"/>
+            <Label Content="Value"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   HorizontalContentAlignment="Center"
+                   VerticalContentAlignment="Center"
+                   Grid.Row="0"
+                   Grid.Column="1"/>
+
+            <eui:NumericValue Grid.Row="1"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              LabelText="Number Of Points"
+                              Value="{Binding Path=Model.ProductionSmoothing.NumberOfPoints, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                              Increment="1"
+                              FormatString="0"/>
+
+            <eui:NumericValue Grid.Row="2"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="2"
+                              LabelText="Iterations"
+                              Value="{Binding Path=Model.ProductionSmoothing.Iterations, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                              Increment="1"
+                              FormatString="0"/>
+
+            <Label Grid.Row="3"
+                   Grid.Column="0"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Center"
+                   HorizontalContentAlignment="Right"
+                   VerticalContentAlignment="Center"
+                   Margin="5,5,5,5"
+                   Content="Normalize"/>
+
+            <CheckBox Grid.Row="3"
+                      Grid.Column="1"
+                      Height="20"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Stretch"
+                      HorizontalContentAlignment="Center"
+                      VerticalContentAlignment="Center"
+                      IsChecked="{Binding Path=Model.ProductionSmoothing.Normalize, Mode = TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}"
+                      Margin="5,5,5,5"/>
+
+            <Grid Grid.Row="5"
+                  Grid.Column="0"
+                  Grid.ColumnSpan="2"
+                  HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Command="{Binding Path=SmoothCommand}"
+                        Content="Smooth"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Height="32"
+                        Margin="5"/>
+
+                <Button Grid.Column="1"
+                        Command="{Binding Path=CloseDialogCommand}"
+                        CommandParameter="True"
+                        Content="Import"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Height="30"/>
+
+                <Button Grid.Column="2"
+                        Command="{Binding Path=CloseDialogCommand}"
+                        CommandParameter="False"
+                        Content="Cancel"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Height="30"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

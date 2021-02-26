@@ -62,6 +62,10 @@ namespace MultiPorosity.Services.Models
         [JsonPropertyName(nameof(DatabaseDataSource))]
         public DatabaseDataSource? DatabaseDataSource { get; set; }
 
+        [JsonPropertyName(nameof(ProductionSmoothing))]
+        public ProductionSmoothing? ProductionSmoothing { get; set; }
+
+
         public Project()
         {
             Name                                = string.Empty;
@@ -73,6 +77,7 @@ namespace MultiPorosity.Services.Models
             MultiPorosityModelParameters        = new();
             ParticleSwarmOptimizationOptions    = new();
             MultiPorosityModelResults           = new();
+            ProductionSmoothing                 = new();
             
             PorosityModelKind                   = PorosityModelKind.Triple;
             FlowType                            = FlowType.UnsteadyState;
@@ -96,6 +101,7 @@ namespace MultiPorosity.Services.Models
             ParticleSwarmOptimizationOptions    = new();
             MultiPorosityModelResults           = new();
             DatabaseDataSource                  = new();
+            ProductionSmoothing                 = new();
             
             PorosityModelKind                   = PorosityModelKind.Triple;
             FlowType                            = FlowType.UnsteadyState;
@@ -117,6 +123,7 @@ namespace MultiPorosity.Services.Models
                        ParticleSwarmOptimizationOptions    particleSwarmOptimizationOptions,
                        MultiPorosityModelResults           multiPorosityModelResults,
                        DatabaseDataSource?                 databaseDataSource,
+                       ProductionSmoothing                 productionSmoothing,
                        PorosityModelKind                   porosityModelKind         = PorosityModelKind.Triple,
                        FlowType                            flowType                  = FlowType.UnsteadyState,
                        SolutionType                        solutionType              = SolutionType.Linear,
@@ -132,6 +139,7 @@ namespace MultiPorosity.Services.Models
             ParticleSwarmOptimizationOptions    = particleSwarmOptimizationOptions;
             MultiPorosityModelResults           = multiPorosityModelResults;
             DatabaseDataSource                  = databaseDataSource;
+            ProductionSmoothing                 = productionSmoothing;
 
             PorosityModelKind                   = porosityModelKind;
             FlowType                            = flowType;

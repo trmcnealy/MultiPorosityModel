@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="$([MSBuild]::GetPathOfFileAbove(GlobalVersioning.props))"/>
+    <Import Project="$([MSBuild]::GetPathOfFileAbove(GlobalVersioning.props))" />
 
     <PropertyGroup>
         <LangVersion>9.0</LangVersion>
@@ -14,35 +14,33 @@
           Condition="'$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Artifacts.props))' != '' " />
 
     <ItemGroup>
-        <Compile Remove="PrincipalComponentAnalysis.cs"/>
+        <Compile Remove="PrincipalComponentAnalysis.cs" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="PrincipalComponentAnalysis.cs"/>
+        <None Include="PrincipalComponentAnalysis.cs" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Engineering.DataSource"
                           Version="$(ENGINEERING_DATASOURCE_VERSION)"/>
-        <PackageReference Include="Kokkos.NET"
+        <!--<PackageReference Include="Kokkos.NET"
                           Version="$(KOKKOS_VERSION)"/>
         <PackageReference Include="OilGas.Data"
                           Version="$(OILGAS_DATA_VERSION)"/>
         <PackageReference Include="ParallelExtensionsCore"
                           Version="$(PARALLELEXTENSIONSEXTRAS_VERSION)"/>
-        <PackageReference Include="HDF.PInvoke.1.10"
-                          Version="1.10.613"/>
-        <PackageReference Include="UnManagedCil"
-                          Version="$(UNMANAGED_VERSION)"/>
+        <PackageReference Include="HDF.PInvoke.1.10" Version="1.10.613" />-->
+        <!--<PackageReference Include="UnManagedCil"
+                          Version="$(UNMANAGED_VERSION)"/>-->
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MultiPorosity.Services\MultiPorosity.Services.csproj"/>
+      <ProjectReference Include="..\MultiPorosity.Services\MultiPorosity.Services.csproj" />
     </ItemGroup>
 
-    <Target Name="PreBuild"
-            BeforeTargets="PreBuildEvent">
-        <Exec Command="dotnet restore"/>
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+        <Exec Command="dotnet restore" />
     </Target>
 
 </Project>

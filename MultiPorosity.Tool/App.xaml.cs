@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 
 using Engineering.UI.Controls;
@@ -26,6 +29,11 @@ namespace MultiPorosity
         private readonly IEventAggregator _eventAggregator;
 
         private readonly StringBuilder _stringBuilder;
+
+        public override Encoding Encoding
+        {
+            get { return Encoding.ASCII; }
+        }
 
         public ConsoleWriter(IEventAggregator eventAggregator)
         {
@@ -242,11 +250,6 @@ namespace MultiPorosity
         }
 
         #endregion
-
-        public override Encoding Encoding
-        {
-            get { return Encoding.ASCII; }
-        }
     }
 
     public sealed partial class App //: ConfiguredPrismApplication<ShellWindow, ShellViewModel>
@@ -264,11 +267,7 @@ namespace MultiPorosity
         //}
 
         private ConsoleWriter _consoleWriter;
-
-        public App()
-        {
-        }
-
+        
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
             base.RegisterTypes(containerRegistry);
@@ -279,15 +278,21 @@ namespace MultiPorosity
 
             _consoleWriter = Container.Resolve<ConsoleWriter>();
 
-            //ConsoleRedirector.Attach(_consoleWriter);
-
             Console.SetOut(_consoleWriter);
             Console.SetError(_consoleWriter);
+
+            ConsoleRedirector.Attach(_consoleWriter);
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
             moduleCatalog.AddModule<Presentation.Module>();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            ConsoleRedirector.Detatch();
+            base.OnExit(e);
         }
     }
 }

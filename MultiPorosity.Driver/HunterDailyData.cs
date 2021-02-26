@@ -1,4 +1,5 @@
-﻿namespace MultiPorosity.Driver
+﻿#if false
+namespace MultiPorosity.Driver
 {
     public static class HunterDailyData
     {
@@ -64,3 +65,5 @@
         };
     }
 }
+
+#endif

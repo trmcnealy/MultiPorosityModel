@@ -225,7 +225,7 @@ namespace MultiPorosity.Services.Models
 
         public string[] GetNames()
         {
-            if(sk != 0.0)
+            if(sk == 0.0)
             {
                 return Names1;
             }

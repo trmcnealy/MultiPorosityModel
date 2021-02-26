@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace MultiPorosity.Services.Models
 {
@@ -25,6 +26,23 @@ namespace MultiPorosity.Services.Models
             Gas   = gas;
             Oil   = oil;
             Water = water;
+        }
+
+        public static implicit operator MultiPorosity.Models.MultiPorosityModelProduction(MultiPorosityModelProduction multiPorosityModelProduction)
+        {
+            return new(multiPorosityModelProduction.Days, multiPorosityModelProduction.Gas, multiPorosityModelProduction.Oil, multiPorosityModelProduction.Water);
+        }
+
+        public static List<MultiPorosity.Models.MultiPorosityModelProduction> Convert(List<MultiPorosityModelProduction> multiPorosityModelProduction)
+        {
+            List<MultiPorosity.Models.MultiPorosityModelProduction> multiPorosityModelProductions = new(multiPorosityModelProduction.Count);
+
+            for (int i = 0; i < multiPorosityModelProduction.Count; ++i)
+            {
+                multiPorosityModelProductions.Add(multiPorosityModelProduction[i]);
+            }
+
+            return multiPorosityModelProductions;
         }
     }
 }

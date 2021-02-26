@@ -4,6 +4,18 @@ using System.Runtime.CompilerServices;
 
 namespace MultiPorosity.Models
 {
+    public static class ProductionColumn
+    {
+        public const int Index            = 0;
+        public const int Date             = 1;
+        public const int Days             = 2;
+        public const int Gas              = 3;
+        public const int Oil              = 4;
+        public const int Water            = 5;
+        public const int WellheadPressure = 6;
+        public const int Weight           = 7;
+    }
+
     public sealed class ProductionRecordColumn
     {
         private readonly int                _columnIndex;

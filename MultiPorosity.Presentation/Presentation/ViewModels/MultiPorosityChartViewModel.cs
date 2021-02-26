@@ -80,9 +80,14 @@ namespace MultiPorosity.Presentation
                 new ScatterGl
                 {
                     Name = "Gas",
-                    Mode = ScatterGl.ModeFlag.Markers,
+                    Mode = ScatterGl.ModeFlag.Markers | ScatterGl.ModeFlag.Lines,
                     XSrc = "Days",
                     YSrc = "Gas",
+                    Line = new Line()
+                    {
+                        Color = "#CC0000",
+                        Width = 2
+                    },
                     Marker = new Marker()
                     {
                         Color   = "#CC0000",
@@ -93,12 +98,35 @@ namespace MultiPorosity.Presentation
                 new ScatterGl
                 {
                     Name = "Oil",
-                    Mode = ScatterGl.ModeFlag.Markers,
+                    Mode = ScatterGl.ModeFlag.Markers | ScatterGl.ModeFlag.Lines,
                     XSrc = "Days",
                     YSrc = "Oil",
+                    Line = new Line()
+                    {
+                        Color = "#00CC00",
+                        Width = 2
+                    },
                     Marker = new Marker()
                     {
                         Color   = "#00CC00",
+                        Size    = 10,
+                        SizeSrc = "Weight"
+                    }
+                },
+                new ScatterGl
+                {
+                    Name = "Water",
+                    Mode = ScatterGl.ModeFlag.Markers | ScatterGl.ModeFlag.Lines,
+                    XSrc = "Days",
+                    YSrc = "Water",
+                    Line = new Line()
+                    {
+                        Color = "#0000CC",
+                        Width = 2
+                    },
+                    Marker = new Marker()
+                    {
+                        Color   = "#0000CC",
                         Size    = 10,
                         SizeSrc = "Weight"
                     }
@@ -117,13 +145,25 @@ namespace MultiPorosity.Presentation
                 },
                 new ScatterGl
                 {
-                    Name      = "Model Oil",
-                    Mode      = ScatterGl.ModeFlag.Lines,
-                    XSrc      = "ModelDays",
-                    YSrc      = "ModelOil",
+                    Name = "Model Oil",
+                    Mode = ScatterGl.ModeFlag.Lines,
+                    XSrc = "ModelDays",
+                    YSrc = "ModelOil",
                     Line = new Line()
                     {
                         Color = "#00CC00",
+                        Width = 7
+                    }
+                },
+                new ScatterGl
+                {
+                    Name = "Model Water",
+                    Mode = ScatterGl.ModeFlag.Lines,
+                    XSrc = "ModelDays",
+                    YSrc = "ModelWater",
+                    Line = new Line()
+                    {
+                        Color = "#0000CC",
                         Width = 7
                     }
                 }

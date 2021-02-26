@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+
+using MultiPorosity.Models;
 
 namespace MultiPorosity.Services.Models
 {
     public sealed class ProductionHistory
     {
-        
         [JsonPropertyName(nameof(Index))]
         public int Index { get; set; }
         
@@ -48,6 +50,30 @@ namespace MultiPorosity.Services.Models
             Water            = water;
             WellheadPressure = wellheadPressure;
             Weight           = weight;
+        }
+
+        public static implicit operator ProductionHistory(ProductionRecord productionRecord)
+        {
+            return new(productionRecord.Index,
+                       productionRecord.Date,
+                       productionRecord.Days,
+                       productionRecord.Gas,
+                       productionRecord.Oil,
+                       productionRecord.Water,
+                       productionRecord.WellheadPressure,
+                       productionRecord.Weight);
+        }
+
+        public static List<ProductionHistory> Convert(List<ProductionRecord> productionRecord)
+        {
+            List<ProductionHistory> productionRecords = new(productionRecord.Count);
+
+            for (int i = 0; i < productionRecord.Count; ++i)
+            {
+                productionRecords.Add(productionRecord[i]);
+            }
+
+            return productionRecords;
         }
     }
 }

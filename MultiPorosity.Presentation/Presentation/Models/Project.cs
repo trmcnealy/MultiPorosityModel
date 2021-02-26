@@ -48,6 +48,8 @@ namespace MultiPorosity.Presentation.Models
 
         private DatabaseDataSource _DatabaseDataSource;
 
+        private ProductionSmoothing _ProductionSmoothing;
+
         private double maxGas;
 
         private double maxOil;
@@ -248,188 +250,15 @@ namespace MultiPorosity.Presentation.Models
             }
         }
 
-        public Project(MultiPorosity.Services.Models.Project project)
+        public ProductionSmoothing ProductionSmoothing
         {
-            ProductionDataSet productionDataSet = new();
-
-            int      index;
-            DateTime date;
-            double   days;
-            double   gas;
-            double   oil;
-            double   water;
-            double   wellheadPressure;
-            double   weight;
-
-            ProductionHistory productionHistory;
-
-            for(int i = 0; i < project.ProductionHistory.Count; ++i)
+            get { return _ProductionSmoothing; }
+            set
             {
-                productionHistory = project.ProductionHistory[i];
-                index             = productionHistory.Index;
-                date              = productionHistory.Date;
-                days              = productionHistory.Days;
-                gas               = productionHistory.Gas;
-                oil               = productionHistory.Oil;
-                water             = productionHistory.Water;
-                wellheadPressure  = productionHistory.WellheadPressure;
-                weight            = productionHistory.Weight;
-
-                productionDataSet.Actual.AddActualRow(index, date, days, gas, oil, water, wellheadPressure, weight);
+                if(SetProperty(ref _ProductionSmoothing, value))
+                {
+                }
             }
-
-            ProductionDataSet = productionDataSet;
-
-            //ProductionHistory.ListChanged += OnDataViewChanged;
-
-            Name                                = project.Name;
-            MultiPorosityProperties             = new(project.MultiPorosityProperties, project.PvtModelProperties, project.MultiPorosityModelParameters);
-            PvtModelProperties                  = new(project.PvtModelProperties);
-            RelativePermeabilityProperties      = new(project.RelativePermeabilityProperties);
-            MultiPorosityHistoryMatchParameters = new(project.MultiPorosityHistoryMatchParameters);
-            MultiPorosityModelParameters        = new(project.MultiPorosityModelParameters);
-            ParticleSwarmOptimizationOptions    = new(project.ParticleSwarmOptimizationOptions);
-            MultiPorosityModelResults           = new(project.MultiPorosityModelResults);
-            DatabaseDataSource                  = new(project.DatabaseDataSource);
-
-
-            PorosityModelKind                   = project.PorosityModelKind;
-            FlowType                            = project.FlowType;
-            SolutionType                        = project.SolutionType;
-            InverseTransformPrecision           = project.InverseTransformPrecision;
-        }
-
-        public static implicit operator MultiPorosity.Services.Models.Project(Project project)
-        {
-            List<ProductionHistory> productionHistory = new(project.ProductionDataSet.Actual.Count);
-
-            int                         index;
-            DateTime                    date;
-            double                      days;
-            double                      gas;
-            double                      oil;
-            double                      water;
-            double                      wellheadPressure;
-            double                      weight;
-            ProductionDataSet.ActualRow row;
-
-            for(int i = 0; i < project.ProductionDataSet.Actual.Count; ++i)
-            {
-                row              = project.ProductionDataSet.Actual[i];
-                index            = row.Index;
-                date             = row.Date;
-                days             = row.Days;
-                gas              = row.Gas;
-                oil              = row.Oil;
-                water            = row.Water;
-                wellheadPressure = row.WellheadPressure;
-                weight           = row.Weight;
-
-                productionHistory.Add(new ProductionHistory(index, date, days, gas, oil, water, wellheadPressure, weight));
-            }
-
-            (MultiPorosity.Services.Models.MultiPorosityProperties multiPorosityProperties, MultiPorosity.Services.Models.PvtModelProperties pvtModelProperties,
-                MultiPorosity.Services.Models.MultiPorosityModelParameters multiPorosityModelParameters) models = project._multiPorosityProperties;
-
-            return new(project._name,
-                       productionHistory,
-                       models.multiPorosityProperties,
-                       models.pvtModelProperties,
-                       project._relativePermeabilityProperties,
-                       project._multiPorosityHistoryMatchParameters,
-                       models.multiPorosityModelParameters,
-                       project._particleSwarmOptimizationOptions,
-                       project._multiPorosityModelResults,
-                       project._DatabaseDataSource,
-                       project._porosityModelKind,
-                       project._flowType,
-                       project._solutionType,
-                       project._inverseTransformPrecision);
-        }
-
-        private void OnDataViewChanged(object               sender,
-                                       ListChangedEventArgs e)
-        {
-            UpdateRecords();
-        }
-
-        private void UpdateRecords()
-        {
-            if(ProductionDataSet.Actual.Count == 0)
-            {
-                return;
-            }
-
-            //productionRecords.Clear();
-            //OilPoints.Clear();
-            //DaysToDateMap.Clear();
-
-            List<ProductionRecord> records = new(ProductionDataSet.Actual.Count);
-
-            double days = 15;
-
-            for(int i = 0; i < ProductionDataSet.Actual.Count; ++i)
-            {
-                records.Add(new ProductionRecord(i, ProductionDataSet.Actual[i]));
-
-                days += 30;
-            }
-
-            ProductionRecords           = new BindableCollection<ProductionRecord>(records);
-            CumulativeProductionRecords = new BindableCollection<CumulativeProductionRecord>(ProductionService.CumulativeProduction(productionRecords.ToList()));
-
-            RaisePropertyChanged(nameof(HistoryCount));
-            //RaisePropertyChanged(nameof(ProductionRecords));
-            //RaisePropertyChanged(nameof(CumulativeProductionRecords));
-            //this.RaisePropertyChanged(nameof(OilPoints));
-        }
-
-        public void UpdateProductionDataset(List<ProductionRecord> production_records)
-        {
-            ProductionDataSet productionDataSet = new();
-
-            int      index;
-            DateTime date;
-            double   days;
-            double   gas;
-            double   oil;
-            double   water;
-            double   wellheadPressure;
-            double   weight;
-
-            ProductionRecord productionRecord;
-
-            for(int i = 0; i < production_records.Count; ++i)
-            {
-                productionRecord = production_records[i];
-                index            = productionRecord.Index;
-                date             = productionRecord.Date;
-                days             = productionRecord.Days;
-                gas              = productionRecord.Gas;
-                oil              = productionRecord.Oil;
-                water            = productionRecord.Water;
-                wellheadPressure = productionRecord.WellheadPressure;
-                weight           = productionRecord.Weight;
-
-                productionDataSet.Actual.AddActualRow(index, date, days, gas, oil, water, wellheadPressure, weight);
-            }
-
-            ProductionDataSet = productionDataSet;
-        }
-
-        public void UpdateModel(MultiPorosity.Services.Models.MultiPorosityModelResults results)
-        {
-            List<MultiPorosity.Models.MultiPorosityModelProduction> records = new(results.Production.Count);
-
-            for(int i = 0; i < results.Production.Count; ++i)
-            {
-                records.Add(new MultiPorosity.Models.MultiPorosityModelProduction(results.Production[i].Days, results.Production[i].Gas, results.Production[i].Oil, results.Production[i].Water));
-            }
-
-            MultiPorosityModelResults = new(results);
-
-            MultiPorosityModelProduction           = new BindableCollection<MultiPorosity.Models.MultiPorosityModelProduction>(records);
-            CumulativeMultiPorosityModelProduction = new BindableCollection<CumulativeMultiPorosityModelProduction>(ProductionService.CumulativeProduction(multiPorosityModelProduction.ToList()));
         }
 
         #region Collections
@@ -721,5 +550,192 @@ namespace MultiPorosity.Presentation.Models
         }
 
         #endregion
+
+        public Project(MultiPorosity.Services.Models.Project project)
+        {
+            ProductionDataSet productionDataSet = new();
+
+            int      index;
+            DateTime date;
+            double   days;
+            double   gas;
+            double   oil;
+            double   water;
+            double   wellheadPressure;
+            double   weight;
+
+            ProductionHistory productionHistory;
+
+            for(int i = 0; i < project.ProductionHistory.Count; ++i)
+            {
+                productionHistory = project.ProductionHistory[i];
+                index             = productionHistory.Index;
+                date              = productionHistory.Date;
+                days              = productionHistory.Days;
+                gas               = productionHistory.Gas;
+                oil               = productionHistory.Oil;
+                water             = productionHistory.Water;
+                wellheadPressure  = productionHistory.WellheadPressure;
+                weight            = productionHistory.Weight;
+
+                productionDataSet.Actual.AddActualRow(index, date, days, gas, oil, water, wellheadPressure, weight);
+            }
+
+            ProductionDataSet = productionDataSet;
+
+            //ProductionHistory.ListChanged += OnDataViewChanged;
+
+            Name                                = project.Name;
+            MultiPorosityProperties             = new(project.MultiPorosityProperties, project.PvtModelProperties, project.MultiPorosityModelParameters);
+            PvtModelProperties                  = new(project.PvtModelProperties);
+            RelativePermeabilityProperties      = new(project.RelativePermeabilityProperties);
+            MultiPorosityHistoryMatchParameters = new(project.MultiPorosityHistoryMatchParameters);
+            MultiPorosityModelParameters        = new(project.MultiPorosityModelParameters);
+            ParticleSwarmOptimizationOptions    = new(project.ParticleSwarmOptimizationOptions);
+            MultiPorosityModelResults           = new(project.MultiPorosityModelResults);
+            DatabaseDataSource                  = new(project.DatabaseDataSource);
+
+
+            PorosityModelKind                   = project.PorosityModelKind;
+            FlowType                            = project.FlowType;
+            SolutionType                        = project.SolutionType;
+            InverseTransformPrecision           = project.InverseTransformPrecision;
+        }
+
+        public static implicit operator MultiPorosity.Services.Models.Project(Project project)
+        {
+            List<ProductionHistory> productionHistory = new(project.ProductionDataSet.Actual.Count);
+
+            int                         index;
+            DateTime                    date;
+            double                      days;
+            double                      gas;
+            double                      oil;
+            double                      water;
+            double                      wellheadPressure;
+            double                      weight;
+            ProductionDataSet.ActualRow row;
+
+            for(int i = 0; i < project.ProductionDataSet.Actual.Count; ++i)
+            {
+                row              = project.ProductionDataSet.Actual[i];
+                index            = row.Index;
+                date             = row.Date;
+                days             = row.Days;
+                gas              = row.Gas;
+                oil              = row.Oil;
+                water            = row.Water;
+                wellheadPressure = row.WellheadPressure;
+                weight           = row.Weight;
+
+                productionHistory.Add(new ProductionHistory(index, date, days, gas, oil, water, wellheadPressure, weight));
+            }
+
+            (MultiPorosity.Services.Models.MultiPorosityProperties multiPorosityProperties, 
+             MultiPorosity.Services.Models.PvtModelProperties pvtModelProperties,
+             MultiPorosity.Services.Models.MultiPorosityModelParameters multiPorosityModelParameters) models = project._multiPorosityProperties;
+
+            return new(project._name,
+                       productionHistory,
+                       models.multiPorosityProperties,
+                       models.pvtModelProperties,
+                       project._relativePermeabilityProperties,
+                       project._multiPorosityHistoryMatchParameters,
+                       models.multiPorosityModelParameters,
+                       project._particleSwarmOptimizationOptions,
+                       project._multiPorosityModelResults,
+                       project._DatabaseDataSource,
+                       project._ProductionSmoothing,
+                       project._porosityModelKind,
+                       project._flowType,
+                       project._solutionType,
+                       project._inverseTransformPrecision);
+        }
+
+        private void OnDataViewChanged(object               sender,
+                                       ListChangedEventArgs e)
+        {
+            UpdateRecords();
+        }
+
+        private void UpdateRecords()
+        {
+            if(ProductionDataSet.Actual.Count == 0)
+            {
+                return;
+            }
+
+            //productionRecords.Clear();
+            //OilPoints.Clear();
+            //DaysToDateMap.Clear();
+
+            List<ProductionRecord> records = new(ProductionDataSet.Actual.Count);
+
+            double days = 15;
+
+            for(int i = 0; i < ProductionDataSet.Actual.Count; ++i)
+            {
+                records.Add(new ProductionRecord(i, ProductionDataSet.Actual[i]));
+
+                days += 30;
+            }
+
+            ProductionRecords           = new BindableCollection<ProductionRecord>(records);
+            CumulativeProductionRecords = new BindableCollection<CumulativeProductionRecord>(ProductionService.CumulativeProduction(productionRecords.ToList()));
+
+            RaisePropertyChanged(nameof(HistoryCount));
+            //RaisePropertyChanged(nameof(ProductionRecords));
+            //RaisePropertyChanged(nameof(CumulativeProductionRecords));
+            //this.RaisePropertyChanged(nameof(OilPoints));
+        }
+
+        public void UpdateProductionDataset(List<ProductionRecord> production_records)
+        {
+            ProductionDataSet productionDataSet = new();
+
+            int      index;
+            DateTime date;
+            double   days;
+            double   gas;
+            double   oil;
+            double   water;
+            double   wellheadPressure;
+            double   weight;
+
+            ProductionRecord productionRecord;
+
+            for(int i = 0; i < production_records.Count; ++i)
+            {
+                productionRecord = production_records[i];
+                index            = productionRecord.Index;
+                date             = productionRecord.Date;
+                days             = productionRecord.Days;
+                gas              = productionRecord.Gas;
+                oil              = productionRecord.Oil;
+                water            = productionRecord.Water;
+                wellheadPressure = productionRecord.WellheadPressure;
+                weight           = productionRecord.Weight;
+
+                productionDataSet.Actual.AddActualRow(index, date, days, gas, oil, water, wellheadPressure, weight);
+            }
+
+            ProductionDataSet = productionDataSet;
+        }
+
+        public void UpdateModel(MultiPorosity.Services.Models.MultiPorosityModelResults results)
+        {
+            List<MultiPorosity.Models.MultiPorosityModelProduction> records = new(results.Production.Count);
+
+            for(int i = 0; i < results.Production.Count; ++i)
+            {
+                records.Add(new MultiPorosity.Models.MultiPorosityModelProduction(results.Production[i].Days, results.Production[i].Gas, results.Production[i].Oil, results.Production[i].Water));
+            }
+
+            MultiPorosityModelResults = new(results);
+
+            MultiPorosityModelProduction           = new BindableCollection<MultiPorosity.Models.MultiPorosityModelProduction>(records);
+            CumulativeMultiPorosityModelProduction = new BindableCollection<CumulativeMultiPorosityModelProduction>(ProductionService.CumulativeProduction(multiPorosityModelProduction.ToList()));
+        }
+        
     }
 }

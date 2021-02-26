@@ -144,6 +144,24 @@ namespace MultiPorosity.Presentation
                         Color = "#00CC00",
                         Width = 1
                     }
+                },
+                new ScatterGl
+                {
+                    Name = "Water",
+                    Mode = ScatterGl.ModeFlag.Lines | ScatterGl.ModeFlag.Markers,
+                    XSrc = "Days",
+                    YSrc = "Water",
+                    Marker = new Marker()
+                    {
+                        Color   = "#0000CC",
+                        Size    = 8,
+                        SizeSrc = "Weight"
+                    },
+                    Line = new Line()
+                    {
+                        Color = "#0000CC",
+                        Width = 1
+                    }
                 }
             };
 

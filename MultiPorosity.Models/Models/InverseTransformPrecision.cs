@@ -2,7 +2,8 @@
 {
     public enum InverseTransformPrecision : ushort
     {
-        Low = 0,
-        High
+        Low    = 13,
+        Medium = 26,
+        High   = 32
     }
 }

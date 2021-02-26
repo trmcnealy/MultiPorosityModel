@@ -44,13 +44,19 @@ namespace MultiPorosity.Presentation
             MultiPorosityModelService? multiPorosityModelService = containerProvider.Resolve<MultiPorosityModelService>();
             multiPorosityModelService.SetRepositoryPath();
             multiPorosityModelService.SetExecutionSpace();
+            
+            regionManager.RegisterViewWithRegion(RegionNames.ProductionSmootherChart, typeof(ProductionSmootherChartView));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterSingleton<MultiPorosityModelService>();
-            
+
+            containerRegistry.RegisterSingleton<ProductionSmootherService>();
+
             containerRegistry.RegisterDialog<ConnectToDatabase, ConnectToDatabaseViewModel>();
+            
+            containerRegistry.RegisterDialog<ProductionSmootherView, ProductionSmootherViewModel>();
 
             containerRegistry.RegisterDialogWindow<DialogWindow>();
 

@@ -15,7 +15,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="35"/>
         </Grid.RowDefinitions>
 
         <plotly:PlotlyView x:Name="PlotlyView"
@@ -30,19 +30,38 @@
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="60"/>
                 <ColumnDefinition Width="35"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Label Grid.Column="0"
+
+            <Button Grid.Column="0"
+                    Command="{Binding Path=PlayCachedResultsCommand}"
+                    Content="Play"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Width="Auto"
+                    Margin="5"/>
+
+            <Button Grid.Column="1"
+                    Command="{Binding Path=PauseCachedResultsCommand}"
+                    Content="Pause"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Width="Auto"
+                    Margin="5"/>
+
+            <Label Grid.Column="2"
                    Content="Iteration:"
                    HorizontalAlignment="Right" VerticalAlignment="Center"/>
-            <Label Grid.Column="1"
+            <Label Grid.Column="3"
                    Content="{Binding Path=Value, Source={x:Reference IterationSlider}}"
                    VerticalContentAlignment="Center"
                    HorizontalContentAlignment="Center"
                    HorizontalAlignment="Stretch"/>
             <Slider x:Name="IterationSlider"
-                    Grid.Column="2"
+                    Grid.Column="4"
                     Margin="5,5,5,5"
                     Minimum="0"
                     Maximum="{Binding Path=MaxIteration, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

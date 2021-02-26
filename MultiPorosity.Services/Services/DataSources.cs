@@ -6,17 +6,23 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 using Engineering.DataSource;
 using Engineering.DataSource.Services.DataAccess;
 using Engineering.DataSource.Tools;
+using Engineering.UI.Controls;
 
 using MultiPorosity.Models;
 using MultiPorosity.Services.Models;
 
 using PostgreSql;
 
+using Prism.Events;
+using Prism.Ioc;
+
 using ParticleSwarmOptimizationOptions = MultiPorosity.Services.Models.ParticleSwarmOptimizationOptions;
+using ProductionSmoothing = MultiPorosity.Models.ProductionSmoothing;
 
 namespace MultiPorosity.Services
 {
@@ -31,21 +37,22 @@ namespace MultiPorosity.Services
             return project;
         }
 
-        public static void SaveProject(string                              filePath,
-                                       string                              name,
-                                       ProductionDataSet                   productionDataSet,
-                                       MultiPorosityProperties             multiPorosityProperties,
-                                       PvtModelProperties                  pvtModelProperties,
-                                       RelativePermeabilityProperties      relativePermeabilityProperties,
-                                       MultiPorosityHistoryMatchParameters multiPorosityHistoryMatchParameters,
-                                       MultiPorosityModelParameters        multiPorosityModelParameters,
-                                       ParticleSwarmOptimizationOptions    particleSwarmOptimizationOptions,
-                                       MultiPorosityModelResults           multiPorosityModelResults,
-                                       DatabaseDataSource                  databaseDataSource,
-                                       PorosityModelKind                   porosityModelKind         = PorosityModelKind.Triple,
-                                       FlowType                            flowType                  = FlowType.UnsteadyState,
-                                       SolutionType                        solutionType              = SolutionType.Linear,
-                                       InverseTransformPrecision           inverseTransformPrecision = InverseTransformPrecision.High)
+        public static void SaveProject(string                                            filePath,
+                                       string                                            name,
+                                       ProductionDataSet                                 productionDataSet,
+                                       MultiPorosityProperties                           multiPorosityProperties,
+                                       PvtModelProperties                                pvtModelProperties,
+                                       RelativePermeabilityProperties                    relativePermeabilityProperties,
+                                       MultiPorosityHistoryMatchParameters               multiPorosityHistoryMatchParameters,
+                                       MultiPorosityModelParameters                      multiPorosityModelParameters,
+                                       ParticleSwarmOptimizationOptions                  particleSwarmOptimizationOptions,
+                                       MultiPorosityModelResults                         multiPorosityModelResults,
+                                       DatabaseDataSource                                databaseDataSource,
+                                       MultiPorosity.Services.Models.ProductionSmoothing productionSmoothing,
+                                       PorosityModelKind                                 porosityModelKind         = PorosityModelKind.Triple,
+                                       FlowType                                          flowType                  = FlowType.UnsteadyState,
+                                       SolutionType                                      solutionType              = SolutionType.Linear,
+                                       InverseTransformPrecision                         inverseTransformPrecision = InverseTransformPrecision.High)
         {
             List<ProductionHistory> productionHistory = new(productionDataSet.Actual.Count);
 
@@ -72,27 +79,29 @@ namespace MultiPorosity.Services
                             particleSwarmOptimizationOptions,
                             multiPorosityModelResults,
                             databaseDataSource,
+                            productionSmoothing,
                             porosityModelKind,
                             flowType,
                             solutionType,
                             inverseTransformPrecision));
         }
 
-        public static void SaveProject(string                              filePath,
-                                       string                              name,
-                                       List<ProductionHistory>             productionHistory,
-                                       MultiPorosityProperties             multiPorosityProperties,
-                                       PvtModelProperties                  pvtModelProperties,
-                                       RelativePermeabilityProperties      relativePermeabilityProperties,
-                                       MultiPorosityHistoryMatchParameters multiPorosityHistoryMatchParameters,
-                                       MultiPorosityModelParameters        multiPorosityModelParameters,
-                                       ParticleSwarmOptimizationOptions    particleSwarmOptimizationOptions,
-                                       MultiPorosityModelResults           multiPorosityModelResults,
-                                       DatabaseDataSource                  databaseDataSource,
-                                       PorosityModelKind                   porosityModelKind         = PorosityModelKind.Triple,
-                                       FlowType                            flowType                  = FlowType.UnsteadyState,
-                                       SolutionType                        solutionType              = SolutionType.Linear,
-                                       InverseTransformPrecision           inverseTransformPrecision = InverseTransformPrecision.High)
+        public static void SaveProject(string                                           filePath,
+                                       string                                           name,
+                                       List<ProductionHistory>                          productionHistory,
+                                       MultiPorosityProperties                          multiPorosityProperties,
+                                       PvtModelProperties                               pvtModelProperties,
+                                       RelativePermeabilityProperties                   relativePermeabilityProperties,
+                                       MultiPorosityHistoryMatchParameters              multiPorosityHistoryMatchParameters,
+                                       MultiPorosityModelParameters                     multiPorosityModelParameters,
+                                       ParticleSwarmOptimizationOptions                 particleSwarmOptimizationOptions,
+                                       MultiPorosityModelResults                        multiPorosityModelResults,
+                                       DatabaseDataSource                               databaseDataSource,
+                                       MultiPorosity.Services.Models.ProductionSmoothing productionSmoothing,
+                                       PorosityModelKind                                porosityModelKind         = PorosityModelKind.Triple,
+                                       FlowType                                         flowType                  = FlowType.UnsteadyState,
+                                       SolutionType                                     solutionType              = SolutionType.Linear,
+                                       InverseTransformPrecision                        inverseTransformPrecision = InverseTransformPrecision.High)
         {
             SaveProject(filePath,
                         new(name,
@@ -105,6 +114,7 @@ namespace MultiPorosity.Services
                             particleSwarmOptimizationOptions,
                             multiPorosityModelResults,
                             databaseDataSource,
+                            productionSmoothing,
                             porosityModelKind,
                             flowType,
                             solutionType,
@@ -306,6 +316,100 @@ namespace MultiPorosity.Services
         public static void ExportCsv(DataView dtDataTable,
                                      string   strFilePath)
         {
+            try
+            {
+                _ExportCsv(dtDataTable, strFilePath);
+            }
+            catch(Exception e)
+            {
+                Prism.Ioc.ContainerLocator.Container.Resolve<IEventAggregator>()?.GetEvent<EventConsoleWrite>().Publish(new ConsoleWritePayload(e.Message));
+            }
+        }
+
+        public static void ExportCsv(DataTable dtDataTable,
+                                     string    strFilePath)
+        {
+            try
+            {
+                _ExportCsv(dtDataTable, strFilePath);
+            }
+            catch(Exception e)
+            {
+                Prism.Ioc.ContainerLocator.Container.Resolve<IEventAggregator>()?.GetEvent<EventConsoleWrite>().Publish(new ConsoleWritePayload(e.Message));
+            }
+        }
+
+        public static void ExportCsv(string[]                                                              cached_header,
+                                     List<MultiPorosity.Services.Models.TriplePorosityOptimizationResults> cached_results,
+                                     string                                                                strFilePath)
+        {
+            try
+            {
+                _ExportCsv(cached_header, cached_results, strFilePath);
+            }
+            catch(Exception e)
+            {
+                Prism.Ioc.ContainerLocator.Container.Resolve<IEventAggregator>()?.GetEvent<EventConsoleWrite>().Publish(new ConsoleWritePayload(e.Message));
+            }
+        }
+
+        public static void ExportCsv(MultiPorosity.Services.Models.MultiPorosityModelResults multiPorosityModelResults,
+                                     List<MultiPorosity.Models.MultiPorosityModelProduction> multiPorosityModelProduction,
+                                     string                                                  strFilePath)
+        {
+            try
+            {
+                _ExportCsv(multiPorosityModelResults, multiPorosityModelProduction, strFilePath);
+            }
+            catch(Exception e)
+            {
+                Prism.Ioc.ContainerLocator.Container.Resolve<IEventAggregator>()?.GetEvent<EventConsoleWrite>().Publish(new ConsoleWritePayload(e.Message));
+            }
+        }
+
+        public static void ExporXlsx(DataView dtDataTable,
+                                     string   strFilePath)
+        {
+            try
+            {
+                _ExporXlsx(dtDataTable, strFilePath);
+            }
+            catch(Exception e)
+            {
+                Prism.Ioc.ContainerLocator.Container.Resolve<IEventAggregator>()?.GetEvent<EventConsoleWrite>().Publish(new ConsoleWritePayload(e.Message));
+            }
+        }
+
+        public static void ExporXlsx(DataTable dtDataTable,
+                                     string    strFilePath)
+        {
+            try
+            {
+                _ExporXlsx(dtDataTable, strFilePath);
+            }
+            catch(Exception e)
+            {
+                Prism.Ioc.ContainerLocator.Container.Resolve<IEventAggregator>()?.GetEvent<EventConsoleWrite>().Publish(new ConsoleWritePayload(e.Message));
+            }
+        }
+
+        public static void ExporXlsx(string[]                                                              cached_header,
+                                     List<MultiPorosity.Services.Models.TriplePorosityOptimizationResults> cached_results,
+                                     string                                                                strFilePath)
+        {
+            try
+            {
+                _ExporXlsx(cached_header, cached_results, strFilePath);
+            }
+            catch(Exception e)
+            {
+                Prism.Ioc.ContainerLocator.Container.Resolve<IEventAggregator>()?.GetEvent<EventConsoleWrite>().Publish(new ConsoleWritePayload(e.Message));
+            }
+        }
+
+        private static void _ExportCsv(DataView dtDataTable,
+                                       string   strFilePath)
+        {
             StreamWriter sw = new StreamWriter(strFilePath, false);
 
             if(dtDataTable.Table != null)
@@ -363,8 +467,8 @@ namespace MultiPorosity.Services
             sw.Close();
         }
 
-        public static void ExportCsv(DataTable dtDataTable,
-                                     string    strFilePath)
+        private static void _ExportCsv(DataTable dtDataTable,
+                                       string    strFilePath)
         {
             StreamWriter sw = new StreamWriter(strFilePath, false);
 
@@ -414,9 +518,44 @@ namespace MultiPorosity.Services
             sw.Close();
         }
 
-        public static void ExportCsv(string[]                                                              cached_header,
-                                     List<MultiPorosity.Services.Models.TriplePorosityOptimizationResults> cached_results,
-                                     string                                                                strFilePath)
+        private static void _ExportCsv(MultiPorosity.Services.Models.MultiPorosityModelResults multiPorosityModelResults,
+                                       List<MultiPorosity.Models.MultiPorosityModelProduction> multiPorosityModelProduction,
+                                       string                                                  strFilePath)
+        {
+            MultiPorosity.Services.Models.MultiPorosityModelResults _multiPorosityModelResults    = multiPorosityModelResults;
+            List<MultiPorosity.Models.MultiPorosityModelProduction> _multiPorosityModelProduction = multiPorosityModelProduction;
+            
+            StreamWriter sw = new StreamWriter(strFilePath, false);
+
+            sw.WriteLine($"MatrixPermeability,{_multiPorosityModelResults.MatrixPermeability}");
+
+            sw.WriteLine($"HydraulicFracturePermeability,{_multiPorosityModelResults.HydraulicFracturePermeability}");
+        
+            sw.WriteLine($"NaturalFracturePermeability,{_multiPorosityModelResults.NaturalFracturePermeability}");
+
+            sw.WriteLine($"HydraulicFractureHalfLength,{_multiPorosityModelResults.HydraulicFractureHalfLength}");
+
+            sw.WriteLine($"HydraulicFractureSpacing,{_multiPorosityModelResults.HydraulicFractureSpacing}");
+
+            sw.WriteLine($"NaturalFractureSpacing,{_multiPorosityModelResults.NaturalFractureSpacing}");
+
+            sw.WriteLine($"Skin,{_multiPorosityModelResults.Skin}");
+
+
+            sw.WriteLine("Days,Gas,Oil,Water");
+
+            for (int i = 0; i < _multiPorosityModelProduction.Count; i++)
+            {
+                sw.WriteLine($"{_multiPorosityModelProduction[i].Days},{_multiPorosityModelProduction[i].Gas},{_multiPorosityModelProduction[i].Oil},{_multiPorosityModelProduction[i].Water}");
+            }
+
+            sw.Flush();
+            sw.Close();
+        }
+
+        private static void _ExportCsv(string[]                                                              cached_header,
+                                       List<MultiPorosity.Services.Models.TriplePorosityOptimizationResults> cached_results,
+                                       string                                                                strFilePath)
         {
             List<string>                                                          header  = new(cached_header);
             List<MultiPorosity.Services.Models.TriplePorosityOptimizationResults> results = cached_results;
@@ -444,8 +583,8 @@ namespace MultiPorosity.Services
             sw.Close();
         }
 
-        public static void ExporXlsx(DataView dtDataTable,
-                                     string   strFilePath)
+        private static void _ExporXlsx(DataView dtDataTable,
+                                       string   strFilePath)
         {
             Microsoft.Office.Interop.Excel.Application excel = new Microsoft.Office.Interop.Excel.Application();
             excel.Visible       = false;
@@ -502,8 +641,8 @@ namespace MultiPorosity.Services
             }
         }
 
-        public static void ExporXlsx(DataTable dtDataTable,
-                                     string    strFilePath)
+        private static void _ExporXlsx(DataTable dtDataTable,
+                                       string    strFilePath)
         {
             Microsoft.Office.Interop.Excel.Application excel = new Microsoft.Office.Interop.Excel.Application();
             excel.Visible       = false;
@@ -557,9 +696,9 @@ namespace MultiPorosity.Services
             excel.Quit();
         }
 
-        public static void ExporXlsx(string[]                                                              cached_header,
-                                     List<MultiPorosity.Services.Models.TriplePorosityOptimizationResults> cached_results,
-                                     string                                                                strFilePath)
+        private static void _ExporXlsx(string[]                                                              cached_header,
+                                       List<MultiPorosity.Services.Models.TriplePorosityOptimizationResults> cached_results,
+                                       string                                                                strFilePath)
         {
             List<string>                                                          header  = new(cached_header);
             List<MultiPorosity.Services.Models.TriplePorosityOptimizationResults> results = cached_results;
@@ -577,7 +716,7 @@ namespace MultiPorosity.Services
             {
                 excelSheet.Cells[1, i + 1] = header[i];
             }
-            
+
             for(int i = 0; i < results.Count; i++)
             {
                 for(int j = 0; j < results[i].GetLength(); j++)
@@ -615,8 +754,25 @@ namespace MultiPorosity.Services
 
             try
             {
-                sessionId = dbConnection.ConnectAsync(databaseDataSource.Host, databaseDataSource.Port, databaseDataSource.Username, databaseDataSource.Password, databaseDataSource.DatabaseName).
-                                         Result;
+                sessionId = dbConnection.Connect(databaseDataSource.Host, databaseDataSource.Port, databaseDataSource.Username, databaseDataSource.Password, databaseDataSource.DatabaseName);
+            }
+            catch(Exception)
+            {
+                // ignored
+            }
+
+            return (dbConnection, sessionId);
+        }
+
+        public static async Task<(DbConnection Connection, string sessionId)> ConnectToDatabaseAsync(DatabaseDataSource databaseDataSource)
+        {
+            DbConnection dbConnection = new();
+
+            string sessionId = string.Empty;
+
+            try
+            {
+                sessionId = await dbConnection.ConnectAsync(databaseDataSource.Host, databaseDataSource.Port, databaseDataSource.Username, databaseDataSource.Password, databaseDataSource.DatabaseName).ConfigureAwait(true);
             }
             catch(Exception)
             {
@@ -629,7 +785,7 @@ namespace MultiPorosity.Services
         public static DataTable QueryDatabase(DbConnection dbConnection,
                                               string       query)
         {
-            pg_result result = dbConnection.SqlQueryAsync(query).Result;
+            pg_result result = dbConnection.SqlQuery(query);
 
             return dbConnection.ResultAsDataTable(result);
         }
@@ -637,7 +793,7 @@ namespace MultiPorosity.Services
         public static void DisconnectFromDatabase(DbConnection dbConnection,
                                                   string       session)
         {
-            dbConnection.DisconnectAsync(session);
+            dbConnection.Disconnect(session);
         }
 
         #endregion

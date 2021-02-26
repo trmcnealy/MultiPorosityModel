@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 using Engineering.UI;
 using Engineering.UI.Controls;
 
+using MultiPorosity.Presentation.Services;
+
 using Prism.Mvvm;
 
 namespace MultiPorosity.Presentation.Models
@@ -39,8 +41,18 @@ namespace MultiPorosity.Presentation.Models
             get { return _gasSaturation; }
             set
             {
+                double old_gas = _gasSaturation;
+
                 if(SetProperty(ref _gasSaturation, value))
                 {
+                    SaturationService.ReProportion(old_gas, _gasSaturation, ref _oilSaturation, ref _waterSaturation);
+
+                    if(SaturationService.ReBalance(ref _gasSaturation, ref _oilSaturation, ref _waterSaturation))
+                    {
+                        RaisePropertyChanged(nameof(GasSaturation));
+                    }
+                    RaisePropertyChanged(nameof(OilSaturation));
+                    RaisePropertyChanged(nameof(WaterSaturation));
                 }
             }
         }
@@ -135,8 +147,18 @@ namespace MultiPorosity.Presentation.Models
             get { return _oilSaturation; }
             set
             {
+                double old_oil = _oilSaturation;
+
                 if(SetProperty(ref _oilSaturation, value))
                 {
+                    SaturationService.ReProportion(ref _gasSaturation, old_oil, _oilSaturation, ref _waterSaturation);
+
+                    if(SaturationService.ReBalance(ref _gasSaturation, ref _oilSaturation, ref _waterSaturation))
+                    {
+                        RaisePropertyChanged(nameof(OilSaturation));
+                    }
+                    RaisePropertyChanged(nameof(GasSaturation));
+                    RaisePropertyChanged(nameof(WaterSaturation));
                 }
             }
         }
@@ -215,8 +237,18 @@ namespace MultiPorosity.Presentation.Models
             get { return _waterSaturation; }
             set
             {
+                double old_water = _waterSaturation;
+
                 if(SetProperty(ref _waterSaturation, value))
                 {
+                    SaturationService.ReProportion(ref _gasSaturation, ref _oilSaturation, old_water, _waterSaturation);
+
+                    if(SaturationService.ReBalance(ref _gasSaturation, ref _oilSaturation, ref _waterSaturation))
+                    {
+                        RaisePropertyChanged(nameof(WaterSaturation));
+                    }
+                    RaisePropertyChanged(nameof(GasSaturation));
+                    RaisePropertyChanged(nameof(OilSaturation));
                 }
             }
         }

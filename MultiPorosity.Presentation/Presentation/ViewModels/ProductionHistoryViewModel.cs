@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -22,6 +24,8 @@ using Prism.Mvvm;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Services.Dialogs;
+
+using DataGridExtensions;
 
 namespace MultiPorosity.Presentation
 {
@@ -52,10 +56,12 @@ namespace MultiPorosity.Presentation
 
         public DelegateCommand ConvertCommand { get; }
 
+        public DelegateCommand SmoothingCommand { get; }
+
         public DelegateCommand<DataGrid> KeyDownCommand { get; }
 
         public DelegateCommand<IList<object>> KeyUpCommand { get; }
-        
+
         public DelegateCommand<IList<object>> DeleteRowsCommand { get; }
 
         public DelegateCommand<IList<object>> PreviewKeyDownCommand { get; }
@@ -65,6 +71,10 @@ namespace MultiPorosity.Presentation
         public DelegateCommand<IList<DataGridCellInfo>> SelectedModelsCommand { get; }
 
         public DelegateCommand<DataGrid> HistoryView_DataGridCommand { get; }
+
+        public DelegateCommand<DataGrid> CopyCommand { get; }
+
+        public DelegateCommand<DataGrid> PasteCommand { get; }
 
         #endregion
 
@@ -111,6 +121,12 @@ namespace MultiPorosity.Presentation
             ExportCommand = new DelegateCommand(Export);
 
             ConvertCommand = new DelegateCommand(Convert);
+
+            SmoothingCommand = new DelegateCommand(Smooth);
+
+            CopyCommand = new DelegateCommand<DataGrid>(OnCopy);
+
+            PasteCommand = new DelegateCommand<DataGrid>(OnPaste);
 
             _multiPorosityModelService.PropertyChanged -= OnPropertyChanged;
             _multiPorosityModelService.PropertyChanged += OnPropertyChanged;
@@ -270,7 +286,7 @@ namespace MultiPorosity.Presentation
                             }
                         }
                     }
-                    
+
                     if(HistoryView_DataGrid.SelectedItems.Count > 0)
                     {
                         HistoryView_DataGrid.SelectedItem = HistoryView_DataGrid.SelectedItems[0];
@@ -593,8 +609,8 @@ namespace MultiPorosity.Presentation
 
         private void ConnectToDatabase()
         {
-             DialogParameters parameters = new ();
-            
+            DialogParameters parameters = new();
+
             _dialogService.ShowDialog(RegionNames.ConnectToDatabase, parameters, ConnectToDatabaseResult);
         }
 
@@ -602,7 +618,6 @@ namespace MultiPorosity.Presentation
         {
             if(dialogResult.Result == ButtonResult.OK)
             {
-
             }
         }
 
@@ -658,8 +673,39 @@ namespace MultiPorosity.Presentation
             _multiPorosityModelService.ActiveProject.UpdateProductionDataset(new(ProductionService.ConvertMonthlyToDaily(_multiPorosityModelService.ActiveProject.ProductionRecords.ToList())));
         }
 
+        private void Smooth()
+        {
+            DialogParameters parameters = new();
+
+            _dialogService.ShowDialog(RegionNames.ProductionSmoother, parameters, ProductionSmootherResult);
+        }
+
+        private void ProductionSmootherResult(IDialogResult dialogResult)
+        {
+            if(dialogResult.Result == ButtonResult.OK)
+            {
+            }
+        }
+
         public void UpdateIndex()
         {
+            _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual.DefaultView.Sort = "Date ASC";
+
+            for(int rowIndex = 0; rowIndex < _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual.Count; ++rowIndex)
+            {
+                _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual[rowIndex].Index = rowIndex;
+
+                if(rowIndex == 0)
+                {
+                    _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual[rowIndex].Days = 1;
+                }
+                else
+                {
+                    _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual[rowIndex].Days =
+                        (_multiPorosityModelService.ActiveProject.ProductionDataSet.Actual[rowIndex].Date - _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual[0].Date).Days;
+                }
+            }
+
             //List<ProductionRecord> _productionHistory = new List<ProductionRecord>(productionHistory.Count);
 
             //try
@@ -692,6 +738,172 @@ namespace MultiPorosity.Presentation
             //    this.RaisePropertyChanged(nameof(ProductionHistory));
             //}
         }
+
+        #region Copy & Paste Methods
+        private const char TextColumnSeparator = '\t';
+        private const string Quote = "\"";
+
+        public static string ToString(IList<IList<string>> table,
+                                      char separator)
+        {
+            if (table.Count == 1 && table[0] != null && table[0].Count == 1 && string.IsNullOrWhiteSpace(table[0][0]))
+            {
+                return Quote + (table[0][0] ?? string.Empty) + Quote;
+            }
+
+            return string.Join(Environment.NewLine, table.Select(line => string.Join(separator.ToString(), line.Select(cell => Quoted(cell, separator)))));
+        }
+
+        public static string Quoted(string? value,
+                                    char separator)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            if (value.Any(IsLineFeed) || value.Contains(separator) || value.StartsWith(Quote, StringComparison.Ordinal))
+            {
+                return Quote + value.Replace(Quote, Quote + Quote) + Quote;
+            }
+
+            return value;
+        }
+
+        private void OnCopy(DataGrid dataGrid)
+        {
+            if (!dataGrid.HasRectangularCellSelection())
+            {
+                MessageBox.Show("Invalid selection for copy");
+
+                return;
+            }
+
+            IList<IList<string>>? cellSelection = dataGrid.GetCellSelection();
+
+            Clipboard.SetText(ToString(cellSelection, TextColumnSeparator));
+        }
+
+        public static IList<IList<string>>? ParseTable(string text,
+                                                       char separator)
+        {
+            List<IList<string>>? table = new List<IList<string>>();
+
+            using (StringReader? reader = new StringReader(text))
+            {
+                while (reader.Peek() != -1)
+                {
+                    table.Add(ReadTableLine(reader, separator));
+                }
+            }
+
+            if (!table.Any())
+            {
+                return null;
+            }
+
+            IList<string>? headerColumns = table.First();
+
+            return table.Any(columns => columns?.Count != headerColumns?.Count) ? null : table;
+        }
+
+        private static IList<string> ReadTableLine([NotNull] TextReader reader,
+                                                   char separator)
+        {
+            List<string>? columns = new List<string>();
+
+            while (true)
+            {
+                columns.Add(ReadTableColumn(reader, separator));
+
+                if ((char)reader.Peek() == separator)
+                {
+                    reader.Read();
+
+                    continue;
+                }
+
+                while (IsLineFeed(reader.Peek()))
+                {
+                    reader.Read();
+                }
+
+                break;
+            }
+
+            return columns;
+        }
+
+        private static string ReadTableColumn(TextReader reader,
+                                              char separator)
+        {
+            StringBuilder? stringBuilder = new StringBuilder();
+            int nextChar;
+
+            if (IsDoubleQuote(reader.Peek()))
+            {
+                reader.Read();
+
+                while ((nextChar = reader.Read()) != -1)
+                {
+                    if (IsDoubleQuote(nextChar))
+                    {
+                        if (IsDoubleQuote(reader.Peek()))
+                        {
+                            reader.Read();
+                            stringBuilder.Append((char)nextChar);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        stringBuilder.Append((char)nextChar);
+                    }
+                }
+            }
+            else
+            {
+                while ((nextChar = reader.Peek()) != -1)
+                {
+                    if (IsLineFeed(nextChar) || nextChar == separator)
+                    {
+                        break;
+                    }
+
+                    reader.Read();
+                    stringBuilder.Append((char)nextChar);
+                }
+            }
+
+            return stringBuilder.ToString();
+        }
+
+        private static bool IsDoubleQuote(int c)
+        {
+            return c == '"';
+        }
+
+        private static bool IsLineFeed(int c)
+        {
+            return c == '\r' || c == '\n';
+        }
+
+        private static bool IsLineFeed(char c)
+        {
+            return IsLineFeed((int)c);
+        }
+
+        private void OnPaste(DataGrid dataGrid)
+        {
+            if (!dataGrid.PasteCells(ParseTable(Clipboard.GetText(), TextColumnSeparator)))
+            {
+                MessageBox.Show("Selection does not match data.");
+            }
+        } 
+        #endregion
 
         public void SetDataGrid(DataGrid e)
         {
@@ -745,8 +957,6 @@ namespace MultiPorosity.Presentation
                     //    _productionHistory.Add(new ProductionRecord(item));
                     //}
 
-                    List<ProductionRecord>? _productionHistory = null;
-
                     int startRow            = 0;
                     int startCol            = 0;
                     int clipboardDataLength = 0;
@@ -772,29 +982,42 @@ namespace MultiPorosity.Presentation
                                                                                                    SelectedCells[0].Item));
                         }
 
-                        startCol = HistoryView_DataGrid.SelectedCells[0].Column.DisplayIndex + 1;
-
                         clipboardDataLength = clipboardData.Length;
 
-                        _productionHistory = new List<ProductionRecord>(clipboardDataLength);
+                        int total_length = clipboardDataLength + startRow;
 
-                        for(int i = 0; i < clipboardDataLength; i++)
+                        if(total_length > _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual.Count)
                         {
-                            _productionHistory.Add(new ProductionRecord());
+                            int      old_count   = _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual.Count;
+                            DateTime maxDateTime = _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual[old_count - 1].Date;
+
+                            for(int rowIndex = 0; rowIndex < (total_length - _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual.Count); rowIndex++)
+                            {
+                                _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual.AddActualRow(old_count + rowIndex,
+                                                                                                               maxDateTime.AddDays(old_count + rowIndex),
+                                                                                                               0.0,
+                                                                                                               0.0,
+                                                                                                               0.0,
+                                                                                                               0.0,
+                                                                                                               0.0,
+                                                                                                               0.0);
+                            }
                         }
 
-                        for(int rowIndex = 0; rowIndex < clipboardDataLength; rowIndex++)
+                        startCol = HistoryView_DataGrid.SelectedCells[0].Column.DisplayIndex + 1;
+
+                        for(int rowIndex = startRow; rowIndex < (clipboardDataLength + startRow); rowIndex++)
                         {
                             string[] rowContent = clipboardData[rowIndex - startRow];
                             int      cols       = rowContent.Length;
 
-                            for(int colIndex = startCol; colIndex < startCol + cols; colIndex++)
+                            for(int colIndex = startCol; colIndex < (startCol + cols); colIndex++)
                             {
                                 string cellContent = rowContent[colIndex - startCol];
 
                                 if(cellContent.Length > 0)
                                 {
-                                    _productionHistory[rowIndex][colIndex] = cellContent;
+                                    _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual[rowIndex][colIndex] = cellContent;
                                 }
                             }
                         }
@@ -802,40 +1025,6 @@ namespace MultiPorosity.Presentation
                     catch
                     {
                         // ignored
-                    }
-                    finally
-                    {
-                        if(_productionHistory != null)
-                        {
-                            for(int rowIndex = startRow; rowIndex < clipboardDataLength + startRow; rowIndex++)
-                            {
-                                if(rowIndex > _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual.Count)
-                                {
-                                    _multiPorosityModelService.ActiveProject.ProductionDataSet.Actual.AddActualRow(rowIndex,
-                                                                                                                   _productionHistory[rowIndex].Date,
-                                                                                                                   _productionHistory[rowIndex].Days,
-                                                                                                                   _productionHistory[rowIndex].Gas,
-                                                                                                                   _productionHistory[rowIndex].Oil,
-                                                                                                                   _productionHistory[rowIndex].Water,
-                                                                                                                   _productionHistory[rowIndex].WellheadPressure,
-                                                                                                                   _productionHistory[rowIndex].Weight);
-                                }
-                            }
-                        }
-
-                        //productionHistory.Clear();
-
-                        //foreach (ProductionRecord item in _productionHistory)
-                        //{
-                        //    productionHistory.Add(new ProductionHistoryModel(item));
-                        //}
-
-                        //foreach(ProductionRecord item in _productionHistory)
-                        //{
-                        //    productionHistory.Add(new ProductionHistoryModel(item));
-                        //}
-
-                        //IsDirty = true;
                     }
 
                     UpdateIndex();
@@ -948,7 +1137,7 @@ namespace MultiPorosity.Presentation
             //    throw new ArgumentException("The SelectionUnit of the DataGrid must be set to FullRow.");
             //}
 
-            if(rowIndex < 0 || rowIndex > dataGrid.Items.Count - 1)
+            if(rowIndex < 0 || rowIndex > (dataGrid.Items.Count - 1))
             {
                 throw new ArgumentException($"{rowIndex} is an invalid row index.");
             }

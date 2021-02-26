@@ -121,7 +121,10 @@ namespace MultiPorosity.Presentation
 
         protected override void CloseDialog(string parameter)
         {
-            _databaseConnectionService.ImportTable(Model.WellProductionData);
+            if(parameter?.ToLower() == "true")
+            {
+                _databaseConnectionService.ImportTable(Model.WellProductionData);
+            }
 
             base.CloseDialog(parameter);
         }

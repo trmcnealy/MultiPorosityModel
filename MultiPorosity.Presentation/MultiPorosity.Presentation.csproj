@@ -27,6 +27,7 @@
         <PackageReference Include="Plotly.WPF" Version="$(PLOTLY_WPF_VERSION)" />
         <PackageReference Include="OilGas.Data" Version="$(OILGAS_DATA_GROUP_VERSION)" />
         <PackageReference Include="Prism.WPF" Version="8.0.0.1909" />
+        <PackageReference Include="DataGridExtensions" Version="2.4.7" />
     </ItemGroup>
     
     <ItemGroup>

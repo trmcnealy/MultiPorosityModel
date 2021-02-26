@@ -55,6 +55,13 @@
                        Height="25"
                        Margin="0,0,0,0"/>
             </Button>
+            <Button Command="{Binding Path=SmoothingCommand}"
+                    ToolTip="Smooth Production">
+                <Image Source="{DynamicResource SmoothingButtonIcon}"
+                       Width="25"
+                       Height="25"
+                       Margin="0,0,0,0"/>
+            </Button>
         </ToolBar>
 
         <DataGrid x:Name="HistoryViewDataGrid"
@@ -70,6 +77,13 @@
                   KeyDown="HistoryViewDataGrid_OnItemOverride"
                   PreviewKeyDown="HistoryViewDataGrid_PreviewKeyDown">
 
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Copy" Command="{Binding Path=CopyCommand}" CommandParameter="{Binding PlacementTarget, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" />
+                    <MenuItem Header="Paste" Command="{Binding Path=PasteCommand}" CommandParameter="{Binding PlacementTarget, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+
             <interactivity:Interaction.Triggers>
                 <interactivity:EventTrigger EventName="Loaded">
                     <interactivity:InvokeCommandAction Command="{Binding Path=HistoryView_DataGridCommand, Mode=OneWay}"
@@ -80,12 +94,12 @@
                     <interactivity:InvokeCommandAction Command="{Binding Path=CellEditEndingCommand, Mode=OneWay}"/>
                 </interactivity:EventTrigger>
 
-                <interactivity:KeyTrigger Key="V"
+                <!--<interactivity:KeyTrigger Key="V"
                                           Modifiers="Control"
                                           FiredOn="KeyDown">
                     <interactivity:InvokeCommandAction Command="{Binding Path=KeyDownCommand}"
                                                        CommandParameter="{Binding ElementName=HistoryViewDataGrid}"/>
-                </interactivity:KeyTrigger>
+                </interactivity:KeyTrigger>-->
 
                 <interactivity:KeyTrigger Key="Enter"
                                           FiredOn="KeyDown">

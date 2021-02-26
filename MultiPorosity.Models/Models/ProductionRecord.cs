@@ -324,9 +324,7 @@ namespace MultiPorosity.Models
                 }
             }
         }
-
-        #region Equality members
-
+        
         public bool Equals(ProductionRecord? other)
         {
             if(ReferenceEquals(null, other))
@@ -352,15 +350,9 @@ namespace MultiPorosity.Models
             return HashCode.Combine(Date, Days, Gas, Oil, Water, WellheadPressure);
         }
 
-        #endregion
-
-        #region Overrides of Object
-
         public override string ToString()
         {
             return $"{Index} {Date:MM/dd/yyyy} {Days} {Gas} {Oil} {Water} {WellheadPressure} {Weight}";
         }
-
-        #endregion
     }
 }
