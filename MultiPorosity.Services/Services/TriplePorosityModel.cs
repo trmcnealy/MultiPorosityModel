@@ -1114,5 +1114,65 @@ namespace MultiPorosity.Services
 
             eventAggregator?.GetEvent<TriplePorosityOptimizationResultsEvent>().Publish(results);
         }
+
+        public static (double F, double f, double m) CalculateLambdaOil(MultiPorosityProperties parameters,
+                                                                        in double               km,
+                                                                        in double               kF,
+                                                                        in double               kf,
+                                                                        in double               ye,
+                                                                        in double               LF,
+                                                                        in double               Lf,
+                                                                        in double               skin = 0.0)
+        {
+
+            double Acw = 2.0 * parameters.ReservoirProperties.Thickness * parameters.ReservoirProperties.Length;
+            
+            (double F, double f, double m) kr   = (parameters.RelativePermeabilities.FractureOil, parameters.RelativePermeabilities.NaturalFractureOil, parameters.RelativePermeabilities.MatrixOil);
+            (double F, double f, double m) k    = (kF * kr.F, kf * kr.f, km * kr.m);
+            (double F, double f, double m) phio = (parameters.FractureProperties.Porosity, parameters.NaturalFractureProperties.Porosity, parameters.ReservoirProperties.Porosity);
+            (double F, double f, double m) phi  = (parameters.Pvt.OilSaturation * phio.F, parameters.Pvt.OilSaturation * phio.f, parameters.Pvt.OilSaturation * phio.m);
+
+            (double F, double f, double m) W = (parameters.FractureProperties.Width, parameters.NaturalFractureProperties.Width, 1.0);
+            (double F, double f, double m) L = (LF, Lf, 1.0);
+            (double F, double f, double m) K = (k.F * (W.F / L.F), k.f * (W.f / L.f), k.m * (W.m / L.m));
+
+            double Ac_Ff = (12.0 / Math.Pow(LF, 2.0)) * (K.f / K.F) * Acw;
+            double Ac_fm = (12.0 / Math.Pow(Lf, 2.0)) * (K.m / K.F) * Acw;
+
+            return (3.0, Ac_Ff, Ac_fm);
+        }
+
+        public static (double F, double f, double m) CalculateOmegaOil(MultiPorosityProperties parameters,
+                                                                       in double               km,
+                                                                       in double               kF,
+                                                                       in double               kf,
+                                                                       in double               ye,
+                                                                       in double               LF,
+                                                                       in double               Lf,
+                                                                       in double               skin = 0.0)
+        {
+
+            double Acw = 2.0 * parameters.ReservoirProperties.Thickness * parameters.ReservoirProperties.Length;
+            
+            (double F, double f, double m) kr   = (parameters.RelativePermeabilities.FractureOil, parameters.RelativePermeabilities.NaturalFractureOil, parameters.RelativePermeabilities.MatrixOil);
+            (double F, double f, double m) k    = (kF * kr.F, kf * kr.f, km * kr.m);
+            (double F, double f, double m) phio = (parameters.FractureProperties.Porosity, parameters.NaturalFractureProperties.Porosity, parameters.ReservoirProperties.Porosity);
+            (double F, double f, double m) phi  = (parameters.Pvt.OilSaturation * phio.F, parameters.Pvt.OilSaturation * phio.f, parameters.Pvt.OilSaturation * phio.m);
+
+            (double F, double f, double m) W = (parameters.FractureProperties.Width, parameters.NaturalFractureProperties.Width, 1.0);
+            (double F, double f, double m) L = (LF, Lf, 1.0);
+            (double F, double f, double m) K = (k.F * (W.F / L.F), k.f * (W.f / L.f), k.m * (W.m / L.m));
+
+            double                         Vt =  2 * parameters.ReservoirProperties.Length * ye;
+            double                         VF = (Vt * (W.F / L.F));
+            double                         Vf = (Vt * (W.f / L.f));
+            (double F, double f, double m) V  = (VF, Vf, Vt - (VF + Vf));
+
+            (double F, double f, double m) PhiV  = (phi.F * V.F, phi.f * V.f, phi.m * V.m);
+            double                         phiVt = (PhiV.F + PhiV.f + PhiV.m);
+            double                         phit  = (phiVt / Vt);
+
+            return (PhiV.F / phiVt, PhiV.f / phiVt, PhiV.m / phiVt);
+        }
     }
 }

@@ -87,11 +87,32 @@ namespace MultiPorosity.Presentation.Models
             set { SetProperty(ref productionSmoothing, value); }
         }
 
-        public ProductionSmootherModel(MultiPorosityModelService? multiPorosityModelService)
-        {
-            productionSmoothing = multiPorosityModelService.ActiveProject.ProductionSmoothing;
 
-            ProductionRecords = multiPorosityModelService.ActiveProject.ProductionRecords;
+        private readonly MultiPorosityModelService _multiPorosityModelService;
+
+        public ProductionSmootherModel(MultiPorosityModelService multiPorosityModelService)
+        {
+            _multiPorosityModelService = multiPorosityModelService;
+
+            _multiPorosityModelService.PropertyChanged -= OnPropertyChanged;
+            _multiPorosityModelService.PropertyChanged += OnPropertyChanged;
+        }
+
+        private void OnPropertyChanged(object?                  sender,
+                                       PropertyChangedEventArgs e)
+        {
+            switch(e.PropertyName)
+            {
+                case "ActiveProject":
+                {
+                    ProductionSmoothing = _multiPorosityModelService.ActiveProject.ProductionSmoothing;
+
+                    ProductionRecords = _multiPorosityModelService.ActiveProject.ProductionRecords;
+
+                    SmoothedProductionRecords = new(ProductionRecords);
+                    break;
+                }
+            }
         }
     }
 }

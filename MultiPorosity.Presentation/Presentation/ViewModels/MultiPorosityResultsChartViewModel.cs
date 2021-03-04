@@ -41,37 +41,37 @@ namespace MultiPorosity.Presentation
         private ObservableDictionary<string, (string type, object[] array)> dataSource = new ObservableDictionary<string, (string type, object[] array)>
         {
             {
-                "Iteration", ("long", new object[0])
+                "Iteration", ("long", Array.Empty<object>())
             },
             {
-                "SwarmIndex", ("long", new object[0])
+                "SwarmIndex", ("long", Array.Empty<object>())
             },
             {
-                "ParticleIndex", ("long", new object[0])
+                "ParticleIndex", ("long", Array.Empty<object>())
             },
             {
-                "RMS", ("double", new object[0])
+                "RMS", ("double", Array.Empty<object>())
             },
             {
-                "MatrixPermeability", ("double", new object[0])
+                "MatrixPermeability", ("double", Array.Empty<object>())
             },
             {
-                "HydraulicFracturePermeability", ("double", new object[0])
+                "HydraulicFracturePermeability", ("double", Array.Empty<object>())
             },
             {
-                "NaturalFracturePermeability", ("double", new object[0])
+                "NaturalFracturePermeability", ("double", Array.Empty<object>())
             },
             {
-                "HydraulicFractureHalfLength", ("double", new object[0])
+                "HydraulicFractureHalfLength", ("double", Array.Empty<object>())
             },
             {
-                "HydraulicFractureSpacing", ("double", new object[0])
+                "HydraulicFractureSpacing", ("double", Array.Empty<object>())
             },
             {
-                "NaturalFractureSpacing", ("double", new object[0])
+                "NaturalFractureSpacing", ("double", Array.Empty<object>())
             },
             {
-                "Skin", ("double", new object[0])
+                "Skin", ("double", Array.Empty<object>())
             }
         };
 
@@ -261,7 +261,8 @@ namespace MultiPorosity.Presentation
                         ShowScale  = true,
                         ColorBar   = new ColorBar(),
                         ColorSrc   = "RMS",
-                        ColorScale = Utilities.BuildColorscale(0, 10000.0, Colors.Green_1, Colors.Blue, Colors.Red_1),
+                        ColorScale = "Jet",
+                        //ColorScale = Utilities.BuildColorscale(0, 10000.0, Colors.Green_1, Colors.Blue, Colors.Red_1),
                         Size       = 5
                     }
                 }
@@ -269,12 +270,12 @@ namespace MultiPorosity.Presentation
 
             PlotLayout = new Layout
             {
-                Title = new Title
-                {
-                    Text = "Scatterplot Matrix"
-                },
+                //Title = new Title
+                //{
+                //    Text = "Scatterplot Matrix"
+                //},
                 ShowLegend = true,
-                //AutoSize   = true,
+                AutoSize   = true,
                 Legend = new Legend
                 {
                     Orientation = OrientationEnum.H,
@@ -447,12 +448,12 @@ namespace MultiPorosity.Presentation
         {
             return new Layout
             {
-                Title = new Title
-                {
-                    Text = "Scatterplot Matrix"
-                },
+                //Title = new Title
+                //{
+                //    Text = "Scatterplot Matrix"
+                //},
                 ShowLegend = true,
-                //AutoSize   = true,
+                AutoSize   = true,
                 Legend = new Legend
                 {
                     Orientation = OrientationEnum.H,

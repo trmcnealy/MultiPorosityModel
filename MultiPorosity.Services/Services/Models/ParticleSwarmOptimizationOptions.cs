@@ -1,6 +1,8 @@
 ﻿
 using System.Text.Json.Serialization;
 
+using Engineering.DataSource;
+
 namespace MultiPorosity.Services.Models
 {
     public sealed class ParticleSwarmOptimizationOptions 
@@ -52,6 +54,19 @@ namespace MultiPorosity.Services.Models
             MinInertWeight   = minInertWeight;
             MaxInertWeight   = maxInertWeight;
             CacheResults     = cacheResults;
+        }
+
+        public ParticleSwarmOptimizationOptions(ParticleSwarmOptimizationOptions? particleSwarmOptimizationOptions)
+        {
+            Throw.IfNull(particleSwarmOptimizationOptions);
+
+            SwarmSize        = particleSwarmOptimizationOptions.SwarmSize;
+            ParticlesInSwarm = particleSwarmOptimizationOptions.ParticlesInSwarm;
+            IterationMax     = particleSwarmOptimizationOptions.IterationMax;
+            ErrorThreshold   = particleSwarmOptimizationOptions.ErrorThreshold;
+            MinInertWeight   = particleSwarmOptimizationOptions.MinInertWeight;
+            MaxInertWeight   = particleSwarmOptimizationOptions.MaxInertWeight;
+            CacheResults     = particleSwarmOptimizationOptions.CacheResults;
         }
     }
 }

@@ -594,6 +594,7 @@ namespace MultiPorosity.Presentation.Models
             ParticleSwarmOptimizationOptions    = new(project.ParticleSwarmOptimizationOptions);
             MultiPorosityModelResults           = new(project.MultiPorosityModelResults);
             DatabaseDataSource                  = new(project.DatabaseDataSource);
+            ProductionSmoothing                 = (ProductionSmoothing)project.ProductionSmoothing;
 
 
             PorosityModelKind                   = project.PorosityModelKind;

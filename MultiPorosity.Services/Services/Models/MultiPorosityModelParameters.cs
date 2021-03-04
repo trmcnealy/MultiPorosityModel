@@ -51,14 +51,28 @@ namespace MultiPorosity.Services.Models
                                             double naturalFractureSpacing,
                                             double skin)
         {
-            Days                         = days;
-            MatrixPermeability           = matrixPermeability;
+            Days                          = days;
+            MatrixPermeability            = matrixPermeability;
             HydraulicFracturePermeability = hydraulicFracturePermeability;
-            NaturalFracturePermeability  = naturalFracturePermeability;
+            NaturalFracturePermeability   = naturalFracturePermeability;
             HydraulicFractureHalfLength   = hydraulicFractureHalfLength;
             HydraulicFractureSpacing      = hydraulicFractureSpacing;
-            NaturalFractureSpacing       = naturalFractureSpacing;
-            Skin                         = skin;
+            NaturalFractureSpacing        = naturalFractureSpacing;
+            Skin                          = skin;
+        }
+
+        public MultiPorosityModelParameters(MultiPorosityModelParameters? multiPorosityModelParameters)
+        {
+            Throw.IfNull(multiPorosityModelParameters);
+
+            Days                          = multiPorosityModelParameters.Days;
+            MatrixPermeability            = multiPorosityModelParameters.MatrixPermeability;
+            HydraulicFracturePermeability = multiPorosityModelParameters.HydraulicFracturePermeability;
+            NaturalFracturePermeability   = multiPorosityModelParameters.NaturalFracturePermeability;
+            HydraulicFractureHalfLength   = multiPorosityModelParameters.HydraulicFractureHalfLength;
+            HydraulicFractureSpacing      = multiPorosityModelParameters.HydraulicFractureSpacing;
+            NaturalFractureSpacing        = multiPorosityModelParameters.NaturalFractureSpacing;
+            Skin                          = multiPorosityModelParameters.Skin;
         }
     }
 }

@@ -173,7 +173,7 @@ namespace MultiPorosity.Presentation.Services
                 double   wellheadPressure;
                 double   weight;
 
-                productionData.Sort = "Date DESC";
+                productionData.Sort = "Date ASC";
 
                 for(int i = 0; i < WellProductionData.Rows.Count; ++i)
                 {

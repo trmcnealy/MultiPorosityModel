@@ -1,23 +1,10 @@
-﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+﻿<#@ template debug="true" hostspecific="false" language="C#" #>
 <#@ assembly name="System.Core" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
 <#@ include file ="../../../BuildTools/NativeStructBuilder.ttinclude" #>
-<#
-    string structName = "BoundConstraints";
-    List<(string Name, string Constraint)> genericTypeList = new List<(string Name, string Constraint)>{("T", "unmanaged")};
-    List<(string type, string fieldName, string propertyName)> propertyList = new List<(string type, string fieldName, string propertyName)>
-    {
-        ("T", "_lower", "Lower"),
-        ("T", "_upper", "Upper")
-    };
-    int indentLevel = 1;
-    string executionSpace = "Cuda";
-
-//NATIVE_STRUCT_BUILDER(structName, genericTypeList, propertyList, indentLevel, executionSpace)
-#>
 using System;
 using System.Runtime.Versioning;
 using System.Runtime.CompilerServices;
@@ -93,6 +80,12 @@ namespace MultiPorosity.Models
         {
             Lower = lower;
             Upper = upper;
+        }
+
+        public BoundConstraints(BoundConstraints<T> boundConstraints)
+        {
+            Lower = boundConstraints.Lower;
+            Upper = boundConstraints.Upper;
         }
 
         public BoundConstraints(BoundConstraints.BoundConstraintsSingle boundConstraints)

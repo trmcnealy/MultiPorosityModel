@@ -1,4 +1,5 @@
 ﻿
+
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -78,18 +79,19 @@ namespace MultiPorosity.Models
             pointer = NativePointer.Allocate(ThisSize, executionSpace);
         }
         
-        ~NaturalFractureProperties()
-        {
-        }
         public void Dispose()
         {
             pointer.Dispose();
-            GC.SuppressFinalize(this);
         }
         
         internal NaturalFractureProperties(IntPtr intPtr, ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)
         {
             pointer = new NativePointer(intPtr, ThisSize, false, executionSpace);
+        }
+        
+        internal NaturalFractureProperties(NaturalFractureProperties<T> copy, ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)
+        {
+            pointer = new NativePointer(copy.Instance, executionSpace);
         }
         
         public static implicit operator NaturalFractureProperties<T>(IntPtr intPtr)

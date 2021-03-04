@@ -44,6 +44,8 @@ namespace MultiPorosity.Presentation
             MultiPorosityModelService? multiPorosityModelService = containerProvider.Resolve<MultiPorosityModelService>();
             multiPorosityModelService.SetRepositoryPath();
             multiPorosityModelService.SetExecutionSpace();
+
+            ProductionSmootherService? productionSmootherService = containerProvider.Resolve<ProductionSmootherService>();
             
             regionManager.RegisterViewWithRegion(RegionNames.ProductionSmootherChart, typeof(ProductionSmootherChartView));
         }

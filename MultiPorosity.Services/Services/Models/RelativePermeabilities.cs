@@ -1,6 +1,8 @@
 ﻿
 using System.Text.Json.Serialization;
 
+using Engineering.DataSource;
+
 namespace MultiPorosity.Services.Models
 {
     public sealed class RelativePermeabilities 
@@ -55,6 +57,21 @@ namespace MultiPorosity.Services.Models
             NaturalFractureOil   = naturalFractureOil;
             NaturalFractureWater = naturalFractureWater;
             NaturalFractureGas   = naturalFractureGas;
+        }
+
+        public RelativePermeabilities(RelativePermeabilities? relativePermeabilities)
+        {
+            Throw.IfNull(relativePermeabilities);
+
+            MatrixOil            = relativePermeabilities.MatrixOil;
+            MatrixWater          = relativePermeabilities.MatrixWater;
+            MatrixGas            = relativePermeabilities.MatrixGas;
+            FractureOil          = relativePermeabilities.FractureOil;
+            FractureWater        = relativePermeabilities.FractureWater;
+            FractureGas          = relativePermeabilities.FractureGas;
+            NaturalFractureOil   = relativePermeabilities.NaturalFractureOil;
+            NaturalFractureWater = relativePermeabilities.NaturalFractureWater;
+            NaturalFractureGas   = relativePermeabilities.NaturalFractureGas;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -20,7 +21,7 @@ namespace MultiPorosity.Presentation.Services
     {
         private readonly MultiPorosityModelService _multiPorosityModelService;
 
-        internal ProductionSmootherModel _model;
+        private ProductionSmootherModel _model;
 
         public ProductionSmootherModel Model
         {
@@ -29,6 +30,28 @@ namespace MultiPorosity.Presentation.Services
             {
                 if(SetProperty(ref _model, value))
                 {
+                    //void OnModelPropertyChanged(object?                  sender,
+                    //                            PropertyChangedEventArgs e)
+                    //{
+                    //    RaisePropertyChanged(nameof(Model));
+                    //}
+
+                    //void OnProductionRecordsChanged(object?                           sender,
+                    //                                NotifyCollectionChangedEventArgs? e)
+                    //{
+                    //    RaisePropertyChanged(nameof(Model));
+                    //}
+
+
+                    //_model.PropertyChanged -= OnModelPropertyChanged;
+                    //_model.PropertyChanged += OnModelPropertyChanged;
+
+
+                    //_model.ProductionRecords.CollectionChanged -= OnProductionRecordsChanged;
+                    //_model.ProductionRecords.CollectionChanged += OnProductionRecordsChanged;
+                    
+                    //_model.SmoothedProductionRecords.CollectionChanged -= OnProductionRecordsChanged;
+                    //_model.SmoothedProductionRecords.CollectionChanged += OnProductionRecordsChanged;
                 }
             }
         }
@@ -37,23 +60,21 @@ namespace MultiPorosity.Presentation.Services
         {
             _multiPorosityModelService = Throw.IfNull(multiPorosityModelService);
 
-            _model = new(multiPorosityModelService);
+            Model = new(multiPorosityModelService);
         }
 
         internal void SmoothProduction()
         {
             if(Model.ProductionRecords.Count > 0)
             {
-                Models.ProductionSmoothing productionSmoothing = _multiPorosityModelService.ActiveProject.ProductionSmoothing;
-
                 double[] days  = new ProductionRecordColumn(ProductionColumn.Days,  Model.ProductionRecords.ToArray()).ToArray().Cast<double>().ToArray();
                 double[] gas   = new ProductionRecordColumn(ProductionColumn.Gas,   Model.ProductionRecords.ToArray()).ToArray().Cast<double>().ToArray();
                 double[] oil   = new ProductionRecordColumn(ProductionColumn.Oil,   Model.ProductionRecords.ToArray()).ToArray().Cast<double>().ToArray();
                 double[] water = new ProductionRecordColumn(ProductionColumn.Water, Model.ProductionRecords.ToArray()).ToArray().Cast<double>().ToArray();
 
-                int  m          = productionSmoothing.NumberOfPoints;
-                int  k          = productionSmoothing.Iterations;
-                bool normalized = productionSmoothing.Normalized;
+                int  m          = Model.ProductionSmoothing.NumberOfPoints;
+                int  k          = Model.ProductionSmoothing.Iterations;
+                bool normalized = Model.ProductionSmoothing.Normalized;
 
                 double[] new_gas   = MultiPorosity.Services.ProductionService.KolmogorovZurbenko(days, gas,   m, k, normalized);
                 double[] new_oil   = MultiPorosity.Services.ProductionService.KolmogorovZurbenko(days, oil,   m, k, normalized);
@@ -92,7 +113,7 @@ namespace MultiPorosity.Presentation.Services
                 double   wellheadPressure;
                 double   weight;
 
-                List<ProductionRecord> sortedRecords = Model.SmoothedProductionRecords.OrderByDescending(p => p.Date).ToList();
+                List<ProductionRecord> sortedRecords = Model.SmoothedProductionRecords.OrderBy(p => p.Date).ToList();
 
                 for(int i = 0; i < sortedRecords.Count; ++i)
                 {
@@ -114,6 +135,9 @@ namespace MultiPorosity.Presentation.Services
 
                 _multiPorosityModelService.ActiveProject.ProductionDataSet = productionDataSet;
             }
+
+
+            _multiPorosityModelService.ActiveProject.ProductionSmoothing = Model.ProductionSmoothing;
         }
     }
 }

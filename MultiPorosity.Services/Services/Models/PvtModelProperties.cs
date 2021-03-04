@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
+using Engineering.DataSource;
+
 using PVT;
 
 namespace MultiPorosity.Services.Models
@@ -102,6 +104,30 @@ namespace MultiPorosity.Services.Models
             WaterViscosityType             = waterViscosityType;
             WaterFormationVolumeFactorType = waterFormationVolumeFactorType;
             WaterCompressibilityType       = waterCompressibilityType;
+        }
+
+        public PvtModelProperties(PvtModelProperties? pvtModelProperties)
+        {
+            Throw.IfNull(pvtModelProperties);
+
+            SeparatorPressure              = pvtModelProperties.SeparatorPressure;
+            SeparatorTemperature           = pvtModelProperties.SeparatorTemperature;
+            WaterSalinity                  = pvtModelProperties.WaterSalinity;
+            GasViscosityType               = pvtModelProperties.GasViscosityType;
+            GasFormationVolumeFactorType   = pvtModelProperties.GasFormationVolumeFactorType;
+            GasCompressibilityFactorType   = pvtModelProperties.GasCompressibilityFactorType;
+            GasPseudoCriticalType          = pvtModelProperties.GasPseudoCriticalType;
+            GasCompressibilityType         = pvtModelProperties.GasCompressibilityType;
+            OilSolutionGasType             = pvtModelProperties.OilSolutionGasType;
+            OilBubblePointType             = pvtModelProperties.OilBubblePointType;
+            DeadOilViscosityType           = pvtModelProperties.DeadOilViscosityType;
+            SaturatedOilViscosityType      = pvtModelProperties.SaturatedOilViscosityType;
+            UnderSaturatedOilViscosityType = pvtModelProperties.UnderSaturatedOilViscosityType;
+            OilFormationVolumeFactorType   = pvtModelProperties.OilFormationVolumeFactorType;
+            OilCompressibilityType         = pvtModelProperties.OilCompressibilityType;
+            WaterViscosityType             = pvtModelProperties.WaterViscosityType;
+            WaterFormationVolumeFactorType = pvtModelProperties.WaterFormationVolumeFactorType;
+            WaterCompressibilityType       = pvtModelProperties.WaterCompressibilityType;
         }
     }
 }

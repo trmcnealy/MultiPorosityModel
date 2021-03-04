@@ -1,6 +1,8 @@
 ﻿
 using System.Text.Json.Serialization;
 
+using Engineering.DataSource;
+
 namespace MultiPorosity.Services.Models
 {
     public sealed class WellProperties 
@@ -26,6 +28,15 @@ namespace MultiPorosity.Services.Models
             API                = api;
             LateralLength      = lateralLength;
             BottomholePressure = bottomholePressure;
+        }
+
+        public WellProperties(WellProperties? wellProperties)
+        {
+            Throw.IfNull(wellProperties);
+
+            API                = wellProperties.API;
+            LateralLength      = wellProperties.LateralLength;
+            BottomholePressure = wellProperties.BottomholePressure;
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿
 using System.Text.Json.Serialization;
 
+using Engineering.DataSource;
+
 using MultiPorosity.Models;
 
 namespace MultiPorosity.Services.Models
@@ -51,7 +53,17 @@ namespace MultiPorosity.Services.Models
             RelativePermeabilities    = relativePermeabilities;
         }
         
-        
+        public MultiPorosityProperties(MultiPorosityProperties? multiPorosityProperties)
+        {
+            Throw.IfNull(multiPorosityProperties);
+
+            FractureProperties        = new (multiPorosityProperties.FractureProperties);
+            NaturalFractureProperties = new (multiPorosityProperties.NaturalFractureProperties);
+            ReservoirProperties       = new (multiPorosityProperties.ReservoirProperties);
+            WellProperties            = new (multiPorosityProperties.WellProperties);
+            Pvt                       = new (multiPorosityProperties.Pvt);
+            RelativePermeabilities    = new (multiPorosityProperties.RelativePermeabilities);
+        }
 
 
         //// LateralLength = 6500.0;

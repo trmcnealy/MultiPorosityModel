@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -210,18 +209,19 @@ namespace MultiPorosity.Models
             pointer = NativePointer.Allocate(ThisSize, executionSpace);
         }
         
-        ~Pvt()
-        {
-        }
         public void Dispose()
         {
             pointer.Dispose();
-            GC.SuppressFinalize(this);
         }
         
         internal Pvt(IntPtr intPtr, ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)
         {
             pointer = new NativePointer(intPtr, ThisSize, false, executionSpace);
+        }
+        
+        internal Pvt(Pvt<T> copy, ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)
+        {
+            pointer = new NativePointer(copy.Instance, executionSpace);
         }
         
         public static implicit operator Pvt<T>(IntPtr intPtr)

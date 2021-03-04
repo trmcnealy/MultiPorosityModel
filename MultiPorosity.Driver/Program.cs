@@ -24,6 +24,8 @@ using Engineering.DataSource.Tools;
 
 using HDF.PInvoke;
 
+using MultiPorosity.Services.Models;
+
 using Unsafe = UnManaged.Unsafe;
 
 namespace MultiPorosity.Driver
@@ -35,31 +37,31 @@ namespace MultiPorosity.Driver
         {
             string dir = "R:/TypeCurve";
 
-            MultiPorosity.Services.Models.Project project = MultiPorosity.Services.DataSources.LoadProject(@"C:\Users\trmcnealy\MultiPorosity.Tool\test2.mpm");
+            MultiPorosity.Services.Models.Project? project = MultiPorosity.Services.DataSources.LoadProject(@"C:\Users\trmcnealy\MultiPorosity.Tool\test2.2.mpm");
 
-            double[] MatrixPermeabilities            = Engineering.DataSource.Tools.Sequence.LinearSpacing(0.0001, 0.01,   3);
-            double[] HydraulicFracturePermeabilities = Engineering.DataSource.Tools.Sequence.LinearSpacing(100.0,  1000.0, 3);
-            double[] NaturalFracturePermeabilities   = Engineering.DataSource.Tools.Sequence.LinearSpacing(0.01,   100.0,  3);
-            double[] HydraulicFractureHalfLengths    = Engineering.DataSource.Tools.Sequence.LinearSpacing(1.0,    500.0,  3);
-            double[] HydraulicFractureSpacings       = Engineering.DataSource.Tools.Sequence.LinearSpacing(50.0,   250.0,  3);
-            double[] NaturalFractureSpacings         = Engineering.DataSource.Tools.Sequence.LinearSpacing(10.0,   150.0,  3);
+            if(project is null)
+            {
+                return;
+            }
+
+            double[] MatrixPermeabilities            = Engineering.DataSource.Tools.Sequence.LinearSpacing(0.0001, 0.01,   2);
+            double[] HydraulicFracturePermeabilities = Engineering.DataSource.Tools.Sequence.LinearSpacing(100.0,  1000.0, 2);
+            double[] NaturalFracturePermeabilities   = Engineering.DataSource.Tools.Sequence.LinearSpacing(0.01,   100.0,  2);
+            double[] HydraulicFractureHalfLengths    = Engineering.DataSource.Tools.Sequence.LinearSpacing(10.0,   500.0,  2);
+            double[] HydraulicFractureSpacings       = Engineering.DataSource.Tools.Sequence.LinearSpacing(50.0,   250.0,  2);
+            double[] NaturalFractureSpacings         = Engineering.DataSource.Tools.Sequence.LinearSpacing(10.0,   150.0,  2);
+
+            int size = MatrixPermeabilities.Length * HydraulicFracturePermeabilities.Length * NaturalFracturePermeabilities.Length * HydraulicFractureHalfLengths.Length * HydraulicFractureSpacings.Length * NaturalFractureSpacings.Length;
 
             MultiPorosity.Services.Models.MultiPorosityModelResults results;
 
-            List<MultiPorosity.Services.Models.MultiPorosityModelResults> data_results = new List<MultiPorosity.Services.Models.MultiPorosityModelResults>(MatrixPermeabilities.Length *
-                HydraulicFracturePermeabilities.Length                                                                                                                                 *
-                NaturalFracturePermeabilities.Length                                                                                                                                   *
-                HydraulicFractureHalfLengths.Length                                                                                                                                    *
-                HydraulicFractureSpacings.Length                                                                                                                                       *
-                NaturalFractureSpacings.Length);
+            List<MultiPorosity.Services.Models.MultiPorosityModelResults> data_results = new List<MultiPorosity.Services.Models.MultiPorosityModelResults>(size);
 
-            List<List<MultiPorosity.Services.Models.MultiPorosityModelProduction>> data =
-                new List<List<MultiPorosity.Services.Models.MultiPorosityModelProduction>>(MatrixPermeabilities.Length            *
-                                                                                           HydraulicFracturePermeabilities.Length *
-                                                                                           NaturalFracturePermeabilities.Length   *
-                                                                                           HydraulicFractureHalfLengths.Length    *
-                                                                                           HydraulicFractureSpacings.Length       *
-                                                                                           NaturalFractureSpacings.Length);
+            List<List<MultiPorosity.Services.Models.MultiPorosityModelProduction>> data = new List<List<MultiPorosity.Services.Models.MultiPorosityModelProduction>>(size);
+
+            List<(double F, double f, double m)> Lambdas = new List<(double F, double f, double m)>(size);
+
+            List<(double F, double f, double m)> OmegaOils = new List<(double F, double f, double m)>(size);
 
             for(int i0 = 0; i0 < MatrixPermeabilities.Length; ++i0)
             {
@@ -91,6 +93,24 @@ namespace MultiPorosity.Driver
                                     data_results.Add(results);
 
                                     data.Add(results.Production);
+
+                                    Lambdas.Add(TriplePorosityModel.CalculateLambdaOil(project.MultiPorosityProperties,
+                                                                                       project.MultiPorosityModelParameters.MatrixPermeability,
+                                                                                       project.MultiPorosityModelParameters.HydraulicFracturePermeability,
+                                                                                       project.MultiPorosityModelParameters.NaturalFracturePermeability,
+                                                                                       project.MultiPorosityModelParameters.HydraulicFractureHalfLength,
+                                                                                       project.MultiPorosityModelParameters.HydraulicFractureSpacing,
+                                                                                       project.MultiPorosityModelParameters.NaturalFractureSpacing));
+
+                                    OmegaOils.Add(TriplePorosityModel.CalculateOmegaOil(project.MultiPorosityProperties,
+                                                                                        project.MultiPorosityModelParameters.MatrixPermeability,
+                                                                                        project.MultiPorosityModelParameters.HydraulicFracturePermeability,
+                                                                                        project.MultiPorosityModelParameters.NaturalFracturePermeability,
+                                                                                        project.MultiPorosityModelParameters.HydraulicFractureHalfLength,
+                                                                                        project.MultiPorosityModelParameters.HydraulicFractureSpacing,
+                                                                                        project.MultiPorosityModelParameters.NaturalFractureSpacing));
+
+                                    Console.WriteLine($"{i0} {i1} {i2} {i3} {i4} {i5}");
                                 }
                             }
                         }
@@ -98,49 +118,90 @@ namespace MultiPorosity.Driver
                 }
             }
 
-            string[] lines = new string[9 + (int)project.MultiPorosityModelParameters.Days];
+            double[] maxGas   = new double[data.Count];
+            double[] maxOil   = new double[data.Count];
+            double[] maxWater = new double[data.Count];
+
+            double currentGas   = 0.0;
+            double currentOil   = 0.0;
+            double currentWater = 0.0;
+
+            for(int j = 0; j < data.Count; ++j)
+            {
+                maxGas[j]   = 0.0;
+                maxOil[j]   = 0.0;
+                maxWater[j] = 0.0;
+
+                for(int i = 0; i < data[j].Count; i++)
+                {
+                    currentGas   = data[j][i].Gas;
+                    currentOil   = data[j][i].Oil;
+                    currentWater = data[j][i].Water;
+
+                    if(currentGas > maxGas[j])
+                    {
+                        maxGas[j] = currentGas;
+                    }
+
+                    if(currentOil > maxOil[j])
+                    {
+                        maxOil[j] = currentOil;
+                    }
+
+                    if(currentWater > maxWater[j])
+                    {
+                        maxWater[j] = currentWater;
+                    }
+                }
+            }
+
+            for(int j = 0; j < data.Count; ++j)
+            {
+                for(int i = 0; i < data[j].Count; i++)
+                {
+                    data[j][i].Gas   /= maxGas[j];
+                    data[j][i].Oil   /= maxOil[j];
+                    data[j][i].Water /= maxWater[j];
+                }
+            }
+
+            string[] lines = new string[7 + (int)project.MultiPorosityModelParameters.Days];
 
             lines[0] = "Index";
-            lines[1] = "MatrixPermeability";
-            lines[2] = "HydraulicFracturePermeability";
-            lines[3] = "NaturalFracturePermeability";
-            lines[4] = "HydraulicFractureHalfLength";
-            lines[5] = "HydraulicFractureSpacing";
-            lines[6] = "NaturalFractureSpacing";
-            lines[7] = "Skin";
+            lines[1] = "Lambda.Ff";
+            lines[2] = "Lambda.fm";
+            lines[3] = "OmegaOil.F";
+            lines[4] = "OmegaOil.f";
+            lines[5] = "OmegaOil.m";
 
             lines[0] += ",0";
-            lines[1] += $",{data_results[0].MatrixPermeability}";
-            lines[2] += $",{data_results[0].HydraulicFracturePermeability}";
-            lines[3] += $",{data_results[0].NaturalFracturePermeability}";
-            lines[4] += $",{data_results[0].HydraulicFractureHalfLength}";
-            lines[5] += $",{data_results[0].HydraulicFractureSpacing}";
-            lines[6] += $",{data_results[0].NaturalFractureSpacing}";
-            lines[7] += $",{data_results[0].Skin}";
+            lines[1] += $",{Lambdas[0].f}";
+            lines[2] += $",{Lambdas[0].m}";
+            lines[3] += $",{OmegaOils[0].F}";
+            lines[4] += $",{OmegaOils[0].f}";
+            lines[5] += $",{OmegaOils[0].m}";
 
-            lines[8] += $"Days0,Gas0,Oil0,Water0";
+            lines[6] += $"Days0,Oil0";
 
             for(int i = 0; i < data[0].Count; i++)
             {
-                lines[i + 9] = $"{data[0][i].Days},{data[0][i].Gas},{data[0][i].Oil},{data[0][i].Water}";
+                lines[i + 7] = $"{data[0][i].Days},{data[0][i].Oil}";
             }
 
             for(int j = 1; j < data.Count; ++j)
             {
                 lines[0] += $",{j}";
-                lines[1] += $",{data_results[j].MatrixPermeability}";
-                lines[2] += $",{data_results[j].HydraulicFracturePermeability}";
-                lines[3] += $",{data_results[j].NaturalFracturePermeability}";
-                lines[4] += $",{data_results[j].HydraulicFractureHalfLength}";
-                lines[5] += $",{data_results[j].HydraulicFractureSpacing}";
-                lines[6] += $",{data_results[j].NaturalFractureSpacing}";
-                lines[7] += $",{data_results[j].Skin}";
+                lines[1] += $",{Lambdas[j].f}";
+                lines[2] += $",{Lambdas[j].m}";
+                lines[3] += $",{OmegaOils[j].F}";
+                lines[4] += $",{OmegaOils[j].f}";
+                lines[5] += $",{OmegaOils[j].m}";
 
-                lines[8] += $",Days{j},Gas{j},Oil{j},Water{j}";
+                lines[6] += $",Oil{j}";
 
                 for(int i = 0; i < data[j].Count; i++)
                 {
-                    lines[i + 9] += $",{data[j][i].Days},{data[j][i].Gas},{data[j][i].Oil},{data[j][i].Water}";
+                    lines[i + 7] += $",{data[j][i].Oil}";
                 }
             }
 

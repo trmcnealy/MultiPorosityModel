@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
+using Engineering.DataSource;
 
 namespace MultiPorosity.Services.Models
 {
@@ -16,6 +17,9 @@ namespace MultiPorosity.Services.Models
 
         public ProductionSmoothing()
         {
+            NumberOfPoints = 10;
+            Iterations     = 3;
+            Normalized     = false;
         }
 
         public ProductionSmoothing(int m)
@@ -40,6 +44,15 @@ namespace MultiPorosity.Services.Models
             NumberOfPoints = m;
             Iterations     = k;
             Normalized     = normalized;
+        }
+
+        public ProductionSmoothing(ProductionSmoothing? productionSmoothing)
+        {
+            Throw.IfNull(productionSmoothing);
+
+            NumberOfPoints = productionSmoothing.NumberOfPoints;
+            Iterations     = productionSmoothing.Iterations;
+            Normalized     = productionSmoothing.Normalized;
         }
         
         public static explicit operator ProductionSmoothing(MultiPorosity.Models.ProductionSmoothing productionSmoothing)

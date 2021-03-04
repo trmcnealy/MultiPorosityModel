@@ -1,6 +1,8 @@
 ﻿
 using System.Text.Json.Serialization;
 
+using Engineering.DataSource;
+
 namespace MultiPorosity.Services.Models
 {
     public sealed class RelativePermeabilityProperties
@@ -28,6 +30,15 @@ namespace MultiPorosity.Services.Models
             Matrix            = matrix;
             HydraulicFracture = hydraulicFracture;
             NaturalFracture   = naturalFracture;
+        }
+
+        public RelativePermeabilityProperties(RelativePermeabilityProperties? relativePermeabilityProperties)
+        {
+            Throw.IfNull(relativePermeabilityProperties);
+
+            Matrix            = relativePermeabilityProperties.Matrix;
+            HydraulicFracture = relativePermeabilityProperties.HydraulicFracture;
+            NaturalFracture   = relativePermeabilityProperties.NaturalFracture;
         }
     }
     
@@ -114,6 +125,27 @@ namespace MultiPorosity.Services.Models
             ExponentPermeabilityRelativeOilWater    = exponentPermeabilityRelativeOilWater;
             ExponentPermeabilityRelativeGas         = exponentPermeabilityRelativeGas;
             ExponentPermeabilityRelativeOilGas      = exponentPermeabilityRelativeOilGas;
+        }
+
+        public RelativePermeabilityPropertyModel(RelativePermeabilityPropertyModel? relativePermeabilityPropertyModel)
+        {
+            Throw.IfNull(relativePermeabilityPropertyModel);
+
+            SaturationWaterConnate                  = relativePermeabilityPropertyModel.SaturationWaterConnate;
+            SaturationWaterCritical                 = relativePermeabilityPropertyModel.SaturationWaterCritical;
+            SaturationOilIrreducibleWater           = relativePermeabilityPropertyModel.SaturationOilIrreducibleWater;
+            SaturationOilResidualWater              = relativePermeabilityPropertyModel.SaturationOilResidualWater;
+            SaturationOilIrreducibleGas             = relativePermeabilityPropertyModel.SaturationOilIrreducibleGas;
+            SaturationOilResidualGas                = relativePermeabilityPropertyModel.SaturationOilResidualGas;
+            SaturationGasConnate                    = relativePermeabilityPropertyModel.SaturationGasConnate;
+            SaturationGasCritical                   = relativePermeabilityPropertyModel.SaturationGasCritical;
+            PermeabilityRelativeWaterOilIrreducible = relativePermeabilityPropertyModel.PermeabilityRelativeWaterOilIrreducible;
+            PermeabilityRelativeOilWaterConnate     = relativePermeabilityPropertyModel.PermeabilityRelativeOilWaterConnate;
+            PermeabilityRelativeGasLiquidConnate    = relativePermeabilityPropertyModel.PermeabilityRelativeGasLiquidConnate;
+            ExponentPermeabilityRelativeWater       = relativePermeabilityPropertyModel.ExponentPermeabilityRelativeWater;
+            ExponentPermeabilityRelativeOilWater    = relativePermeabilityPropertyModel.ExponentPermeabilityRelativeOilWater;
+            ExponentPermeabilityRelativeGas         = relativePermeabilityPropertyModel.ExponentPermeabilityRelativeGas;
+            ExponentPermeabilityRelativeOilGas      = relativePermeabilityPropertyModel.ExponentPermeabilityRelativeOilGas;
         }
     }
 }

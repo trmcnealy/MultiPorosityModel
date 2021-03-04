@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Runtime.Versioning;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -74,6 +73,12 @@ namespace MultiPorosity.Models
         {
             Lower = lower;
             Upper = upper;
+        }
+
+        public BoundConstraints(BoundConstraints<T> boundConstraints)
+        {
+            Lower = boundConstraints.Lower;
+            Upper = boundConstraints.Upper;
         }
 
         public BoundConstraints(BoundConstraints.BoundConstraintsSingle boundConstraints)

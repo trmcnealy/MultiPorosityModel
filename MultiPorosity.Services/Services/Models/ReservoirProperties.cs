@@ -1,6 +1,8 @@
 ﻿
 using System.Text.Json.Serialization;
 
+using Engineering.DataSource;
+
 namespace MultiPorosity.Services.Models
 {
     public sealed class ReservoirProperties 
@@ -50,6 +52,20 @@ namespace MultiPorosity.Services.Models
             Compressibility       = compressibility;
             BottomholeTemperature = bottomholeTemperature;
             InitialPressure       = initialPressure;
+        }
+
+        public ReservoirProperties(ReservoirProperties? reservoirProperties)
+        {
+            Throw.IfNull(reservoirProperties);
+
+            Length                = reservoirProperties.Length;
+            Width                 = reservoirProperties.Width;
+            Thickness             = reservoirProperties.Thickness;
+            Porosity              = reservoirProperties.Porosity;
+            Permeability          = reservoirProperties.Permeability;
+            Compressibility       = reservoirProperties.Compressibility;
+            BottomholeTemperature = reservoirProperties.BottomholeTemperature;
+            InitialPressure       = reservoirProperties.InitialPressure;
         }
     }
 }

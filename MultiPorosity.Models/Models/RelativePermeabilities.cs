@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -133,18 +132,19 @@ namespace MultiPorosity.Models
             pointer = NativePointer.Allocate(ThisSize, executionSpace);
         }
         
-        ~RelativePermeabilities()
-        {
-        }
         public void Dispose()
         {
             pointer.Dispose();
-            GC.SuppressFinalize(this);
         }
         
         internal RelativePermeabilities(IntPtr intPtr, ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)
         {
             pointer = new NativePointer(intPtr, ThisSize, false, executionSpace);
+        }
+        
+        internal RelativePermeabilities(RelativePermeabilities<T> copy, ExecutionSpaceKind executionSpace = ExecutionSpaceKind.Cuda)
+        {
+            pointer = new NativePointer(copy.Instance, executionSpace);
         }
         
         public static implicit operator RelativePermeabilities<T>(IntPtr intPtr)

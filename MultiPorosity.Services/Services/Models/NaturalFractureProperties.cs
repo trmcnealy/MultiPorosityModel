@@ -1,6 +1,8 @@
 ﻿
 using System.Text.Json.Serialization;
 
+using Engineering.DataSource;
+
 namespace MultiPorosity.Services.Models
 {
     public sealed class NaturalFractureProperties 
@@ -30,6 +32,16 @@ namespace MultiPorosity.Services.Models
             Width        = width;
             Porosity     = porosity;
             Permeability = permeability;
+        }
+
+        public NaturalFractureProperties(NaturalFractureProperties? naturalFractureProperties)
+        {
+            Throw.IfNull(naturalFractureProperties);
+
+            Count        = naturalFractureProperties.Count;
+            Width        = naturalFractureProperties.Width;
+            Porosity     = naturalFractureProperties.Porosity;
+            Permeability = naturalFractureProperties.Permeability;
         }
     }
 }

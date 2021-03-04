@@ -147,6 +147,25 @@ namespace MultiPorosity.Services.Models
             InverseTransformPrecision           = inverseTransformPrecision;
         }
 
+        public Project(Project project)
+        {
+            Name                                = project.Name;
+            ProductionHistory                   = new(project.ProductionHistory);
+            MultiPorosityProperties             = new(project.MultiPorosityProperties);
+            PvtModelProperties                  = new(project.PvtModelProperties);
+            RelativePermeabilityProperties      = new(project.RelativePermeabilityProperties);
+            MultiPorosityHistoryMatchParameters = new(project.MultiPorosityHistoryMatchParameters);
+            MultiPorosityModelParameters        = new(project.MultiPorosityModelParameters);
+            ParticleSwarmOptimizationOptions    = new(project.ParticleSwarmOptimizationOptions);
+            MultiPorosityModelResults           = new(project.MultiPorosityModelResults);
+            PorosityModelKind                   = project.PorosityModelKind;
+            FlowType                            = project.FlowType;
+            SolutionType                        = project.SolutionType;
+            InverseTransformPrecision           = project.InverseTransformPrecision;
+            DatabaseDataSource                  = new(project.DatabaseDataSource);
+            ProductionSmoothing                 = new(project.ProductionSmoothing);
+        }
+
         private void DefaultSettings()
         {
             int index = 0;

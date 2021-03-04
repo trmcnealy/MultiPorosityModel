@@ -73,7 +73,7 @@ namespace MultiPorosity.Presentation
             _productionSmootherService.PropertyChanged -= OnPropertyChanged;
             _productionSmootherService.PropertyChanged += OnPropertyChanged;
 
-            OnPropertyChanged(this, new PropertyChangedEventArgs("ActiveProject"));
+            OnPropertyChanged(this, new PropertyChangedEventArgs("Model"));
 
             PlotData = new ObservableCollection<Plotly.Models.ITrace>
             {
@@ -218,10 +218,13 @@ namespace MultiPorosity.Presentation
         {
             switch(e.PropertyName)
             {
-                case "ActiveProject":
+                case "Model":
                 {
                     _productionSmootherService.PropertyChanged -= OnPropertyChanged;
                     _productionSmootherService.PropertyChanged += OnPropertyChanged;
+
+                    _productionSmootherService.Model.PropertyChanged -= OnPropertyChanged;
+                    _productionSmootherService.Model.PropertyChanged += OnPropertyChanged;
                     
                     _productionSmootherService.Model.ProductionRecords.CollectionChanged -= OnProductionRecordsChanged;
                     _productionSmootherService.Model.ProductionRecords.CollectionChanged += OnProductionRecordsChanged;

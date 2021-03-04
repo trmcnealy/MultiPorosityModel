@@ -1,6 +1,8 @@
 ﻿
 using System.Text.Json.Serialization;
 
+using Engineering.DataSource;
+
 namespace MultiPorosity.Services.Models
 {
     public sealed class Pvt 
@@ -90,6 +92,28 @@ namespace MultiPorosity.Services.Models
             WaterViscosity             = waterViscosity;
             WaterFormationVolumeFactor = waterFormationVolumeFactor;
             WaterCompressibility       = waterCompressibility;
+        }
+
+        public Pvt(Pvt? pvt)
+        {
+            Throw.IfNull(pvt);
+
+            GasSaturation              = pvt.GasSaturation;
+            GasSpecificGravity         = pvt.GasSpecificGravity;
+            GasViscosity               = pvt.GasViscosity;
+            GasFormationVolumeFactor   = pvt.GasFormationVolumeFactor;
+            GasCompressibilityFactor   = pvt.GasCompressibilityFactor;
+            GasCompressibility         = pvt.GasCompressibility;
+            OilSaturation              = pvt.OilSaturation;
+            OilApiGravity              = pvt.OilApiGravity;
+            OilViscosity               = pvt.OilViscosity;
+            OilFormationVolumeFactor   = pvt.OilFormationVolumeFactor;
+            OilCompressibility         = pvt.OilCompressibility;
+            WaterSaturation            = pvt.WaterSaturation;
+            WaterSpecificGravity       = pvt.WaterSpecificGravity;
+            WaterViscosity             = pvt.WaterViscosity;
+            WaterFormationVolumeFactor = pvt.WaterFormationVolumeFactor;
+            WaterCompressibility       = pvt.WaterCompressibility;
         }
     }
 }

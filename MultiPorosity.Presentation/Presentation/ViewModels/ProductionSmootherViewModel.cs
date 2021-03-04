@@ -19,37 +19,52 @@ namespace MultiPorosity.Presentation
         
         public DelegateCommand SmoothCommand { get; }
         
-        public ProductionSmootherModel Model
+
+
+        
+        private ProductionSmootherService _productionSmootherService;
+        public ProductionSmootherService Service
         {
-            get { return _productionSmootherService._model; }
+            get { return _productionSmootherService; }
             set
             {
-                if(SetProperty(ref _productionSmootherService._model, value))
+
+                if(SetProperty(ref _productionSmootherService, value))
                 {
+
+                //    void OnModelPropertyChanged(object?                  sender,
+                //                                   PropertyChangedEventArgs e)
+                //    {
+                //        RaisePropertyChanged(nameof(Model));
+                //    }
+                    
+                //    _productionSmootherService._model.PropertyChanged -= OnModelPropertyChanged;
+                //    _productionSmootherService._model.PropertyChanged += OnModelPropertyChanged;
                 }
             }
         }
 
-        private readonly ProductionSmootherService _productionSmootherService;
 
-        public ProductionSmootherViewModel(MultiPorosityModelService? multiPorosityModelService)
+
+
+        public ProductionSmootherViewModel(ProductionSmootherService? productionSmootherService)
             : base("Production Data Smoother", 1500.0, 1000.0)
         {
-            _productionSmootherService = new(multiPorosityModelService.IsNull());
+            _productionSmootherService = productionSmootherService.IsNull();
 
             CanClose = true;
 
             SmoothCommand = new DelegateCommand(OnSmooth);
         }
 
-        //private void OnPropertyChanged(object?                  sender,
+        //private void OnPropertyChanged(object? sender,
         //                               PropertyChangedEventArgs e)
         //{
-        //    switch(e.PropertyName)
+        //    switch (e.PropertyName)
         //    {
-        //        case "WellListDataFiltered":
+        //        case "Model":
         //        {
-        //            OnUpdateLocations();
+        //            RaisePropertyChanged(nameof(Model));
         //            break;
         //        }
         //    }

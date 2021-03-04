@@ -1,6 +1,8 @@
 ﻿
 using System.Text.Json.Serialization;
 
+using Engineering.DataSource;
+
 namespace MultiPorosity.Services.Models
 {    
     public sealed class FractureProperties 
@@ -45,6 +47,19 @@ namespace MultiPorosity.Services.Models
             Porosity     = porosity;
             Permeability = permeability;
             Skin         = skin;
+        }
+
+        public FractureProperties(FractureProperties? fractureProperties)
+        {
+            Throw.IfNull(fractureProperties);
+
+            Count        = fractureProperties.Count;
+            Width        = fractureProperties.Width;
+            Height       = fractureProperties.Height;
+            HalfLength   = fractureProperties.HalfLength;
+            Porosity     = fractureProperties.Porosity;
+            Permeability = fractureProperties.Permeability;
+            Skin         = fractureProperties.Skin;
         }
     }
 }

@@ -67,5 +67,20 @@ namespace MultiPorosity.Services.Models
             NaturalFractureSpacing            = naturalFractureSpacing;
             Skin                              = skin;
         }
+
+        public MultiPorosityModelResults(MultiPorosityModelResults? multiPorosityModelResults)
+        {
+            Throw.IfNull(multiPorosityModelResults);
+
+            Production                        = multiPorosityModelResults.Production;
+            TriplePorosityOptimizationResults = multiPorosityModelResults.TriplePorosityOptimizationResults;
+            MatrixPermeability                = multiPorosityModelResults.MatrixPermeability;
+            HydraulicFracturePermeability     = multiPorosityModelResults.HydraulicFracturePermeability;
+            NaturalFracturePermeability       = multiPorosityModelResults.NaturalFracturePermeability;
+            HydraulicFractureHalfLength       = multiPorosityModelResults.HydraulicFractureHalfLength;
+            HydraulicFractureSpacing          = multiPorosityModelResults.HydraulicFractureSpacing;
+            NaturalFractureSpacing            = multiPorosityModelResults.NaturalFractureSpacing;
+            Skin                              = multiPorosityModelResults.Skin;
+        }
     }
 }

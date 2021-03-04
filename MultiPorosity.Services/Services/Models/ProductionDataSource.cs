@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
+using Engineering.DataSource;
 using Engineering.DataSource.Services.DataAccess;
 using Engineering.DataSource.Tools;
 
@@ -57,6 +58,17 @@ namespace MultiPorosity.Services.Models
             Port              = port;
             DatabaseName      = databaseName;
             Username          = username;
+        }
+
+        public DatabaseDataSource(DatabaseDataSource? databaseDataSource)
+        {
+            Throw.IfNull(databaseDataSource);
+
+            EncryptedPassword = databaseDataSource.EncryptedPassword;
+            Host              = databaseDataSource.Host;
+            Port              = databaseDataSource.Port;
+            DatabaseName      = databaseDataSource.DatabaseName;
+            Username          = databaseDataSource.Username;
         }
     }
 

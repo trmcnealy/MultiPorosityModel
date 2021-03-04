@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -29,22 +30,22 @@ namespace MultiPorosity.Presentation
         private ObservableDictionary<string, (string type, object[] array)> dataSource = new ObservableDictionary<string, (string type, object[] array)>
         {
             {
-                "Date", ("string", new object[0])
+                "Date", ("string", Array.Empty<object>())
             },
             {
-                "Days", ("float", new object[0])
+                "Days", ("float", Array.Empty<object>())
             },
             {
-                "Gas", ("float", new object[0])
+                "Gas", ("float", Array.Empty<object>())
             },
             {
-                "Oil", ("float", new object[0])
+                "Oil", ("float", Array.Empty<object>())
             },
             {
-                "Water", ("float", new object[0])
+                "Water", ("float", Array.Empty<object>())
             },
             {
-                "Weight", ("float", new object[0])
+                "Weight", ("float", Array.Empty<object>())
             }
         };
 

@@ -45,13 +45,26 @@ namespace MultiPorosity.Services.Models
                                                    Range<double> naturalFractureSpacing,
                                                    Range<double> skin)
         {
-            MatrixPermeability           = matrixPermeability;
+            MatrixPermeability            = matrixPermeability;
             HydraulicFracturePermeability = hydraulicFracturePermeability;
-            NaturalFracturePermeability  = naturalFracturePermeability;
+            NaturalFracturePermeability   = naturalFracturePermeability;
             HydraulicFractureHalfLength   = hydraulicFractureHalfLength;
             HydraulicFractureSpacing      = hydraulicFractureSpacing;
-            NaturalFractureSpacing       = naturalFractureSpacing;
-            Skin                         = skin;
+            NaturalFractureSpacing        = naturalFractureSpacing;
+            Skin                          = skin;
+        }
+
+        public MultiPorosityHistoryMatchParameters(MultiPorosityHistoryMatchParameters? multiPorosityHistoryMatchParameters)
+        {
+            Throw.IfNull(multiPorosityHistoryMatchParameters);
+
+            MatrixPermeability            = new (multiPorosityHistoryMatchParameters.MatrixPermeability);
+            HydraulicFracturePermeability = new (multiPorosityHistoryMatchParameters.HydraulicFracturePermeability);
+            NaturalFracturePermeability   = new (multiPorosityHistoryMatchParameters.NaturalFracturePermeability);
+            HydraulicFractureHalfLength   = new (multiPorosityHistoryMatchParameters.HydraulicFractureHalfLength);
+            HydraulicFractureSpacing      = new (multiPorosityHistoryMatchParameters.HydraulicFractureSpacing);
+            NaturalFractureSpacing        = new (multiPorosityHistoryMatchParameters.NaturalFractureSpacing);
+            Skin                          = new (multiPorosityHistoryMatchParameters.Skin);
         }
         
         ///*km*/
